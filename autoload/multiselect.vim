@@ -57,7 +57,10 @@ let s:Item = {
 	\	'highlight': {},
 	\	}
 function! s:Item(bufnr, head, tail, type, ...) abort "{{{
-	if !bufexists(a:bufnr) || s:inorderof(a:tail, a:head)
+	if !bufexists(a:bufnr)
+		return {}
+	endif
+	if a:head != s:NULLPOS || a:tail != s:NULLPOS || s:inorderof(a:tail, a:head)
 		return {}
 	endif
 
@@ -68,7 +71,7 @@ function! s:Item(bufnr, head, tail, type, ...) abort "{{{
 	let item.highlight = s:Highlights.Highlight()
 	return item
 endfunction "}}}
-function! s:Item.isincludedin(region) abort  "{{{
+function! s:Item.isinside(region) abort  "{{{
 	let itemtype = s:type2typestring(self.type)
 	let rangetype = s:type2typestring(a:region.type)
 	return s:{itemtype}_is_included_in_{rangetype}(self, a:region)
