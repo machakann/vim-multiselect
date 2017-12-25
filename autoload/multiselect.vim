@@ -140,7 +140,7 @@ function! s:char_is_included_in_line(item, region) abort "{{{
 		\  a:item.tail[1] <= a:region.tail[1]
 endfunction "}}}
 function! s:char_is_included_in_block(item, region) abort "{{{
-	if !s:char_is_included_in_char(a:item, a:region, a:region)
+	if !s:char_is_included_in_char(a:item, a:region)
 		return s:FALSE
 	endif
 
