@@ -60,7 +60,7 @@ function! s:Item(bufnr, head, tail, type, ...) abort "{{{
 	if !bufexists(a:bufnr)
 		return {}
 	endif
-	if a:head != s:NULLPOS || a:tail != s:NULLPOS || s:inorderof(a:tail, a:head)
+	if a:head == s:NULLPOS || a:tail == s:NULLPOS || s:inorderof(a:tail, a:head)
 		return {}
 	endif
 
