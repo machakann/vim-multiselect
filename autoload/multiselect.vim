@@ -229,7 +229,7 @@ function! s:block_is_touching_line(item, region) abort "{{{
 	return s:line_is_touching_block(a:region, a:item)
 endfunction "}}}
 function! s:block_is_touching_block(item, region) abort "{{{
-	if !s:line_is_included_in_line(a:item, a:region)
+	if !s:line_is_touching_line(a:item, a:region)
 		return s:FALSE
 	endif
 	let itemleft = virtcol(a:item.head[1:2]) + a:item.head[3]
@@ -343,12 +343,7 @@ function! s:Multiselector.emit(...) abort "{{{
 		let Filterexpr = a:1
 		let filtered = s:percolate(self.itemlist, Filterexpr)
 		if filtered != []
-			for item in filtered
-				call item.quench()
-			endfor
-			let self.last.event = 'uncheck'
-			let self.last.modified = filtered
-			call s:doautocmd(s:EVENTUNCHECKPOST)
+			call self._removepost(filtered)
 		endif
 		return filtered
 	endif
@@ -421,15 +416,11 @@ function! s:Multiselector.remove(i, ...) abort	"{{{
 
 	if a:0
 		let removed = remove(self.itemlist, a:i, a:1)
-	else
-		let removed = [remove(self.itemlist, a:i)]
+		call self._removepost(removed)
+		return removed
 	endif
-	for item in removed
-		call item.quench()
-	endfor
-	let self.last.event = 'uncheck'
-	let self.last.modified = removed
-	call s:doautocmd(s:EVENTUNCHECKPOST)
+	let removed = remove(self.itemlist, a:i)
+	call self._removepost([removed])
 	return removed
 endfunction "}}}
 function! s:Multiselector.bufnr() abort "{{{
@@ -521,6 +512,14 @@ function! s:Multiselector._merge(newitem) abort "{{{
 		endwhile
 	endwhile
 	return a:newitem
+endfunction "}}}
+function! s:Multiselector._removepost(removed) abort "{{{
+	for item in a:removed
+		call item.quench()
+	endfor
+	let self.last.event = 'uncheck'
+	let self.last.modified = a:removed
+	call s:doautocmd(s:EVENTUNCHECKPOST)
 endfunction "}}}
 lockvar! s:Multiselector
 
