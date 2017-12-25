@@ -360,14 +360,14 @@ function! s:Multiselector.list(...) abort "{{{
 	endif
 	return copy(self.itemlist)
 endfunction "}}}
-function! s:Multiselector.emit_includedin(region) abort "{{{
-	return self.emit({_, item -> item.isincludedin(a:region)})
+function! s:Multiselector.emit_inside(region) abort "{{{
+	return self.emit({_, item -> item.isinside(a:region)})
 endfunction "}}}
 function! s:Multiselector.emit_touching(expr) abort "{{{
 	return self.emit({_, item -> item.istouching(a:expr)})
 endfunction "}}}
-function! s:Multiselector.list_includedin(region) abort "{{{
-	return self.list({_, item -> item.isincludedin(a:region)})
+function! s:Multiselector.list_inside(region) abort "{{{
+	return self.list({_, item -> item.isinside(a:region)})
 endfunction "}}}
 function! s:Multiselector.list_touching(expr) abort "{{{
 	return self.list({_, item -> item.istouching(a:expr)})
