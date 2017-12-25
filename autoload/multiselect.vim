@@ -387,8 +387,9 @@ function! s:sort_items(i1, i2) abort "{{{
 endfunction "}}}
 
 " low-level interfaces
-function! s:Multiselector.get(i) abort	"{{{
-	return get(self.itemlist, a:i)
+function! s:Multiselector.get(i, ...) abort "{{{
+	let default = get(a:000, 0, 0)
+	return get(self.itemlist, a:i, default)
 endfunction "}}}
 function! s:Multiselector.extend(itemlist) abort "{{{
 	let added = []
