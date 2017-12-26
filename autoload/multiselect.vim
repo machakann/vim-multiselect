@@ -375,7 +375,7 @@ function! s:Multiselector.list_touching(expr) abort "{{{
 	return self.list({_, item -> item.istouching(a:expr)})
 endfunction "}}}
 function! s:Multiselector.filter(Filterexpr) abort "{{{
-	call self.emit(a:Filterexpr)
+	call self.emit({i1, i2 -> !a:Filterexpr(i1, i2)})
 	return self.itemlist
 endfunction
 "}}}
