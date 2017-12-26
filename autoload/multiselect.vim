@@ -131,6 +131,16 @@ function! s:itemid() abort "{{{
 	let s:itemid += 1
 	return s:itemid
 endfunction "}}}
+function! s:type2typestring(type) abort "{{{
+	if a:type ==# 'v'
+		return 'char'
+	elseif a:type ==# 'V'
+		return 'line'
+	elseif a:type[0] ==# "\<C-v>"
+		return 'block'
+	endif
+	return a:type
+endfunction "}}}
 function! s:char_is_included_in_char(item, region) abort "{{{
 	return !s:inorderof(a:item.head, a:region.head) &&
 		\  !s:inorderof(a:region.tail, a:item.tail)
@@ -404,13 +414,13 @@ function! s:Multiselector.extend(itemlist) abort "{{{
 	endif
 
 	let added = []
-	for item in a:itemlist
-		if empty(item)
+	for newitem in a:itemlist
+		if empty(newitem)
 			continue
 		endif
-		call self._merge(item)
-		call add(self.itemlist, item)
-		call add(added, item)
+		call self.filter({_, olditem -> !newitem.istouching(olditem)})
+		call add(self.itemlist, newitem)
+		call add(added, newitem)
 	endfor
 	call self._checkpost(added)
 	return self.itemlist
@@ -503,25 +513,6 @@ function! s:Multiselector._initialize() abort "{{{
 		call event.on()
 	endfor
 endfunction "}}}
-function! s:Multiselector._merge(newitem) abort "{{{
-	let mergeable = s:TRUE
-	while mergeable
-		let type = s:type2typestring(a:newitem.type)
-		let i = self.itemnum() - 1
-		let mergeable = s:FALSE
-		while i >= 0
-			let item = self.get(i)
-			let itemtype = s:type2typestring(item.type)
-			let mergeable = s:merge_{type}_{itemtype}(a:newitem, item)
-			if mergeable
-				call self.remove(i)
-				break
-			endif
-			let i -= 1
-		endwhile
-	endwhile
-	return a:newitem
-endfunction "}}}
 function! s:Multiselector._checkpost(added) abort "{{{
 	for item in a:added
 		call item.show(self.higroup)
@@ -539,75 +530,6 @@ function! s:Multiselector._uncheckpost(removed) abort "{{{
 	call s:doautocmd(s:EVENTUNCHECKPOST)
 endfunction "}}}
 lockvar! s:Multiselector
-
-" conflict resolving (in Multiselector.add)
-" NOTE: These functions are destructive for 'newitem'.
-function! s:merge_char_char(newitem, item) abort "{{{
-	if !a:newitem.istouching(a:item)
-		return s:FALSE
-	endif
-	let a:newitem.head = s:get_former(a:item.head, a:newitem.head)
-	let a:newitem.tail = s:get_latter(a:item.tail, a:newitem.tail)
-	return s:TRUE
-endfunction "}}}
-function! s:merge_char_line(newitem, item) abort "{{{
-	return s:merge_char_char(a:newitem, a:item)
-endfunction "}}}
-function! s:merge_char_block(newitem, item) abort "{{{
-	return a:newitem.istouching(a:item)
-endfunction "}}}
-function! s:merge_line_char(newitem, item) abort "{{{
-	if !a:newitem.istouching(a:item)
-		return s:FALSE
-	endif
-	let lineend = a:newitem.tail[2]
-	let a:newitem.head = s:get_former(a:item.head, a:newitem.head)
-	let a:newitem.tail = s:get_latter(a:item.tail, a:newitem.tail)
-	let a:newitem.head[2] = 1
-	let a:newitem.tail[2] = lineend
-	return s:TRUE
-endfunction "}}}
-function! s:merge_line_line(newitem, item) abort "{{{
-	if !a:newitem.istouching(a:item)
-		return s:FALSE
-	endif
-	let a:newitem.head = s:get_former(a:item.head, a:newitem.head)
-	let a:newitem.tail = s:get_latter(a:item.tail, a:newitem.tail)
-	return s:TRUE
-endfunction "}}}
-function! s:merge_line_block(newitem, item) abort "{{{
-	return a:newitem.istouching(a:item)
-endfunction "}}}
-function! s:merge_block_char(newitem, item) abort "{{{
-	return a:newitem.istouching(a:item)
-endfunction "}}}
-function! s:merge_block_line(newitem, item) abort "{{{
-	return a:newitem.istouching(a:item)
-endfunction "}}}
-function! s:merge_block_block(newitem, item) abort "{{{
-	if !a:newitem.istouching(a:item)
-		return s:FALSE
-	endif
-	let a:newitem.head = s:get_former(a:item.head, a:newitem.head)
-	let a:newitem.tail = s:get_latter(a:item.tail, a:newitem.tail)
-	return s:TRUE
-endfunction "}}}
-function! s:type2typestring(type) abort "{{{
-	if a:type ==# 'v'
-		return 'char'
-	elseif a:type ==# 'V'
-		return 'line'
-	elseif a:type[0] ==# "\<C-v>"
-		return 'block'
-	endif
-	return a:type
-endfunction "}}}
-function! s:get_former(pos1, pos2) abort "{{{
-	return s:inorderof(a:pos1, a:pos2) ? a:pos1 : a:pos2
-endfunction "}}}
-function! s:get_latter(pos1, pos2) abort "{{{
-	return s:inorderof(a:pos1, a:pos2) ? a:pos2 : a:pos1
-endfunction "}}}
 "}}}
 
 " keymapping interfaces
