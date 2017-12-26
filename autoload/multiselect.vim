@@ -287,7 +287,7 @@ function! s:Event._tic() abort "{{{
 endfunction "}}}
 lockvar! s:Event
 "}}}
-" multiselect class "{{{
+" Multiselector class "{{{
 unlockvar! s:Multiselector
 let s:Multiselector = {
 	\	'__CLASS__': 'Multiselector',
@@ -296,7 +296,7 @@ let s:Multiselector = {
 	\	'higroup': '',
 	\	'last':{
 	\			'event': '',
-	\			'modified': [],
+	\			'itemlist': [],
 	\		},
 	\	'event': {
 	\			'BufLeave': s:Event('BufLeave'),
@@ -343,7 +343,7 @@ function! s:Multiselector.emit(...) abort "{{{
 		let Filterexpr = a:1
 		let filtered = s:percolate(self.itemlist, Filterexpr)
 		if filtered != []
-			call self._removepost(filtered)
+			call self._uncheckpost(filtered)
 		endif
 		return filtered
 	endif
@@ -402,13 +402,10 @@ function! s:Multiselector.extend(itemlist) abort "{{{
 			continue
 		endif
 		call self._merge(item)
-		call item.show(self.higroup)
 		call add(self.itemlist, item)
 		call add(added, item)
 	endfor
-	let self.last.event = 'check'
-	let self.last.modified = added
-	call s:doautocmd(s:EVENTCHECKPOST)
+	call self._checkpost(added)
 	return self.itemlist
 endfunction "}}}
 function! s:Multiselector.add(item) abort "{{{
@@ -421,11 +418,11 @@ function! s:Multiselector.remove(i, ...) abort	"{{{
 
 	if a:0
 		let removed = remove(self.itemlist, a:i, a:1)
-		call self._removepost(removed)
+		call self._uncheckpost(removed)
 		return removed
 	endif
 	let removed = remove(self.itemlist, a:i)
-	call self._removepost([removed])
+	call self._uncheckpost([removed])
 	return removed
 endfunction "}}}
 function! s:Multiselector.bufnr() abort "{{{
@@ -436,7 +433,7 @@ function! s:Multiselector.itemnum() abort "{{{
 endfunction "}}}
 function! s:Multiselector.lastevent() abort "{{{
 	let last = copy(self.last)
-	let last.modified = copy(self.last.modified)
+	let last.itemlist = copy(self.last.itemlist)
 	return last
 endfunction "}}}
 function! s:Multiselector.show(...) abort "{{{
@@ -494,7 +491,7 @@ function! s:Multiselector._initialize() abort "{{{
 	let self._bufnr = bufnr('%')
 	call self.uncheckall()
 	let self.last.event = ''
-	let self.last.modified = []
+	let self.last.itemlist = []
 	for event in values(self.event)
 		call event.on()
 	endfor
@@ -518,12 +515,20 @@ function! s:Multiselector._merge(newitem) abort "{{{
 	endwhile
 	return a:newitem
 endfunction "}}}
-function! s:Multiselector._removepost(removed) abort "{{{
+function! s:Multiselector._checkpost(added) abort "{{{
+	for item in a:added
+		call item.show(self.higroup)
+	endfor
+	let self.last.event = 'check'
+	let self.last.itemlist = a:added
+	call s:doautocmd(s:EVENTCHECKPOST)
+endfunction "}}}
+function! s:Multiselector._uncheckpost(removed) abort "{{{
 	for item in a:removed
 		call item.quench()
 	endfor
 	let self.last.event = 'uncheck'
-	let self.last.modified = a:removed
+	let self.last.itemlist = a:removed
 	call s:doautocmd(s:EVENTUNCHECKPOST)
 endfunction "}}}
 lockvar! s:Multiselector
