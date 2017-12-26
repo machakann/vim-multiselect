@@ -1,5 +1,7 @@
 " multiselect.vim : An library for multiple selection
 " TODO: better error messaging
+" FIXME: UniqueEvents has problems: it is shared in all instances
+" FIXME: UniqueEvents has problems: default on? set it in Multiselector constructor?
 let s:Highlights = multiselect#highlight#import()
 let s:TRUE = 1
 let s:FALSE = 0
@@ -304,6 +306,36 @@ function! s:Event._check_skipcount() abort "{{{
 endfunction "}}}
 lockvar! s:Event
 "}}}
+" UniqueEvent class (inherits Event class){{{
+let s:UniqueEvent = {
+	\	'__CLASS__': 'UniqueEvent',
+	\	'eventdefinition': '',
+	\	'doautocmd': '',
+	\	}
+function! s:UniqueEvent(name) abort "{{{
+	let origin = s:Event(a:name)
+	let uniqueevent = extend(origin, deepcopy(s:UniqueEvent), 'force')
+	let uniqueevent.eventdefinition = '#User#' . a:name
+	let uniqueevent.doautocmd = 'doautocmd <nomodeline> User ' . a:name
+	return uniqueevent
+endfunction "}}}
+function! s:UniqueEvent.trigger() abort "{{{
+	if !self.isdefined()
+		return
+	endif
+
+	call self._decrement_skipcount()
+	if !self.isactive()
+		call self._check_skipcount()
+		return
+	endif
+
+	execute self.doautocmd
+endfunction "}}}
+function! s:UniqueEvent.isdefined() abort "{{{
+	return exists(self.eventdefinition)
+endfunction "}}}
+"}}}
 " Multiselector class "{{{
 unlockvar! s:Multiselector
 let s:Multiselector = {
@@ -324,6 +356,8 @@ let s:Multiselector = {
 	\			'WinNew': s:Event('WinNew'),
 	\		},
 	\	}
+let s:Multiselector.event[s:EVENTCHECKPOST] = s:UniqueEvent(s:EVENTCHECKPOST)
+let s:Multiselector.event[s:EVENTUNCHECKPOST] = s:UniqueEvent(s:EVENTUNCHECKPOST)
 function! s:Multiselector(...) abort "{{{
 	let multiselector = deepcopy(s:Multiselector)
 	let multiselector.higroup = get(a:000, 0, s:HIGROUP)
@@ -496,12 +530,6 @@ function! s:percolate(iter, Filterexpr) abort "{{{
 	endif
 	return filtered
 endfunction "}}}
-function! s:doautocmd(event) abort "{{{
-	if !exists('#User#' . a:event)
-		return
-	endif
-	execute 'doautocmd <nomodeline> User ' . a:event
-endfunction "}}}
 
 " private methods
 function! s:Multiselector._initialize() abort "{{{
@@ -519,7 +547,7 @@ function! s:Multiselector._checkpost(added) abort "{{{
 	endfor
 	let self.last.event = 'check'
 	let self.last.itemlist = a:added
-	call s:doautocmd(s:EVENTCHECKPOST)
+	call self.event[s:EVENTCHECKPOST].trigger()
 endfunction "}}}
 function! s:Multiselector._uncheckpost(removed) abort "{{{
 	for item in a:removed
@@ -527,7 +555,7 @@ function! s:Multiselector._uncheckpost(removed) abort "{{{
 	endfor
 	let self.last.event = 'uncheck'
 	let self.last.itemlist = a:removed
-	call s:doautocmd(s:EVENTUNCHECKPOST)
+	call self.event[s:EVENTUNCHECKPOST].trigger()
 endfunction "}}}
 lockvar! s:Multiselector
 "}}}
