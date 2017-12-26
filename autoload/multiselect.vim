@@ -354,6 +354,7 @@ let s:Multiselector = {
 	\	'__CLASS__': 'Multiselector',
 	\	'_bufnr': -1,
 	\	'itemlist': [],
+	\	'name': '',
 	\	'higroup': '',
 	\	'checkpostevent': '',
 	\	'uncheckpostevent': '',
@@ -375,6 +376,7 @@ function! s:Multiselector(...) abort "{{{
 	let multiselector = deepcopy(s:Multiselector)
 	let multiselector.higroup = get(options, 'higroup', s:HIGROUP)
 	let multiselector._bufnr = bufnr('%')
+	let multiselector.name = get(options, 'name', '')
 
 	let EVENTCHECKPOST = get(options, 'checkpostevent', '')
 	let EVENTUNCHECKPOST = get(options, 'uncheckpostevent', '')
@@ -716,6 +718,7 @@ endfunction "}}}
 lockvar! s:MultiselectModule
 "}}}
 let s:multiselector = s:MultiselectModule.Multiselector({
+	\	'name': 'multiselect',
 	\	'higroup': s:HIGROUP,
 	\	'checkpostevent': s:EVENTCHECKPOST,
 	\	'uncheckpostevent': s:EVENTUNCHECKPOST,
