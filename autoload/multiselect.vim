@@ -257,12 +257,12 @@ function! s:Event(name) abort "{{{
 endfunction "}}}
 function! s:Event.on() abort "{{{
 	let self.state = s:ON
-	let self._skipcount = 0
+	let self._skipcount = -1
 	return self.state
 endfunction "}}}
 function! s:Event.off() abort "{{{
 	let self.state = s:OFF
-	let self._skipcount = 0
+	let self._skipcount = -1
 	return self.state
 endfunction "}}}
 function! s:Event.skip(...) abort "{{{
@@ -273,17 +273,24 @@ function! s:Event.skip(...) abort "{{{
 	call self.off()
 	let self._skipcount = n
 endfunction "}}}
-function! s:Event.is_active() abort "{{{
+function! s:Event.isactive() abort "{{{
 	return self.state
 endfunction "}}}
-function! s:Event._tic() abort "{{{
+function! s:Event._decrement_skipcount() abort "{{{
 	if self.state is s:ON
 		return
 	endif
-	if self._skipcount <= 0
+	if self._skipcount > 0
+		let self._skipcount -= 1
+	endif
+endfunction "}}}
+function! s:Event._check_skipcount() abort "{{{
+	if self.state is s:ON
+		return
+	endif
+	if self._skipcount == 0
 		call self.on()
 	endif
-	let self._skipcount -= 1
 endfunction "}}}
 lockvar! s:Event
 "}}}
@@ -684,28 +691,32 @@ augroup END
 
 function! multiselect#_event_uncheckall(event) abort "{{{
 	for ms in s:table
-		call ms.event[a:event]._tic()
-		if ms.event[a:event].is_active()
-			call ms.uncheckall()
+		call ms.event[a:event]._decrement_skipcount()
+		if !ms.event[a:event].isactive()
+			call ms.event[a:event]._check_skipcount()
+			continue
 		endif
+		call ms.uncheckall()
 	endfor
 endfunction "}}}
 function! multiselect#_event_initializeall(event) abort "{{{
 	for ms in s:table
-		call ms.event[a:event]._tic()
-		if ms.event[a:event].is_active()
-			call ms._initialize()
+		call ms.event[a:event]._decrement_skipcount()
+		if !ms.event[a:event].isactive()
+			call ms.event[a:event]._check_skipcount()
+			continue
 		endif
+		call ms._initialize()
 	endfor
 endfunction "}}}
 function! multiselect#_event_highlight(event) abort "{{{
 	let winid = win_getid()
 	for ms in s:table
-		call ms.event[a:event]._tic()
-		if !ms.event[a:event].is_active()
+		call ms.event[a:event]._decrement_skipcount()
+		if !ms.event[a:event].isactive()
+			call ms.event[a:event]._check_skipcount()
 			continue
 		endif
-
 		for item in ms.itemlist
 			if item._histatus(winid) is s:Highlights.OFF
 				call item._showlocal(ms.higroup)
