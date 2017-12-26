@@ -392,6 +392,10 @@ function! s:Multiselector.get(i, ...) abort "{{{
 	return get(self.itemlist, a:i, default)
 endfunction "}}}
 function! s:Multiselector.extend(itemlist) abort "{{{
+	if empty(a:itemlist)
+		return self.itemlist
+	endif
+
 	let added = []
 	for item in a:itemlist
 		if empty(item)
