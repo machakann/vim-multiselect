@@ -359,8 +359,9 @@ let s:Multiselector = {
 let s:Multiselector.event[s:EVENTCHECKPOST] = s:UniqueEvent(s:EVENTCHECKPOST)
 let s:Multiselector.event[s:EVENTUNCHECKPOST] = s:UniqueEvent(s:EVENTUNCHECKPOST)
 function! s:Multiselector(...) abort "{{{
+	let options = get(a:000, 0, {})
 	let multiselector = deepcopy(s:Multiselector)
-	let multiselector.higroup = get(a:000, 0, s:HIGROUP)
+	let multiselector.higroup = get(options, 'higroup', s:HIGROUP)
 	let multiselector._bufnr = bufnr('%')
 	call add(s:table, multiselector)
 	return multiselector
