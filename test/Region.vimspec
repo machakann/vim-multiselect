@@ -1,0 +1,48 @@
+Describe Region
+	Before
+		let Region = g:MS.Region
+		%delete
+		call append(0, [
+			\ 'aaaaaaa',
+			\ 'bbbbbb',
+			\ 'ccccc',
+			\ 'dddd',
+			\ 'eee',
+			\ ])
+		let BUFNR = bufnr('%')
+		$delete
+	End
+
+	Context (head, tail, type)
+		It constructs a characterwise-instance if a:type is omitted.
+			Assert Equals(Region([0, 1, 1, 0], [0, 1, 7, 0]).type, 'v')
+		End
+
+		It constructs a characterwise-instance if a:type is 'v' or 'char'
+			Assert Equals(Region([0, 1, 1, 0], [0, 1, 7, 0], 'v').type, 'v')
+			Assert Equals(Region([0, 1, 1, 0], [0, 1, 7, 0], 'char').type, 'v')
+		End
+
+		It constructs a linewise-instance if a:type is 'V' or 'line'
+			Assert Equals(Region([0, 1, 1, 0], [0, 1, 7, 0], 'V').type, 'V')
+			Assert Equals(Region([0, 1, 1, 0], [0, 1, 7, 0], 'line').type, 'V')
+		End
+
+		It constructs a linewise-instance with modified head/tail positions
+			Assert Equals(Region([0, 1, 2, 0], [0, 1, 2, 0], 'V').head, [0, 1, 1, 0])
+			Assert Equals(Region([0, 1, 2, 0], [0, 1, 2, 0], 'V').tail, [0, 1, 8, 0])
+
+			Assert Equals(Region([0, 1, 2, 0], [0, 3, 2, 0], 'V').head, [0, 1, 1, 0])
+			Assert Equals(Region([0, 1, 2, 0], [0, 3, 2, 0], 'V').tail, [0, 3, 6, 0])
+
+			Assert Equals(Region([0, 1, 2, 0], [0, 5, 2, 0], 'V').head, [0, 1, 1, 0])
+			Assert Equals(Region([0, 1, 2, 0], [0, 5, 2, 0], 'V').tail, [0, 5, 4, 0])
+		End
+
+		It constructs a blockwise-instance if a:type is "\<C-v>" or 'block'
+			Assert Equals(Region([0, 1, 1, 0], [0, 1, 7, 0], "\<C-v>").type, "\<C-v>")
+			Assert Equals(Region([0, 1, 1, 0], [0, 1, 7, 0], 'block').type, "\<C-v>")
+		End
+	End
+End
+" vim:set noet ts=4 sw=4 sts=-1:

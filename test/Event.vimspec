@@ -1,0 +1,202 @@
+Describe Event
+	Before
+		let Item = g:MS.Item
+		%delete
+		call append(0, [
+			\ 'aaaaaaa',
+			\ 'bbbbbbb',
+			\ 'ccccccc',
+			\ 'ddddddd',
+			\ 'eeeeeee',
+			\ ])
+		$delete
+	End
+
+	Context .on()/.off()
+		It turns on/off initialize process
+			let multiselector = g:MS.Multiselector()
+			call multiselector.extend([
+				\ Item(bufnr('%'), [0, 1, 1, 0], [0, 1, 1, 0], 'v'),
+				\ ])
+
+			Assert True(multiselector.event.BufLeave.isactive())
+			doautocmd <nomodeline> multiselect-events BufLeave
+			Assert True(empty(multiselector.itemlist))
+
+			call multiselector.extend([
+				\ Item(bufnr('%'), [0, 1, 1, 0], [0, 1, 1, 0], 'v'),
+				\ ])
+			call multiselector.event.BufLeave.off()
+			Assert False(multiselector.event.BufLeave.isactive())
+			doautocmd <nomodeline> multiselect-events BufLeave
+			Assert False(empty(multiselector.itemlist))
+
+			call multiselector.event.BufLeave.on()
+			Assert True(multiselector.event.BufLeave.isactive())
+			doautocmd <nomodeline> multiselect-events BufLeave
+			Assert True(empty(multiselector.itemlist))
+
+
+
+			let multiselector = g:MS.Multiselector()
+			call multiselector.extend([
+				\ Item(bufnr('%'), [0, 1, 1, 0], [0, 1, 1, 0], 'v'),
+				\ ])
+
+			Assert True(multiselector.event.TabLeave.isactive())
+			doautocmd <nomodeline> multiselect-events TabLeave
+			Assert True(empty(multiselector.itemlist))
+
+			call multiselector.extend([
+				\ Item(bufnr('%'), [0, 1, 1, 0], [0, 1, 1, 0], 'v'),
+				\ ])
+			call multiselector.event.TabLeave.off()
+			Assert False(multiselector.event.TabLeave.isactive())
+			doautocmd <nomodeline> multiselect-events TabLeave
+			Assert False(empty(multiselector.itemlist))
+
+			call multiselector.event.TabLeave.on()
+			Assert True(multiselector.event.TabLeave.isactive())
+			doautocmd <nomodeline> multiselect-events TabLeave
+			Assert True(empty(multiselector.itemlist))
+
+
+
+			let multiselector = g:MS.Multiselector()
+			call multiselector.extend([
+				\ Item(bufnr('%'), [0, 1, 1, 0], [0, 1, 1, 0], 'v'),
+				\ ])
+
+			Assert True(multiselector.event.CmdwinLeave.isactive())
+			doautocmd <nomodeline> multiselect-events CmdwinLeave
+			Assert True(empty(multiselector.itemlist))
+
+			call multiselector.extend([
+				\ Item(bufnr('%'), [0, 1, 1, 0], [0, 1, 1, 0], 'v'),
+				\ ])
+			call multiselector.event.CmdwinLeave.off()
+			Assert False(multiselector.event.CmdwinLeave.isactive())
+			doautocmd <nomodeline> multiselect-events CmdwinLeave
+			Assert False(empty(multiselector.itemlist))
+
+			call multiselector.event.CmdwinLeave.on()
+			Assert True(multiselector.event.CmdwinLeave.isactive())
+			doautocmd <nomodeline> multiselect-events CmdwinLeave
+			Assert True(empty(multiselector.itemlist))
+		End
+
+		It turns on/off auto-uncheckall process
+			let multiselector = g:MS.Multiselector()
+			call multiselector.extend([
+				\ Item(bufnr('%'), [0, 1, 1, 0], [0, 1, 1, 0], 'v'),
+				\ ])
+
+			Assert True(multiselector.event.TextChanged.isactive())
+			doautocmd <nomodeline> multiselect-events TextChanged
+			Assert True(empty(multiselector.itemlist))
+
+			call multiselector.extend([
+				\ Item(bufnr('%'), [0, 1, 1, 0], [0, 1, 1, 0], 'v'),
+				\ ])
+			call multiselector.event.TextChanged.off()
+			Assert False(multiselector.event.TextChanged.isactive())
+			doautocmd <nomodeline> multiselect-events TextChanged
+			Assert False(empty(multiselector.itemlist))
+
+			call multiselector.event.TextChanged.on()
+			Assert True(multiselector.event.TextChanged.isactive())
+			doautocmd <nomodeline> multiselect-events TextChanged
+			Assert True(empty(multiselector.itemlist))
+
+
+
+			let multiselector = g:MS.Multiselector()
+			call multiselector.extend([
+				\ Item(bufnr('%'), [0, 1, 1, 0], [0, 1, 1, 0], 'v'),
+				\ ])
+
+			Assert True(multiselector.event.InsertEnter.isactive())
+			doautocmd <nomodeline> multiselect-events InsertEnter
+			Assert True(empty(multiselector.itemlist))
+
+			call multiselector.extend([
+				\ Item(bufnr('%'), [0, 1, 1, 0], [0, 1, 1, 0], 'v'),
+				\ ])
+			call multiselector.event.InsertEnter.off()
+			Assert False(multiselector.event.InsertEnter.isactive())
+			doautocmd <nomodeline> multiselect-events InsertEnter
+			Assert False(empty(multiselector.itemlist))
+
+			call multiselector.event.InsertEnter.on()
+			Assert True(multiselector.event.InsertEnter.isactive())
+			doautocmd <nomodeline> multiselect-events InsertEnter
+			Assert True(empty(multiselector.itemlist))
+		End
+
+		It turns on/off auto-highlight process for a new window
+			let multiselector = g:MS.Multiselector()
+			call multiselector.extend([
+				\ Item(bufnr('%'), [0, 1, 1, 0], [0, 1, 1, 0], 'v'),
+				\ ])
+			call multiselector.itemlist[0].quench()
+
+			Assert True(multiselector.event.WinNew.isactive())
+			Assert False(multiselector.itemlist[0]._histatus(win_getid()))
+			doautocmd <nomodeline> multiselect-events WinNew
+			Assert True(multiselector.itemlist[0]._histatus(win_getid()))
+		End
+	End
+
+	Context .skip()
+		It sets a count to ignore autocmd events
+			let multiselector = g:MS.Multiselector()
+			call multiselector.extend([
+				\ Item(bufnr('%'), [0, 1, 1, 0], [0, 1, 1, 0], 'v'),
+				\ ])
+			Assert True(multiselector.event.BufLeave.isactive())
+			call multiselector.event.BufLeave.skip(1)
+			Assert False(multiselector.event.BufLeave.isactive())
+			Assert False(empty(multiselector.itemlist))
+			doautocmd <nomodeline> multiselect-events BufLeave
+			Assert True(multiselector.event.BufLeave.isactive())
+			Assert False(empty(multiselector.itemlist))
+			doautocmd <nomodeline> multiselect-events BufLeave
+			Assert True(multiselector.event.BufLeave.isactive())
+			Assert True(empty(multiselector.itemlist))
+
+
+
+			let multiselector = g:MS.Multiselector()
+			call multiselector.extend([
+				\ Item(bufnr('%'), [0, 1, 1, 0], [0, 1, 1, 0], 'v'),
+				\ ])
+			Assert True(multiselector.event.BufLeave.isactive())
+			call multiselector.event.BufLeave.skip(2)
+			Assert False(multiselector.event.BufLeave.isactive())
+			Assert False(empty(multiselector.itemlist))
+			doautocmd <nomodeline> multiselect-events BufLeave
+			Assert False(multiselector.event.BufLeave.isactive())
+			Assert False(empty(multiselector.itemlist))
+			doautocmd <nomodeline> multiselect-events BufLeave
+			Assert True(multiselector.event.BufLeave.isactive())
+			Assert False(empty(multiselector.itemlist))
+			doautocmd <nomodeline> multiselect-events BufLeave
+			Assert True(multiselector.event.BufLeave.isactive())
+			Assert True(empty(multiselector.itemlist))
+
+
+
+			let multiselector = g:MS.Multiselector()
+			call multiselector.extend([
+				\ Item(bufnr('%'), [0, 1, 1, 0], [0, 1, 1, 0], 'v'),
+				\ ])
+			Assert True(multiselector.event.BufLeave.isactive())
+			call multiselector.event.BufLeave.skip(0)
+			Assert True(multiselector.event.BufLeave.isactive())
+			doautocmd <nomodeline> multiselect-events BufLeave
+			Assert True(multiselector.event.BufLeave.isactive())
+			Assert True(empty(multiselector.itemlist))
+		End
+	End
+End
+" vim:set noet ts=4 sw=4 sts=-1:

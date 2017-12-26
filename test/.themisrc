@@ -1,0 +1,11 @@
+set encoding=utf-8
+execute 'set runtimepath+=' . expand('<sfile>:p:h:h')
+runtime! <sfile>:p:h:h/plugin/*.vim
+set noswapfile
+
+let g:assert = themis#helper('assert')
+call themis#helper('command').with(g:assert)
+
+let g:MS = multiselect#import()
+let g:TRUE = 1
+let g:FALSE = 0
