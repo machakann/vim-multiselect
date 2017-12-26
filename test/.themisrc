@@ -9,3 +9,12 @@ call themis#helper('command').with(g:assert)
 let g:MS = multiselect#import()
 let g:TRUE = 1
 let g:FALSE = 0
+let g:DEFAULTS = {
+	\	'higroup': 'MultiselectCheckedItem',
+	\	'checkpostevent': 'MultiselectCheckPost',
+	\	'uncheckpostevent': 'MultiselectUncheckPost',
+	\	}
+
+" vim:set foldmethod=marker:
+" vim:set commentstring="%s:
+" vim:set noet ts=4 sw=4 sts=-1:

@@ -1,7 +1,9 @@
 Describe Multiselector
 	Before
+		let MS = g:MS
 		let Item = g:MS.Item
 		let Region = g:MS.Region
+		let DEFAULTS = g:DEFAULTS
 		%delete
 		call append(0, [
 			\ 'aaaaaaa',
@@ -22,7 +24,7 @@ Describe Multiselector
 
 	Context .extend(itemlist)
 		It appends items in a:itemlist into self.itemlist
-			let multiselector = g:MS.Multiselector()
+			let multiselector = MS.Multiselector(DEFAULTS)
 			Assert True(empty(multiselector.itemlist))
 
 			call multiselector.extend([])
@@ -51,7 +53,7 @@ Describe Multiselector
 		End
 
 		It turns on the highlight of accepted items
-			let multiselector = g:MS.Multiselector()
+			let multiselector = MS.Multiselector(DEFAULTS)
 			let ON = g:TRUE
 			let OFF = g:FALSE
 			Assert True(empty(multiselector.itemlist))
@@ -71,7 +73,7 @@ Describe Multiselector
 		End
 
 		It triggers autocmd event 'MultiselectCheckPost' evry after appending
-			let multiselector = g:MS.Multiselector()
+			let multiselector = MS.Multiselector(DEFAULTS)
 			let g:autocmdcount = 0
 			augroup test-multiselect
 				autocmd!
@@ -97,7 +99,7 @@ Describe Multiselector
 
 	Context .add(item)
 		It appends a:item into self.itemlist
-			let multiselector = g:MS.Multiselector()
+			let multiselector = MS.Multiselector(DEFAULTS)
 			let ON = g:TRUE
 			let OFF = g:FALSE
 			Assert True(empty(multiselector.itemlist))
@@ -128,7 +130,7 @@ Describe Multiselector
 		End
 
 		It turns on the highlight of accepted items
-			let multiselector = g:MS.Multiselector()
+			let multiselector = MS.Multiselector(DEFAULTS)
 			let ON = g:TRUE
 			let OFF = g:FALSE
 			Assert True(empty(multiselector.itemlist))
@@ -153,7 +155,7 @@ Describe Multiselector
 		End
 
 		It triggers autocmd event 'MultiselectCheckPost' evry after appending
-			let multiselector = g:MS.Multiselector()
+			let multiselector = MS.Multiselector(DEFAULTS)
 			let g:autocmdcount = 0
 			augroup test-multiselect
 				autocmd!
@@ -180,7 +182,7 @@ Describe Multiselector
 
 	Context .remove(i)
 		It removes an (i+1)-th item from self.itemlist and return the item
-			let multiselector = g:MS.Multiselector()
+			let multiselector = MS.Multiselector(DEFAULTS)
 			call multiselector.extend([
 				\ Item(bufnr('%'), [0, 1, 1, 0], [0, 1, 1, 0], 'v'),
 				\ Item(bufnr('%'), [0, 2, 1, 0], [0, 2, 1, 0], 'v'),
@@ -215,7 +217,7 @@ Describe Multiselector
 		End
 
 		It turns off the highlight of removed item
-			let multiselector = g:MS.Multiselector()
+			let multiselector = MS.Multiselector(DEFAULTS)
 			let ON = g:TRUE
 			let OFF = g:FALSE
 			call multiselector.extend([
@@ -239,7 +241,7 @@ Describe Multiselector
 		End
 
 		It triggers autocmd event 'MultiselectUncheckPost' evry after removing
-			let multiselector = g:MS.Multiselector()
+			let multiselector = MS.Multiselector(DEFAULTS)
 			call multiselector.extend([
 				\ Item(bufnr('%'), [0, 1, 1, 0], [0, 1, 1, 0], 'v'),
 				\ Item(bufnr('%'), [0, 2, 1, 0], [0, 2, 1, 0], 'v'),
@@ -266,7 +268,7 @@ Describe Multiselector
 
 	Context .remove(i, j)
 		It removes (i+1) to (j+1)-th items from self.itemlist and return as a list
-			let multiselector = g:MS.Multiselector()
+			let multiselector = MS.Multiselector(DEFAULTS)
 			call multiselector.extend([
 				\ Item(bufnr('%'), [0, 1, 1, 0], [0, 1, 1, 0], 'v'),
 				\ Item(bufnr('%'), [0, 2, 1, 0], [0, 2, 1, 0], 'v'),
@@ -284,7 +286,7 @@ Describe Multiselector
 			Assert Equals(multiselector.last.event, 'uncheck')
 			Assert Equals(multiselector.last.itemlist, removed)
 
-			let multiselector = g:MS.Multiselector()
+			let multiselector = MS.Multiselector(DEFAULTS)
 			call multiselector.extend([
 				\ Item(bufnr('%'), [0, 1, 1, 0], [0, 1, 1, 0], 'v'),
 				\ Item(bufnr('%'), [0, 2, 1, 0], [0, 2, 1, 0], 'v'),
@@ -302,7 +304,7 @@ Describe Multiselector
 			Assert Equals(multiselector.last.event, 'uncheck')
 			Assert Equals(multiselector.last.itemlist, removed)
 
-			let multiselector = g:MS.Multiselector()
+			let multiselector = MS.Multiselector(DEFAULTS)
 			call multiselector.extend([
 				\ Item(bufnr('%'), [0, 1, 1, 0], [0, 1, 1, 0], 'v'),
 				\ Item(bufnr('%'), [0, 2, 1, 0], [0, 2, 1, 0], 'v'),
@@ -321,7 +323,7 @@ Describe Multiselector
 			Assert Equals(multiselector.last.event, 'uncheck')
 			Assert Equals(multiselector.last.itemlist, removed)
 
-			let multiselector = g:MS.Multiselector()
+			let multiselector = MS.Multiselector(DEFAULTS)
 			call multiselector.extend([
 				\ Item(bufnr('%'), [0, 1, 1, 0], [0, 1, 1, 0], 'v'),
 				\ Item(bufnr('%'), [0, 2, 1, 0], [0, 2, 1, 0], 'v'),
@@ -342,7 +344,7 @@ Describe Multiselector
 		End
 
 		It turns off the highlight of removed items
-			let multiselector = g:MS.Multiselector()
+			let multiselector = MS.Multiselector(DEFAULTS)
 			let ON = g:TRUE
 			let OFF = g:FALSE
 			call multiselector.extend([
@@ -357,7 +359,7 @@ Describe Multiselector
 			Assert Equals(removed[1]._histatus(win_getid()), OFF)
 			Assert Equals(multiselector.itemlist[0]._histatus(win_getid()), ON)
 
-			let multiselector = g:MS.Multiselector()
+			let multiselector = MS.Multiselector(DEFAULTS)
 			call multiselector.extend([
 				\ Item(bufnr('%'), [0, 1, 1, 0], [0, 1, 1, 0], 'v'),
 				\ Item(bufnr('%'), [0, 2, 1, 0], [0, 2, 1, 0], 'v'),
@@ -370,7 +372,7 @@ Describe Multiselector
 			Assert Equals(removed[1]._histatus(win_getid()), OFF)
 			Assert Equals(multiselector.itemlist[0]._histatus(win_getid()), ON)
 
-			let multiselector = g:MS.Multiselector()
+			let multiselector = MS.Multiselector(DEFAULTS)
 			call multiselector.extend([
 				\ Item(bufnr('%'), [0, 1, 1, 0], [0, 1, 1, 0], 'v'),
 				\ Item(bufnr('%'), [0, 2, 1, 0], [0, 2, 1, 0], 'v'),
@@ -391,7 +393,7 @@ Describe Multiselector
 				autocmd User MultiselectUncheckPost let g:autocmdcount += 1
 			augroup End
 
-			let multiselector = g:MS.Multiselector()
+			let multiselector = MS.Multiselector(DEFAULTS)
 			call multiselector.extend([
 				\ Item(bufnr('%'), [0, 1, 1, 0], [0, 1, 1, 0], 'v'),
 				\ Item(bufnr('%'), [0, 2, 1, 0], [0, 2, 1, 0], 'v'),
@@ -403,7 +405,7 @@ Describe Multiselector
 			let removed = multiselector.remove(0, 0)
 			Assert Equals(g:autocmdcount, 1)
 
-			let multiselector = g:MS.Multiselector()
+			let multiselector = MS.Multiselector(DEFAULTS)
 			call multiselector.extend([
 				\ Item(bufnr('%'), [0, 1, 1, 0], [0, 1, 1, 0], 'v'),
 				\ Item(bufnr('%'), [0, 2, 1, 0], [0, 2, 1, 0], 'v'),
@@ -414,7 +416,7 @@ Describe Multiselector
 			let removed = multiselector.remove(1, 2)
 			Assert Equals(g:autocmdcount, 2)
 
-			let multiselector = g:MS.Multiselector()
+			let multiselector = MS.Multiselector(DEFAULTS)
 			call multiselector.extend([
 				\ Item(bufnr('%'), [0, 1, 1, 0], [0, 1, 1, 0], 'v'),
 				\ Item(bufnr('%'), [0, 2, 1, 0], [0, 2, 1, 0], 'v'),
@@ -429,7 +431,7 @@ Describe Multiselector
 
 	Context .emit()
 		It returns all the items in self.itemlist
-			let multiselector = g:MS.Multiselector()
+			let multiselector = MS.Multiselector(DEFAULTS)
 			let g:autocmdcount = 0
 			let ON = g:TRUE
 			let OFF = g:FALSE
@@ -462,7 +464,7 @@ Describe Multiselector
 
 	Context .emit(filterexpr)
 		It returns only the items that a:filterexpr returns TRUE
-			let multiselector = g:MS.Multiselector()
+			let multiselector = MS.Multiselector(DEFAULTS)
 			let ON = g:TRUE
 			let OFF = g:FALSE
 			augroup test-multiselect
@@ -493,7 +495,7 @@ Describe Multiselector
 
 	Context .list()
 		It returns the copy of self.itemlist
-			let multiselector = g:MS.Multiselector()
+			let multiselector = MS.Multiselector(DEFAULTS)
 			let g:autocmdcount = 0
 			let ON = g:TRUE
 			let OFF = g:FALSE
@@ -529,7 +531,7 @@ Describe Multiselector
 
 	Context .list(Filterexpr)
 		It returns only the items that a:Filterexpr returns TRUE
-			let multiselector = g:MS.Multiselector()
+			let multiselector = MS.Multiselector(DEFAULTS)
 			let ON = g:TRUE
 			let OFF = g:FALSE
 			augroup test-multiselect
@@ -563,7 +565,7 @@ Describe Multiselector
 
 	Context .filter(Filterexpr)
 		It removes the items that a:Filterexpr returns FALSE
-			let multiselector = g:MS.Multiselector()
+			let multiselector = MS.Multiselector(DEFAULTS)
 			let ON = g:TRUE
 			let OFF = g:FALSE
 			augroup test-multiselect
@@ -592,7 +594,7 @@ Describe Multiselector
 
 
 
-			let multiselector = g:MS.Multiselector()
+			let multiselector = MS.Multiselector(DEFAULTS)
 			let g:autocmdcount = 0
 			let added = [
 				\ Item(bufnr('%'), [0, 1, 1, 0], [0, 1, 1, 0], 'v'),
@@ -619,7 +621,7 @@ Describe Multiselector
 
 	Context .sort()
 		It sorts the items in a copy of self.itemlist
-			let multiselector = g:MS.Multiselector()
+			let multiselector = MS.Multiselector(DEFAULTS)
 			let added = [
 				\ Item(bufnr('%'), [0, 2, 1, 0], [0, 2, 1, 0], 'v'),
 				\ Item(bufnr('%'), [0, 3, 1, 0], [0, 3, 1, 0], 'v'),
@@ -641,7 +643,7 @@ Describe Multiselector
 
 	Context .sort(list)
 		It sorts the copy of a:list
-			let multiselector = g:MS.Multiselector()
+			let multiselector = MS.Multiselector(DEFAULTS)
 
 			let list = [
 				\ Region([0, 2, 1, 0], [0, 2, 1, 0], 'v'),

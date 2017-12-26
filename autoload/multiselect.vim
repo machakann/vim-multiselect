@@ -1,7 +1,5 @@
 " multiselect.vim : An library for multiple selection
 " TODO: better error messaging
-" FIXME: UniqueEvents has problems: it is shared in all instances
-" FIXME: UniqueEvents has problems: default on? set it in Multiselector constructor?
 let s:Highlights = multiselect#highlight#import()
 let s:TRUE = 1
 let s:FALSE = 0
@@ -259,7 +257,7 @@ let s:Event = {
 	\	'__CLASS__': 'Event',
 	\	'name': '',
 	\	'state': s:OFF,
-	\	'_skipcount': 0,
+	\	'_skipcount': -1,
 	\	}
 function! s:Event(name) abort "{{{
 	let event = deepcopy(s:Event)
@@ -314,13 +312,24 @@ let s:UniqueEvent = {
 	\	}
 function! s:UniqueEvent(name) abort "{{{
 	let origin = s:Event(a:name)
+	let origin._on = origin.on
 	let uniqueevent = extend(origin, deepcopy(s:UniqueEvent), 'force')
-	let uniqueevent.eventdefinition = '#User#' . a:name
-	let uniqueevent.doautocmd = 'doautocmd <nomodeline> User ' . a:name
+	if empty(a:name)
+		call uniqueevent.off()
+	else
+		let uniqueevent.eventdefinition = '#User#' . a:name
+		let uniqueevent.doautocmd = 'doautocmd <nomodeline> User ' . a:name
+	endif
 	return uniqueevent
 endfunction "}}}
+function! s:UniqueEvent.on() abort "{{{
+	if empty(self.name)
+		return
+	endif
+	call self._on()
+endfunction "}}}
 function! s:UniqueEvent.trigger() abort "{{{
-	if !self.isdefined()
+	if empty(self.doautocmd) || !self.isdefined()
 		return
 	endif
 
@@ -333,6 +342,9 @@ function! s:UniqueEvent.trigger() abort "{{{
 	execute self.doautocmd
 endfunction "}}}
 function! s:UniqueEvent.isdefined() abort "{{{
+	if empty(self.eventdefinition)
+		return s:FALSE
+	endif
 	return exists(self.eventdefinition)
 endfunction "}}}
 "}}}
@@ -343,6 +355,8 @@ let s:Multiselector = {
 	\	'_bufnr': -1,
 	\	'itemlist': [],
 	\	'higroup': '',
+	\	'checkpostevent': '',
+	\	'uncheckpostevent': '',
 	\	'last':{
 	\			'event': '',
 	\			'itemlist': [],
@@ -356,13 +370,19 @@ let s:Multiselector = {
 	\			'WinNew': s:Event('WinNew'),
 	\		},
 	\	}
-let s:Multiselector.event[s:EVENTCHECKPOST] = s:UniqueEvent(s:EVENTCHECKPOST)
-let s:Multiselector.event[s:EVENTUNCHECKPOST] = s:UniqueEvent(s:EVENTUNCHECKPOST)
 function! s:Multiselector(...) abort "{{{
 	let options = get(a:000, 0, {})
 	let multiselector = deepcopy(s:Multiselector)
 	let multiselector.higroup = get(options, 'higroup', s:HIGROUP)
 	let multiselector._bufnr = bufnr('%')
+
+	let EVENTCHECKPOST = get(options, 'checkpostevent', '')
+	let EVENTUNCHECKPOST = get(options, 'uncheckpostevent', '')
+	let multiselector.checkpostevent = EVENTCHECKPOST
+	let multiselector.uncheckpostevent = EVENTUNCHECKPOST
+	let multiselector.event.CheckPost = s:UniqueEvent(EVENTCHECKPOST)
+	let multiselector.event.UncheckPost = s:UniqueEvent(EVENTUNCHECKPOST)
+
 	call add(s:table, multiselector)
 	return multiselector
 endfunction "}}}
@@ -548,7 +568,7 @@ function! s:Multiselector._checkpost(added) abort "{{{
 	endfor
 	let self.last.event = 'check'
 	let self.last.itemlist = a:added
-	call self.event[s:EVENTCHECKPOST].trigger()
+	call self.event.CheckPost.trigger()
 endfunction "}}}
 function! s:Multiselector._uncheckpost(removed) abort "{{{
 	for item in a:removed
@@ -556,7 +576,7 @@ function! s:Multiselector._uncheckpost(removed) abort "{{{
 	endfor
 	let self.last.event = 'uncheck'
 	let self.last.itemlist = a:removed
-	call self.event[s:EVENTUNCHECKPOST].trigger()
+	call self.event.UncheckPost.trigger()
 endfunction "}}}
 lockvar! s:Multiselector
 "}}}
@@ -682,8 +702,6 @@ unlockvar! s:MultiselectModule
 let s:MultiselectModule = {
 	\	'__MODULE__': 'Multiselect',
 	\	'DEFAULTHIGHLIGHTGROUP': s:HIGROUP,
-	\	'EVENTCHECKPOST': s:EVENTCHECKPOST,
-	\	'EVENTUNCHECKPOST': s:EVENTUNCHECKPOST,
 	\	'Region': function('s:Region'),
 	\	'Item': function('s:Item'),
 	\	'Multiselector': function('s:Multiselector'),
@@ -697,7 +715,12 @@ function! s:MultiselectModule.load() abort "{{{
 endfunction "}}}
 lockvar! s:MultiselectModule
 "}}}
-let s:multiselector = s:MultiselectModule.Multiselector()
+let s:multiselector = s:MultiselectModule.Multiselector({
+	\	'higroup': s:HIGROUP,
+	\	'checkpostevent': s:EVENTCHECKPOST,
+	\	'uncheckpostevent': s:EVENTUNCHECKPOST,
+	\	})
+let g:ms = s:multiselector
 " vim:set foldmethod=marker:
 " vim:set commentstring="%s:
 " vim:set noet ts=4 sw=4 sts=-1:
