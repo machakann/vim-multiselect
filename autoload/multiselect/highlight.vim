@@ -39,7 +39,7 @@ function! s:Highlight() abort "{{{
 endfunction "}}}
 function! s:Highlight.initialize(hi_group, region) abort "{{{
 	if a:region.head == s:NULLPOS || a:region.tail == s:NULLPOS ||
-	\		s:in_order_of(a:region.tail, a:region.head)
+	\		s:inorderof(a:region.tail, a:region.head)
 		return s:FALSE
 	endif
 
@@ -139,7 +139,7 @@ function! s:highlight_order(item) abort "{{{
 	return s:eight_order_per_each(orderlist)
 endfunction "}}}
 function! s:highlight_order_charwise(region) abort "{{{
-	if a:region.head == s:NULLPOS || a:region.tail == s:NULLPOS || s:in_order_of(a:region.tail, a:region.head)
+	if a:region.head == s:NULLPOS || a:region.tail == s:NULLPOS || s:inorderof(a:region.tail, a:region.head)
 		return []
 	endif
 
@@ -166,7 +166,7 @@ function! s:highlight_order_linewise(region) abort "{{{
 	return map(range(a:region.head[1], a:region.tail[1]), '[v:val]')
 endfunction "}}}
 function! s:highlight_order_blockwise(region) abort "{{{
-	if a:region.head == s:NULLPOS || a:region.tail == s:NULLPOS || s:in_order_of(a:region.tail, a:region.head)
+	if a:region.head == s:NULLPOS || a:region.tail == s:NULLPOS || s:inorderof(a:region.tail, a:region.head)
 		return []
 	endif
 
@@ -187,7 +187,7 @@ function! s:highlight_order_blockwise(region) abort "{{{
 	call winrestview(view)
 	return orderlist
 endfunction "}}}
-function! s:in_order_of(pos1, pos2) abort  "{{{
+function! s:inorderof(pos1, pos2) abort  "{{{
 	return a:pos1[1] < a:pos2[1] || (a:pos1[1] == a:pos2[1] && a:pos1[2] < a:pos2[2])
 endfunction "}}}
 function! s:eight_order_per_each(orderlist) abort "{{{
