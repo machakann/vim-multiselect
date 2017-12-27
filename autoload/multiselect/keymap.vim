@@ -8,7 +8,7 @@ let s:inorderof = s:Multiselect.inorderof
 function! multiselect#keymap#check(mode) abort  "{{{
 	let head = getpos("'<")
 	let tail = getpos("'>")
-	let type = visualmode()[0]
+	let type = visualmode()
 	let extended = type ==# "\<C-v>" ? s:is_extended() : 0
 	call s:multiselector.check(head, tail, type, extended)
 endfunction "}}}
