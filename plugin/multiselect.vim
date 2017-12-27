@@ -10,10 +10,12 @@ let g:loaded_multiselect = 1
 " keymappings
 nnoremap <silent> <Plug>(multiselect-check) viw<Esc>:call multiselect#keymap#check('n')<CR>
 xnoremap <silent> <Plug>(multiselect-check) <Esc>:call multiselect#keymap#check('x')<CR>
+nnoremap <silent> <Plug>(multiselect-checksearched) :<C-u>call multiselect#keymap#check('n')<CR>
+xnoremap <silent> <Plug>(multiselect-checksearched) <Esc>:call multiselect#keymap#check('x')<CR>
 nnoremap <silent> <Plug>(multiselect-uncheck) :<C-u>call multiselect#keymap#uncheck('n')<CR>
-xnoremap <silent> <Plug>(multiselect-uncheck) :<C-u>call multiselect#keymap#uncheck('x')<CR>
+xnoremap <silent> <Plug>(multiselect-uncheck) <Esc>:call multiselect#keymap#uncheck('x')<CR>
 nnoremap <silent> <Plug>(multiselect-uncheckall) :<C-u>call multiselect#keymap#uncheckall('n')<CR>
-xnoremap <silent> <Plug>(multiselect-uncheckall) :<C-u>call multiselect#keymap#uncheckall('x')<CR>
+xnoremap <silent> <Plug>(multiselect-uncheckall) <Esc>:call multiselect#keymap#uncheckall('x')<CR>
 
 
 
