@@ -723,7 +723,6 @@ let s:multiselector = s:MultiselectModule.Multiselector({
 	\	'checkpostevent': s:EVENTCHECKPOST,
 	\	'uncheckpostevent': s:EVENTUNCHECKPOST,
 	\	})
-let g:ms = s:multiselector
 " vim:set foldmethod=marker:
 " vim:set commentstring="%s:
 " vim:set noet ts=4 sw=4 sts=-1:
