@@ -45,6 +45,9 @@ function! s:Region(head, tail, ...) abort "{{{
 	echoerr s:err_InvalidArgument('s:Region')
 endfunction "}}}
 function! s:Region.isinside(region) abort  "{{{
+	if a:region.head == s:NULLPOS || a:region.tail == s:NULLPOS
+		return s:FALSE
+	endif
 	let itemtype = s:type2typestring(self.type)
 	let rangetype = s:type2typestring(a:region.type)
 	return s:{itemtype}_is_included_in_{rangetype}(self, a:region)
@@ -53,15 +56,25 @@ function! s:Region.istouching(expr) abort "{{{
 	let type_expr = type(a:expr)
 	if type_expr == v:t_number
 		let lnum = a:expr
+		if lnum == 0
+			return s:FALSE
+		endif
 		return self.head[1] <= lnum && lnum <= self.tail[1]
 	elseif type_expr == v:t_list
 		let pos = a:expr
+		if pos == s:NULLPOS
+			return s:FALSE
+		endif
 		let region = s:Region(pos, pos, 'v')
 		return self.istouching(region)
 	elseif type_expr == v:t_dict
+		let range = a:expr
+		if range.head == s:NULLPOS || range.tail == s:NULLPOS
+			return s:FALSE
+		endif
 		let itemtype = s:type2typestring(self.type)
-		let rangetype = s:type2typestring(a:expr.type)
-		return s:{itemtype}_is_touching_{rangetype}(self, a:expr)
+		let rangetype = s:type2typestring(range.type)
+		return s:{itemtype}_is_touching_{rangetype}(self, range)
 	endif
 	echoerr s:err_InvalidArgument('region.istouching')
 endfunction "}}}
