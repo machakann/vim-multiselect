@@ -44,36 +44,12 @@ function! s:Region(head, tail, ...) abort "{{{
 	endif
 	echoerr s:err_InvalidArgument('s:Region')
 endfunction "}}}
-"}}}
-" Item class (inherits Region class)"{{{
-unlockvar! s:Item
-let s:Item = {
-	\	'__CLASS__': 'Item',
-	\	'id': 0,
-	\	'bufnr': 0,
-	\	'highlight': {},
-	\	}
-function! s:Item(bufnr, head, tail, type, ...) abort "{{{
-	if !bufexists(a:bufnr)
-		return {}
-	endif
-	if a:head == s:NULLPOS || a:tail == s:NULLPOS || s:inorderof(a:tail, a:head)
-		return {}
-	endif
-
-	let origin = s:Region(a:head, a:tail, a:type, get(a:000, 0, s:FALSE))
-	let item = extend(origin, deepcopy(s:Item), 'force')
-	let item.id = s:itemid()
-	let item.bufnr = a:bufnr
-	let item.highlight = s:Highlights.Highlight()
-	return item
-endfunction "}}}
-function! s:Item.isinside(region) abort  "{{{
+function! s:Region.isinside(region) abort  "{{{
 	let itemtype = s:type2typestring(self.type)
 	let rangetype = s:type2typestring(a:region.type)
 	return s:{itemtype}_is_included_in_{rangetype}(self, a:region)
 endfunction "}}}
-function! s:Item.istouching(expr) abort "{{{
+function! s:Region.istouching(expr) abort "{{{
 	let type_expr = type(a:expr)
 	if type_expr == v:t_number
 		let lnum = a:expr
@@ -87,47 +63,9 @@ function! s:Item.istouching(expr) abort "{{{
 		let rangetype = s:type2typestring(a:expr.type)
 		return s:{itemtype}_is_touching_{rangetype}(self, a:expr)
 	endif
-	echoerr s:err_InvalidArgument('item.istouching')
+	echoerr s:err_InvalidArgument('region.istouching')
 endfunction "}}}
-function! s:Item.select() abort "{{{
-	execute 'normal! ' . self.type
-	call setpos('.', self.head)
-	normal! o
-	call setpos('.', self.tail)
-	if self.extended
-		normal! $
-	endif
-endfunction "}}}
-function! s:Item.show(higroup) abort "{{{
-	if self.highlight.initialize(a:higroup, self)
-		call self.highlight.quench()
-	endif
-	call self.highlight.show()
-endfunction "}}}
-function! s:Item.quench() abort "{{{
-	call self.highlight.quench()
-endfunction "}}}
-function! s:Item._showlocal(higroup) abort "{{{
-	if self.highlight.initialize(a:higroup, self)
-		call self.highlight.quench()
-		call self.highlight.show()
-	else
-		call self.highlight.showlocal()
-	endif
-endfunction "}}}
-function! s:Item._quenchlocal() abort "{{{
-	call self.highlight.quenchlocal()
-endfunction "}}}
-function! s:Item._histatus(winid) abort "{{{
-	return self.highlight.status(a:winid)
-endfunction "}}}
-lockvar! s:Item
 
-let s:itemid = 0
-function! s:itemid() abort "{{{
-	let s:itemid += 1
-	return s:itemid
-endfunction "}}}
 function! s:type2typestring(type) abort "{{{
 	if a:type ==# 'v'
 		return 'char'
@@ -244,6 +182,69 @@ function! s:block_is_touching_block(item, region) abort "{{{
 	let regionleft = virtcol(a:region.head[1:2]) + a:region.head[3]
 	let regionright = virtcol(a:region.tail[1:2]) + a:region.tail[3]
 	return !(itemright < regionleft || regionright < itemleft)
+endfunction "}}}
+"}}}
+" Item class (inherits Region class)"{{{
+unlockvar! s:Item
+let s:Item = {
+	\	'__CLASS__': 'Item',
+	\	'id': 0,
+	\	'bufnr': 0,
+	\	'highlight': {},
+	\	}
+function! s:Item(bufnr, head, tail, type, ...) abort "{{{
+	if !bufexists(a:bufnr)
+		return {}
+	endif
+	if a:head == s:NULLPOS || a:tail == s:NULLPOS || s:inorderof(a:tail, a:head)
+		return {}
+	endif
+
+	let origin = s:Region(a:head, a:tail, a:type, get(a:000, 0, s:FALSE))
+	let item = extend(origin, deepcopy(s:Item), 'force')
+	let item.id = s:itemid()
+	let item.bufnr = a:bufnr
+	let item.highlight = s:Highlights.Highlight()
+	return item
+endfunction "}}}
+function! s:Item.select() abort "{{{
+	execute 'normal! ' . self.type
+	call setpos('.', self.head)
+	normal! o
+	call setpos('.', self.tail)
+	if self.extended
+		normal! $
+	endif
+endfunction "}}}
+function! s:Item.show(higroup) abort "{{{
+	if self.highlight.initialize(a:higroup, self)
+		call self.highlight.quench()
+	endif
+	call self.highlight.show()
+endfunction "}}}
+function! s:Item.quench() abort "{{{
+	call self.highlight.quench()
+endfunction "}}}
+function! s:Item._showlocal(higroup) abort "{{{
+	if self.highlight.initialize(a:higroup, self)
+		call self.highlight.quench()
+		call self.highlight.show()
+	else
+		call self.highlight.showlocal()
+	endif
+endfunction "}}}
+function! s:Item._quenchlocal() abort "{{{
+	call self.highlight.quenchlocal()
+endfunction "}}}
+function! s:Item._histatus(winid) abort "{{{
+	return self.highlight.status(a:winid)
+endfunction "}}}
+lockvar! s:Item
+
+let s:itemid = 0
+function! s:itemid() abort "{{{
+	let s:itemid += 1
+	return s:itemid
 endfunction "}}}
 "}}}
 " Event class{{{

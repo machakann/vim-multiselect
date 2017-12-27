@@ -4,12 +4,11 @@ Describe Region
 		%delete
 		call append(0, [
 			\ 'aaaaaaa',
-			\ 'bbbbbb',
-			\ 'ccccc',
-			\ 'dddd',
-			\ 'eee',
+			\ 'bbbbbbb',
+			\ 'ccccccc',
+			\ 'ddddddd',
+			\ 'eeeeeee',
 			\ ])
-		let BUFNR = bufnr('%')
 		$delete
 	End
 
@@ -31,17 +30,674 @@ Describe Region
 		It constructs a linewise-instance with modified head/tail positions
 			Assert Equals(Region([0, 1, 2, 0], [0, 1, 2, 0], 'V').head, [0, 1, 1, 0])
 			Assert Equals(Region([0, 1, 2, 0], [0, 1, 2, 0], 'V').tail, [0, 1, 8, 0])
-
-			Assert Equals(Region([0, 1, 2, 0], [0, 3, 2, 0], 'V').head, [0, 1, 1, 0])
-			Assert Equals(Region([0, 1, 2, 0], [0, 3, 2, 0], 'V').tail, [0, 3, 6, 0])
-
-			Assert Equals(Region([0, 1, 2, 0], [0, 5, 2, 0], 'V').head, [0, 1, 1, 0])
-			Assert Equals(Region([0, 1, 2, 0], [0, 5, 2, 0], 'V').tail, [0, 5, 4, 0])
 		End
 
 		It constructs a blockwise-instance if a:type is "\<C-v>" or 'block'
 			Assert Equals(Region([0, 1, 1, 0], [0, 1, 7, 0], "\<C-v>").type, "\<C-v>")
 			Assert Equals(Region([0, 1, 1, 0], [0, 1, 7, 0], 'block').type, "\<C-v>")
+		End
+	End
+
+	Context .isinside(region)
+		It returns TRUE if itself is inside the region
+			" a characterwise item in a characterwise region
+			Assert True(Region([0, 2, 4, 0], [0, 2, 7, 0], 'v').
+						\isinside(Region([0, 2, 4, 0], [0, 4, 4, 0], 'v')))
+
+			Assert True(Region([0, 2, 6, 0], [0, 3, 1, 0], 'v').
+						\isinside(Region([0, 2, 4, 0], [0, 4, 4, 0], 'v')))
+
+			Assert True(Region([0, 3, 1, 0], [0, 3, 7, 0], 'v').
+						\isinside(Region([0, 2, 4, 0], [0, 4, 4, 0], 'v')))
+
+			Assert True(Region([0, 2, 4, 0], [0, 4, 4, 0], 'v').
+						\isinside(Region([0, 2, 4, 0], [0, 4, 4, 0], 'v')))
+
+			Assert True(Region([0, 4, 3, 0], [0, 4, 4, 0], 'v').
+						\isinside(Region([0, 2, 4, 0], [0, 4, 4, 0], 'v')))
+
+			" a characterwise item in a linewise region
+			Assert True(Region([0, 2, 1, 0], [0, 2, 7, 0], 'v').
+						\isinside(Region([0, 2, 4, 0], [0, 4, 4, 0], 'V')))
+
+			Assert True(Region([0, 3, 1, 0], [0, 3, 7, 0], 'v').
+						\isinside(Region([0, 2, 4, 0], [0, 4, 4, 0], 'V')))
+
+			Assert True(Region([0, 4, 1, 0], [0, 4, 7, 0], 'v').
+						\isinside(Region([0, 2, 4, 0], [0, 4, 4, 0], 'V')))
+
+			Assert True(Region([0, 2, 1, 0], [0, 4, 7, 0], 'v').
+						\isinside(Region([0, 2, 4, 0], [0, 4, 4, 0], 'V')))
+
+			" a characterwise item in a blockwise region
+			Assert True(Region([0, 2, 3, 0], [0, 2, 5, 0], 'v').
+						\isinside(Region([0, 2, 3, 0], [0, 4, 5, 0], "\<C-v>")))
+
+			Assert True(Region([0, 3, 3, 0], [0, 3, 5, 0], 'v').
+						\isinside(Region([0, 2, 3, 0], [0, 4, 5, 0], "\<C-v>")))
+
+			Assert True(Region([0, 4, 3, 0], [0, 4, 5, 0], 'v').
+						\isinside(Region([0, 2, 3, 0], [0, 4, 5, 0], "\<C-v>")))
+
+			Assert True(Region([0, 2, 7, 0], [0, 4, 1, 0], 'v').
+						\isinside(Region([0, 2, 1, 0], [0, 4, 8, 0], "\<C-v>")))
+
+			" a linewise item in a characterwise region
+			Assert True(Region([0, 3, 1, 0], [0, 3, 1, 0], 'V').
+						\isinside(Region([0, 2, 4, 0], [0, 4, 4, 0], 'v')))
+
+			" a linewise item in a linewise region
+			Assert True(Region([0, 2, 1, 0], [0, 2, 1, 0], 'V').
+						\isinside(Region([0, 2, 4, 0], [0, 4, 4, 0], 'V')))
+
+			Assert True(Region([0, 3, 1, 0], [0, 3, 1, 0], 'V').
+						\isinside(Region([0, 2, 4, 0], [0, 4, 4, 0], 'V')))
+
+			Assert True(Region([0, 4, 1, 0], [0, 4, 1, 0], 'V').
+						\isinside(Region([0, 2, 4, 0], [0, 4, 4, 0], 'V')))
+
+			Assert True(Region([0, 2, 1, 0], [0, 4, 1, 0], 'V').
+						\isinside(Region([0, 2, 4, 0], [0, 4, 4, 0], 'V')))
+
+			" a linewise item in a blockwise region
+			Assert True(Region([0, 2, 1, 0], [0, 2, 1, 0], 'V').
+						\isinside(Region([0, 2, 1, 0], [0, 4, 8, 0], "\<C-v>")))
+
+			Assert True(Region([0, 3, 1, 0], [0, 3, 1, 0], 'V').
+						\isinside(Region([0, 2, 1, 0], [0, 4, 8, 0], "\<C-v>")))
+
+			Assert True(Region([0, 4, 1, 0], [0, 4, 1, 0], 'V').
+						\isinside(Region([0, 2, 1, 0], [0, 4, 8, 0], "\<C-v>")))
+
+			Assert True(Region([0, 2, 1, 0], [0, 4, 1, 0], 'V').
+						\isinside(Region([0, 2, 1, 0], [0, 4, 8, 0], "\<C-v>")))
+
+			" a blockwise item in a characterwise region
+			Assert True(Region([0, 2, 3, 0], [0, 4, 5, 0], "\<C-v>").
+						\isinside(Region([0, 2, 3, 0], [0, 4, 5, 0], 'v')))
+
+			Assert True(Region([0, 2, 3, 0], [0, 3, 4, 0], "\<C-v>").
+						\isinside(Region([0, 2, 3, 0], [0, 4, 5, 0], 'v')))
+
+			Assert True(Region([0, 3, 4, 0], [0, 4, 5, 0], "\<C-v>").
+						\isinside(Region([0, 2, 3, 0], [0, 4, 5, 0], 'v')))
+
+			Assert True(Region([0, 2, 6, 0], [0, 3, 7, 0], "\<C-v>").
+						\isinside(Region([0, 2, 3, 0], [0, 4, 5, 0], 'v')))
+
+			Assert True(Region([0, 3, 1, 0], [0, 4, 2, 0], "\<C-v>").
+						\isinside(Region([0, 2, 3, 0], [0, 4, 5, 0], 'v')))
+
+			" a blockwise item in a linewise region
+			Assert True(Region([0, 2, 3, 0], [0, 4, 5, 0], "\<C-v>").
+						\isinside(Region([0, 2, 3, 0], [0, 4, 5, 0], 'V')))
+
+			Assert True(Region([0, 2, 1, 0], [0, 4, 4, 0], "\<C-v>").
+						\isinside(Region([0, 2, 3, 0], [0, 4, 5, 0], 'V')))
+
+			Assert True(Region([0, 2, 4, 0], [0, 4, 7, 0], "\<C-v>").
+						\isinside(Region([0, 2, 3, 0], [0, 4, 5, 0], 'V')))
+
+			Assert True(Region([0, 2, 1, 0], [0, 3, 4, 0], "\<C-v>").
+						\isinside(Region([0, 2, 3, 0], [0, 4, 5, 0], 'V')))
+
+			Assert True(Region([0, 2, 4, 0], [0, 3, 7, 0], "\<C-v>").
+						\isinside(Region([0, 2, 3, 0], [0, 4, 5, 0], 'V')))
+
+			Assert True(Region([0, 3, 1, 0], [0, 4, 4, 0], "\<C-v>").
+						\isinside(Region([0, 2, 3, 0], [0, 4, 5, 0], 'V')))
+
+			Assert True(Region([0, 3, 4, 0], [0, 4, 7, 0], "\<C-v>").
+						\isinside(Region([0, 2, 3, 0], [0, 4, 5, 0], 'V')))
+
+			" a blockwise item in a blockwise region
+			Assert True(Region([0, 2, 3, 0], [0, 4, 5, 0], "\<C-v>").
+						\isinside(Region([0, 2, 3, 0], [0, 4, 5, 0], "\<C-v>")))
+
+			Assert True(Region([0, 2, 3, 0], [0, 3, 4, 0], "\<C-v>").
+						\isinside(Region([0, 2, 3, 0], [0, 4, 5, 0], "\<C-v>")))
+
+			Assert True(Region([0, 3, 3, 0], [0, 4, 4, 0], "\<C-v>").
+						\isinside(Region([0, 2, 3, 0], [0, 4, 5, 0], "\<C-v>")))
+
+			Assert True(Region([0, 2, 4, 0], [0, 3, 5, 0], "\<C-v>").
+						\isinside(Region([0, 2, 3, 0], [0, 4, 5, 0], "\<C-v>")))
+
+			Assert True(Region([0, 3, 4, 0], [0, 4, 5, 0], "\<C-v>").
+						\isinside(Region([0, 2, 3, 0], [0, 4, 5, 0], "\<C-v>")))
+		End
+
+		It returns FALSE if itself is not inside the region
+			" a characterwise item not in a characterwise region
+			Assert False(Region([0, 2, 2, 0], [0, 2, 5, 0], 'v').
+						\isinside(Region([0, 2, 4, 0], [0, 4, 4, 0], 'v')))
+
+			Assert False(Region([0, 1, 6, 0], [0, 2, 3, 0], 'v').
+						\isinside(Region([0, 2, 4, 0], [0, 4, 4, 0], 'v')))
+
+			Assert False(Region([0, 2, 3, 0], [0, 2, 4, 0], 'v').
+						\isinside(Region([0, 2, 4, 0], [0, 4, 4, 0], 'v')))
+
+			Assert False(Region([0, 4, 4, 0], [0, 4, 5, 0], 'v').
+						\isinside(Region([0, 2, 4, 0], [0, 4, 4, 0], 'v')))
+
+			Assert False(Region([0, 4, 5, 0], [0, 5, 1, 0], 'v').
+						\isinside(Region([0, 2, 4, 0], [0, 4, 4, 0], 'v')))
+
+			Assert False(Region([0, 5, 2, 0], [0, 5, 5, 0], 'v').
+						\isinside(Region([0, 2, 4, 0], [0, 4, 4, 0], 'v')))
+
+			" a characterwise item not in a linewise region
+			Assert False(Region([0, 1, 1, 0], [0, 1, 7, 0], 'v').
+						\isinside(Region([0, 2, 4, 0], [0, 4, 4, 0], 'V')))
+
+			Assert False(Region([0, 5, 1, 0], [0, 5, 7, 0], 'v').
+						\isinside(Region([0, 2, 4, 0], [0, 4, 4, 0], 'V')))
+
+			" a characterwise item not in a blockwise region
+			Assert False(Region([0, 1, 3, 0], [0, 1, 5, 0], 'v').
+						\isinside(Region([0, 2, 3, 0], [0, 4, 5, 0], "\<C-v>")))
+
+			Assert False(Region([0, 1, 3, 0], [0, 2, 2, 0], 'v').
+						\isinside(Region([0, 2, 3, 0], [0, 4, 5, 0], "\<C-v>")))
+
+			Assert False(Region([0, 2, 1, 0], [0, 2, 2, 0], 'v').
+						\isinside(Region([0, 2, 3, 0], [0, 4, 5, 0], "\<C-v>")))
+
+			Assert False(Region([0, 4, 6, 0], [0, 4, 7, 0], 'v').
+						\isinside(Region([0, 2, 3, 0], [0, 4, 5, 0], "\<C-v>")))
+
+			Assert False(Region([0, 4, 6, 0], [0, 5, 2, 0], 'v').
+						\isinside(Region([0, 2, 3, 0], [0, 4, 5, 0], "\<C-v>")))
+
+			Assert False(Region([0, 5, 3, 0], [0, 5, 5, 0], 'v').
+						\isinside(Region([0, 2, 3, 0], [0, 4, 5, 0], "\<C-v>")))
+
+			" a linewise item not in a characterwise region
+			Assert False(Region([0, 1, 1, 0], [0, 1, 1, 0], 'V').
+						\isinside(Region([0, 2, 4, 0], [0, 4, 4, 0], 'v')))
+
+			Assert False(Region([0, 2, 1, 0], [0, 2, 1, 0], 'V').
+						\isinside(Region([0, 2, 4, 0], [0, 4, 4, 0], 'v')))
+
+			Assert False(Region([0, 4, 1, 0], [0, 4, 1, 0], 'V').
+						\isinside(Region([0, 2, 4, 0], [0, 4, 4, 0], 'v')))
+
+			Assert False(Region([0, 5, 1, 0], [0, 5, 1, 0], 'V').
+						\isinside(Region([0, 2, 4, 0], [0, 4, 4, 0], 'v')))
+
+			" a linewise item not in a linewise region
+			Assert False(Region([0, 1, 1, 0], [0, 1, 1, 0], 'V').
+						\isinside(Region([0, 2, 4, 0], [0, 4, 4, 0], 'V')))
+
+			Assert False(Region([0, 5, 1, 0], [0, 5, 1, 0], 'V').
+						\isinside(Region([0, 2, 4, 0], [0, 4, 4, 0], 'V')))
+
+			" a linewise item not in a blockwise region
+			Assert False(Region([0, 1, 1, 0], [0, 1, 1, 0], 'V').
+						\isinside(Region([0, 2, 1, 0], [0, 4, 8, 0], "\<C-v>")))
+
+			Assert False(Region([0, 5, 1, 0], [0, 5, 1, 0], 'V').
+						\isinside(Region([0, 2, 1, 0], [0, 4, 8, 0], "\<C-v>")))
+
+			Assert False(Region([0, 2, 1, 0], [0, 2, 1, 0], 'V').
+						\isinside(Region([0, 2, 3, 0], [0, 4, 5, 0], "\<C-v>")))
+
+			Assert False(Region([0, 3, 1, 0], [0, 3, 1, 0], 'V').
+						\isinside(Region([0, 2, 3, 0], [0, 4, 5, 0], "\<C-v>")))
+
+			Assert False(Region([0, 4, 1, 0], [0, 4, 1, 0], 'V').
+						\isinside(Region([0, 2, 3, 0], [0, 4, 5, 0], "\<C-v>")))
+
+			Assert False(Region([0, 2, 1, 0], [0, 4, 1, 0], 'V').
+						\isinside(Region([0, 2, 3, 0], [0, 4, 5, 0], "\<C-v>")))
+
+			" a blockwise item not in a characterwise region
+			Assert False(Region([0, 1, 1, 0], [0, 2, 2, 0], "\<C-v>").
+						\isinside(Region([0, 2, 3, 0], [0, 4, 5, 0], 'v')))
+
+			Assert False(Region([0, 1, 1, 0], [0, 3, 4, 0], "\<C-v>").
+						\isinside(Region([0, 2, 3, 0], [0, 4, 5, 0], 'v')))
+
+			Assert False(Region([0, 4, 6, 0], [0, 5, 7, 0], "\<C-v>").
+						\isinside(Region([0, 2, 3, 0], [0, 4, 5, 0], 'v')))
+
+			Assert False(Region([0, 3, 4, 0], [0, 5, 7, 0], "\<C-v>").
+						\isinside(Region([0, 2, 3, 0], [0, 4, 5, 0], 'v')))
+
+			" a blockwise item not in a linewise region
+			Assert False(Region([0, 1, 1, 0], [0, 1, 7, 0], "\<C-v>").
+						\isinside(Region([0, 2, 3, 0], [0, 4, 5, 0], 'V')))
+
+			Assert False(Region([0, 5, 1, 0], [0, 5, 7, 0], "\<C-v>").
+						\isinside(Region([0, 2, 3, 0], [0, 4, 5, 0], 'V')))
+
+			" blockwise item not in a blockwise region
+			Assert False(Region([0, 1, 1, 0], [0, 2, 2, 0], "\<C-v>").
+						\isinside(Region([0, 2, 3, 0], [0, 4, 5, 0], "\<C-v>")))
+
+			Assert False(Region([0, 1, 6, 0], [0, 2, 7, 0], "\<C-v>").
+						\isinside(Region([0, 2, 3, 0], [0, 4, 5, 0], "\<C-v>")))
+
+			Assert False(Region([0, 6, 1, 0], [0, 7, 2, 0], "\<C-v>").
+						\isinside(Region([0, 2, 3, 0], [0, 4, 5, 0], "\<C-v>")))
+
+			Assert False(Region([0, 6, 6, 0], [0, 7, 7, 0], "\<C-v>").
+						\isinside(Region([0, 2, 3, 0], [0, 4, 5, 0], "\<C-v>")))
+
+			Assert False(Region([0, 2, 1, 0], [0, 4, 2, 0], "\<C-v>").
+						\isinside(Region([0, 2, 3, 0], [0, 4, 5, 0], "\<C-v>")))
+
+			Assert False(Region([0, 2, 6, 0], [0, 4, 7, 0], "\<C-v>").
+						\isinside(Region([0, 2, 3, 0], [0, 4, 5, 0], "\<C-v>")))
+
+			Assert False(Region([0, 1, 3, 0], [0, 1, 5, 0], "\<C-v>").
+						\isinside(Region([0, 2, 3, 0], [0, 4, 5, 0], "\<C-v>")))
+
+			Assert False(Region([0, 5, 3, 0], [0, 5, 5, 0], "\<C-v>").
+						\isinside(Region([0, 2, 3, 0], [0, 4, 5, 0], "\<C-v>")))
+		End
+	End
+
+	Context .istouching(lnum)
+		It returns TRUE if itself is touching the line
+			Assert True(Region([0, 2, 5, 0], [0, 3, 3, 0], 'v').istouching(3))
+			Assert True(Region([0, 3, 1, 0], [0, 3, 7, 0], 'v').istouching(3))
+			Assert True(Region([0, 3, 5, 0], [0, 4, 3, 0], 'v').istouching(3))
+
+			Assert True(Region([0, 2, 5, 0], [0, 3, 3, 0], 'V').istouching(3))
+			Assert True(Region([0, 3, 1, 0], [0, 3, 7, 0], 'V').istouching(3))
+			Assert True(Region([0, 3, 5, 0], [0, 4, 3, 0], 'V').istouching(3))
+
+			Assert True(Region([0, 2, 3, 0], [0, 3, 5, 0], "\<C-v>").istouching(3))
+			Assert True(Region([0, 3, 1, 0], [0, 3, 7, 0], "\<C-v>").istouching(3))
+			Assert True(Region([0, 3, 3, 0], [0, 4, 5, 0], "\<C-v>").istouching(3))
+		End
+
+		It returns FALSE if itself is not touching the line
+			Assert False(Region([0, 1, 5, 0], [0, 2, 3, 0], 'v').istouching(3))
+			Assert False(Region([0, 4, 5, 0], [0, 5, 3, 0], 'v').istouching(3))
+
+			Assert False(Region([0, 1, 5, 0], [0, 2, 3, 0], 'V').istouching(3))
+			Assert False(Region([0, 4, 5, 0], [0, 5, 3, 0], 'V').istouching(3))
+
+			Assert False(Region([0, 1, 5, 0], [0, 2, 3, 0], "\<C-v>").istouching(3))
+			Assert False(Region([0, 4, 5, 0], [0, 5, 3, 0], "\<C-v>").istouching(3))
+		End
+	End
+
+	Context .istouching(pos)
+		It returns TRUE if itself is touching the position
+			Assert True(Region([0, 2, 5, 0], [0, 3, 4, 0], 'v').
+						\istouching([0, 3, 4, 0]))
+
+			Assert True(Region([0, 3, 1, 0], [0, 3, 7, 0], 'v').
+						\istouching([0, 3, 4, 0]))
+
+			Assert True(Region([0, 3, 4, 0], [0, 4, 3, 0], 'v').
+						\istouching([0, 3, 4, 0]))
+
+			Assert True(Region([0, 2, 5, 0], [0, 3, 3, 0], 'V').
+						\istouching([0, 3, 4, 0]))
+
+			Assert True(Region([0, 3, 1, 0], [0, 3, 7, 0], 'V').
+						\istouching([0, 3, 4, 0]))
+
+			Assert True(Region([0, 3, 5, 0], [0, 4, 3, 0], 'V').
+						\istouching([0, 3, 4, 0]))
+
+			Assert True(Region([0, 2, 3, 0], [0, 3, 4, 0], "\<C-v>").
+						\istouching([0, 3, 4, 0]))
+
+			Assert True(Region([0, 2, 3, 0], [0, 4, 5, 0], "\<C-v>").
+						\istouching([0, 3, 4, 0]))
+
+			Assert True(Region([0, 3, 4, 0], [0, 4, 5, 0], "\<C-v>").
+						\istouching([0, 3, 4, 0]))
+		End
+
+		It returns FALSE if itself is not touching the position
+			Assert False(Region([0, 1, 5, 0], [0, 3, 3, 0], 'v').
+						\istouching([0, 3, 4, 0]))
+
+			Assert False(Region([0, 3, 5, 0], [0, 5, 3, 0], 'v').
+						\istouching([0, 3, 4, 0]))
+
+			Assert False(Region([0, 1, 5, 0], [0, 2, 3, 0], 'V').
+						\istouching([0, 3, 4, 0]))
+
+			Assert False(Region([0, 4, 5, 0], [0, 5, 3, 0], 'V').
+						\istouching([0, 3, 4, 0]))
+
+			Assert False(Region([0, 1, 5, 0], [0, 3, 3, 0], "\<C-v>").
+						\istouching([0, 3, 4, 0]))
+
+			Assert False(Region([0, 3, 5, 0], [0, 5, 3, 0], "\<C-v>").
+						\istouching([0, 3, 4, 0]))
+		End
+	End
+
+	Context .istouching(region)
+		It returns TRUE if itself is touching the region
+			" a characterwise item touches a characterwise region
+			Assert True(Region([0, 1, 1, 0], [0, 2, 4, 0], 'v').
+						\istouching(Region([0, 2, 4, 0], [0, 4, 4, 0], 'v')))
+
+			Assert True(Region([0, 4, 4, 0], [0, 5, 7, 0], 'v').
+						\istouching(Region([0, 2, 4, 0], [0, 4, 4, 0], 'v')))
+
+			Assert True(Region([0, 1, 1, 0], [0, 5, 7, 0], 'v').
+						\istouching(Region([0, 2, 4, 0], [0, 4, 4, 0], 'v')))
+
+			Assert True(Region([0, 2, 4, 0], [0, 4, 4, 0], 'v').
+						\istouching(Region([0, 2, 4, 0], [0, 4, 4, 0], 'v')))
+
+			Assert True(Region([0, 2, 5, 0], [0, 4, 3, 0], 'v').
+						\istouching(Region([0, 2, 4, 0], [0, 4, 4, 0], 'v')))
+
+			Assert True(Region([0, 2, 3, 0], [0, 4, 5, 0], 'v').
+						\istouching(Region([0, 2, 4, 0], [0, 4, 4, 0], 'v')))
+
+			" a characterwise item touches a linewise region
+			Assert True(Region([0, 1, 1, 0], [0, 2, 1, 0], 'v').
+						\istouching(Region([0, 2, 4, 0], [0, 4, 4, 0], 'V')))
+
+			Assert True(Region([0, 2, 1, 0], [0, 2, 7, 0], 'v').
+						\istouching(Region([0, 2, 4, 0], [0, 4, 4, 0], 'V')))
+
+			Assert True(Region([0, 4, 7, 0], [0, 5, 7, 0], 'v').
+						\istouching(Region([0, 2, 4, 0], [0, 4, 4, 0], 'V')))
+
+			Assert True(Region([0, 1, 1, 0], [0, 5, 7, 0], 'v').
+						\istouching(Region([0, 2, 4, 0], [0, 4, 4, 0], 'V')))
+
+			" a characterwise item touches a blockwise region
+			Assert True(Region([0, 1, 1, 0], [0, 2, 3, 0], 'v').
+						\istouching(Region([0, 2, 3, 0], [0, 4, 5, 0], "\<C-v>")))
+
+			Assert True(Region([0, 4, 5, 0], [0, 5, 7, 0], 'v').
+						\istouching(Region([0, 2, 3, 0], [0, 4, 5, 0], "\<C-v>")))
+
+			Assert True(Region([0, 1, 1, 0], [0, 5, 7, 0], 'v').
+						\istouching(Region([0, 2, 3, 0], [0, 4, 5, 0], "\<C-v>")))
+
+			Assert True(Region([0, 2, 3, 0], [0, 4, 5, 0], 'v').
+						\istouching(Region([0, 2, 3, 0], [0, 4, 5, 0], "\<C-v>")))
+
+			Assert True(Region([0, 2, 4, 0], [0, 4, 4, 0], 'v').
+						\istouching(Region([0, 2, 3, 0], [0, 4, 5, 0], "\<C-v>")))
+
+			Assert True(Region([0, 2, 2, 0], [0, 4, 6, 0], 'v').
+						\istouching(Region([0, 2, 3, 0], [0, 4, 5, 0], "\<C-v>")))
+
+			Assert True(Region([0, 3, 1, 0], [0, 3, 3, 0], 'v').
+						\istouching(Region([0, 2, 3, 0], [0, 4, 5, 0], "\<C-v>")))
+
+			Assert True(Region([0, 3, 5, 0], [0, 3, 7, 0], 'v').
+						\istouching(Region([0, 2, 3, 0], [0, 4, 5, 0], "\<C-v>")))
+
+			" a linewise item touches a characterwise region
+			Assert True(Region([0, 2, 1, 0], [0, 2, 1, 0], 'V').
+						\istouching(Region([0, 2, 3, 0], [0, 4, 5, 0], 'v')))
+
+			Assert True(Region([0, 3, 1, 0], [0, 3, 1, 0], 'V').
+						\istouching(Region([0, 2, 3, 0], [0, 4, 5, 0], 'v')))
+
+			Assert True(Region([0, 4, 1, 0], [0, 4, 1, 0], 'V').
+						\istouching(Region([0, 2, 3, 0], [0, 4, 5, 0], 'v')))
+
+			Assert True(Region([0, 1, 1, 0], [0, 2, 1, 0], 'V').
+						\istouching(Region([0, 2, 3, 0], [0, 4, 5, 0], 'v')))
+
+			Assert True(Region([0, 4, 1, 0], [0, 5, 1, 0], 'V').
+						\istouching(Region([0, 2, 3, 0], [0, 4, 5, 0], 'v')))
+
+			Assert True(Region([0, 2, 1, 0], [0, 4, 1, 0], 'V').
+						\istouching(Region([0, 2, 3, 0], [0, 4, 5, 0], 'v')))
+
+			Assert True(Region([0, 1, 1, 0], [0, 5, 1, 0], 'V').
+						\istouching(Region([0, 2, 3, 0], [0, 4, 5, 0], 'v')))
+
+			" a linewise item touches a linewise region
+			Assert True(Region([0, 2, 1, 0], [0, 2, 1, 0], 'V').
+						\istouching(Region([0, 2, 3, 0], [0, 4, 5, 0], 'V')))
+
+			Assert True(Region([0, 3, 1, 0], [0, 3, 1, 0], 'V').
+						\istouching(Region([0, 2, 3, 0], [0, 4, 5, 0], 'V')))
+
+			Assert True(Region([0, 4, 1, 0], [0, 4, 1, 0], 'V').
+						\istouching(Region([0, 2, 3, 0], [0, 4, 5, 0], 'V')))
+
+			Assert True(Region([0, 1, 1, 0], [0, 2, 1, 0], 'V').
+						\istouching(Region([0, 2, 3, 0], [0, 4, 5, 0], 'V')))
+
+			Assert True(Region([0, 4, 1, 0], [0, 5, 1, 0], 'V').
+						\istouching(Region([0, 2, 3, 0], [0, 4, 5, 0], 'V')))
+
+			Assert True(Region([0, 2, 1, 0], [0, 4, 1, 0], 'V').
+						\istouching(Region([0, 2, 3, 0], [0, 4, 5, 0], 'V')))
+
+			Assert True(Region([0, 1, 1, 0], [0, 5, 1, 0], 'V').
+						\istouching(Region([0, 2, 3, 0], [0, 4, 5, 0], 'V')))
+
+			" a linewise item touches a blockwise region
+			Assert True(Region([0, 2, 1, 0], [0, 2, 1, 0], 'V').
+						\istouching(Region([0, 2, 3, 0], [0, 4, 5, 0], "\<C-v>")))
+
+			Assert True(Region([0, 3, 1, 0], [0, 3, 1, 0], 'V').
+						\istouching(Region([0, 2, 3, 0], [0, 4, 5, 0], "\<C-v>")))
+
+			Assert True(Region([0, 4, 1, 0], [0, 4, 1, 0], 'V').
+						\istouching(Region([0, 2, 3, 0], [0, 4, 5, 0], "\<C-v>")))
+
+			Assert True(Region([0, 1, 1, 0], [0, 2, 1, 0], 'V').
+						\istouching(Region([0, 2, 3, 0], [0, 4, 5, 0], "\<C-v>")))
+
+			Assert True(Region([0, 4, 1, 0], [0, 5, 1, 0], 'V').
+						\istouching(Region([0, 2, 3, 0], [0, 4, 5, 0], "\<C-v>")))
+
+			Assert True(Region([0, 2, 1, 0], [0, 4, 1, 0], 'V').
+						\istouching(Region([0, 2, 3, 0], [0, 4, 5, 0], "\<C-v>")))
+
+			Assert True(Region([0, 1, 1, 0], [0, 5, 1, 0], 'V').
+						\istouching(Region([0, 2, 3, 0], [0, 4, 5, 0], "\<C-v>")))
+
+			" a blockwise item touches a characterwise region
+			Assert True(Region([0, 1, 1, 0], [0, 2, 3, 0], "\<C-v>").
+						\istouching(Region([0, 2, 3, 0], [0, 4, 5, 0], 'v')))
+
+			Assert True(Region([0, 4, 5, 0], [0, 5, 7, 0], "\<C-v>").
+						\istouching(Region([0, 2, 3, 0], [0, 4, 5, 0], 'v')))
+
+			Assert True(Region([0, 2, 3, 0], [0, 4, 5, 0], "\<C-v>").
+						\istouching(Region([0, 2, 3, 0], [0, 4, 5, 0], 'v')))
+
+			Assert True(Region([0, 1, 1, 0], [0, 5, 7, 0], "\<C-v>").
+						\istouching(Region([0, 2, 3, 0], [0, 4, 5, 0], 'v')))
+
+			Assert True(Region([0, 2, 2, 0], [0, 4, 6, 0], "\<C-v>").
+						\istouching(Region([0, 2, 3, 0], [0, 4, 5, 0], 'v')))
+
+			Assert True(Region([0, 2, 4, 0], [0, 4, 4, 0], "\<C-v>").
+						\istouching(Region([0, 2, 3, 0], [0, 4, 5, 0], 'v')))
+
+			Assert True(Region([0, 2, 1, 0], [0, 4, 3, 0], "\<C-v>").
+						\istouching(Region([0, 2, 3, 0], [0, 4, 5, 0], 'v')))
+
+			Assert True(Region([0, 2, 5, 0], [0, 4, 7, 0], "\<C-v>").
+						\istouching(Region([0, 2, 3, 0], [0, 4, 5, 0], 'v')))
+
+			" a blockwise item touches a linewise region
+			Assert True(Region([0, 1, 3, 0], [0, 2, 5, 0], "\<C-v>").
+						\istouching(Region([0, 2, 3, 0], [0, 4, 5, 0], 'V')))
+
+			Assert True(Region([0, 4, 3, 0], [0, 5, 5, 0], "\<C-v>").
+						\istouching(Region([0, 2, 3, 0], [0, 4, 5, 0], 'V')))
+
+			Assert True(Region([0, 2, 3, 0], [0, 4, 5, 0], "\<C-v>").
+						\istouching(Region([0, 2, 3, 0], [0, 4, 5, 0], 'V')))
+
+			Assert True(Region([0, 1, 1, 0], [0, 5, 7, 0], "\<C-v>").
+						\istouching(Region([0, 2, 3, 0], [0, 4, 5, 0], 'V')))
+
+			Assert True(Region([0, 1, 1, 0], [0, 2, 2, 0], "\<C-v>").
+						\istouching(Region([0, 2, 3, 0], [0, 4, 5, 0], 'V')))
+
+			Assert True(Region([0, 1, 1, 0], [0, 5, 2, 0], "\<C-v>").
+						\istouching(Region([0, 2, 3, 0], [0, 4, 5, 0], 'V')))
+
+			Assert True(Region([0, 1, 6, 0], [0, 5, 7, 0], "\<C-v>").
+						\istouching(Region([0, 2, 3, 0], [0, 4, 5, 0], 'V')))
+
+			" a blockwise item touches a blockwise region
+			Assert True(Region([0, 1, 2, 0], [0, 2, 3, 0], "\<C-v>").
+						\istouching(Region([0, 2, 3, 0], [0, 4, 5, 0], "\<C-v>")))
+
+			Assert True(Region([0, 4, 5, 0], [0, 5, 6, 0], "\<C-v>").
+						\istouching(Region([0, 2, 3, 0], [0, 4, 5, 0], "\<C-v>")))
+
+			Assert True(Region([0, 1, 5, 0], [0, 2, 6, 0], "\<C-v>").
+						\istouching(Region([0, 2, 3, 0], [0, 4, 5, 0], "\<C-v>")))
+
+			Assert True(Region([0, 4, 2, 0], [0, 5, 3, 0], "\<C-v>").
+						\istouching(Region([0, 2, 3, 0], [0, 4, 5, 0], "\<C-v>")))
+
+			Assert True(Region([0, 1, 1, 0], [0, 5, 7, 0], "\<C-v>").
+						\istouching(Region([0, 2, 3, 0], [0, 4, 5, 0], "\<C-v>")))
+
+			Assert True(Region([0, 2, 3, 0], [0, 4, 5, 0], "\<C-v>").
+						\istouching(Region([0, 2, 3, 0], [0, 4, 5, 0], "\<C-v>")))
+
+			Assert True(Region([0, 1, 1, 0], [0, 5, 3, 0], "\<C-v>").
+						\istouching(Region([0, 2, 3, 0], [0, 4, 5, 0], "\<C-v>")))
+
+			Assert True(Region([0, 1, 5, 0], [0, 5, 6, 0], "\<C-v>").
+						\istouching(Region([0, 2, 3, 0], [0, 4, 5, 0], "\<C-v>")))
+		End
+
+		It returns FALSE if itself is not touching the region
+			" a characterwise item does not touch a characterwise region
+			Assert False(Region([0, 1, 1, 0], [0, 2, 3, 0], 'v').
+						\istouching(Region([0, 2, 4, 0], [0, 4, 4, 0], 'v')))
+
+			Assert False(Region([0, 4, 5, 0], [0, 5, 7, 0], 'v').
+						\istouching(Region([0, 2, 4, 0], [0, 4, 4, 0], 'v')))
+
+			Assert False(Region([0, 2, 1, 0], [0, 2, 3, 0], 'v').
+						\istouching(Region([0, 2, 4, 0], [0, 4, 4, 0], 'v')))
+
+			Assert False(Region([0, 4, 5, 0], [0, 4, 7, 0], 'v').
+						\istouching(Region([0, 2, 4, 0], [0, 4, 4, 0], 'v')))
+
+			" a characterwise item does not touch a linewise region
+			Assert False(Region([0, 1, 1, 0], [0, 1, 7, 0], 'v').
+						\istouching(Region([0, 2, 4, 0], [0, 4, 4, 0], 'V')))
+
+			Assert False(Region([0, 5, 1, 0], [0, 5, 7, 0], 'v').
+						\istouching(Region([0, 2, 4, 0], [0, 4, 4, 0], 'V')))
+
+			" a characterwise item does not touch a blockwise region
+			Assert False(Region([0, 1, 1, 0], [0, 1, 7, 0], 'v').
+						\istouching(Region([0, 2, 3, 0], [0, 4, 5, 0], "\<C-v>")))
+
+			Assert False(Region([0, 5, 1, 0], [0, 5, 7, 0], 'v').
+						\istouching(Region([0, 2, 3, 0], [0, 4, 5, 0], "\<C-v>")))
+
+			Assert False(Region([0, 2, 1, 0], [0, 2, 2, 0], 'v').
+						\istouching(Region([0, 2, 3, 0], [0, 4, 5, 0], "\<C-v>")))
+
+			Assert False(Region([0, 2, 6, 0], [0, 2, 7, 0], 'v').
+						\istouching(Region([0, 2, 3, 0], [0, 4, 5, 0], "\<C-v>")))
+
+			Assert False(Region([0, 3, 1, 0], [0, 3, 2, 0], 'v').
+						\istouching(Region([0, 2, 3, 0], [0, 4, 5, 0], "\<C-v>")))
+
+			Assert False(Region([0, 3, 6, 0], [0, 3, 7, 0], 'v').
+						\istouching(Region([0, 2, 3, 0], [0, 4, 5, 0], "\<C-v>")))
+
+			Assert False(Region([0, 4, 1, 0], [0, 4, 2, 0], 'v').
+						\istouching(Region([0, 2, 3, 0], [0, 4, 5, 0], "\<C-v>")))
+
+			Assert False(Region([0, 4, 6, 0], [0, 4, 7, 0], 'v').
+						\istouching(Region([0, 2, 3, 0], [0, 4, 5, 0], "\<C-v>")))
+
+			Assert False(Region([0, 1, 1, 0], [0, 2, 2, 0], 'v').
+						\istouching(Region([0, 2, 3, 0], [0, 4, 5, 0], "\<C-v>")))
+
+			Assert False(Region([0, 4, 6, 0], [0, 5, 7, 0], 'v').
+						\istouching(Region([0, 2, 3, 0], [0, 4, 5, 0], "\<C-v>")))
+
+			" a linewise item does not touch a characterwise region
+			Assert False(Region([0, 1, 1, 0], [0, 1, 1, 0], 'V').
+						\istouching(Region([0, 2, 3, 0], [0, 4, 5, 0], 'v')))
+
+			Assert False(Region([0, 5, 1, 0], [0, 5, 1, 0], 'V').
+						\istouching(Region([0, 2, 3, 0], [0, 4, 5, 0], 'v')))
+
+			" a linewise item does not touch a linewise region
+			Assert False(Region([0, 1, 1, 0], [0, 1, 1, 0], 'V').
+						\istouching(Region([0, 2, 3, 0], [0, 4, 5, 0], 'V')))
+
+			Assert False(Region([0, 5, 1, 0], [0, 5, 1, 0], 'V').
+						\istouching(Region([0, 2, 3, 0], [0, 4, 5, 0], 'V')))
+
+			" a linewise item does not touch a blockwise region
+			Assert False(Region([0, 1, 1, 0], [0, 1, 1, 0], 'V').
+						\istouching(Region([0, 2, 3, 0], [0, 4, 5, 0], "\<C-v>")))
+
+			Assert False(Region([0, 5, 1, 0], [0, 5, 1, 0], 'V').
+						\istouching(Region([0, 2, 3, 0], [0, 4, 5, 0], "\<C-v>")))
+
+			" a blockwise item does not touch a characterwise region
+			Assert False(Region([0, 1, 1, 0], [0, 2, 2, 0], "\<C-v>").
+						\istouching(Region([0, 2, 3, 0], [0, 4, 5, 0], 'v')))
+
+			Assert False(Region([0, 4, 6, 0], [0, 5, 7, 0], "\<C-v>").
+						\istouching(Region([0, 2, 3, 0], [0, 4, 5, 0], 'v')))
+
+			" a blockwise item does not touch a linewise region
+			Assert False(Region([0, 1, 1, 0], [0, 1, 7, 0], "\<C-v>").
+						\istouching(Region([0, 2, 3, 0], [0, 4, 5, 0], 'V')))
+
+			Assert False(Region([0, 5, 1, 0], [0, 5, 7, 0], "\<C-v>").
+						\istouching(Region([0, 2, 3, 0], [0, 4, 5, 0], 'V')))
+
+			" a blockwise item does not touch a blockwise region
+			Assert False(Region([0, 1, 1, 0], [0, 1, 7, 0], "\<C-v>").
+						\istouching(Region([0, 2, 3, 0], [0, 4, 5, 0], "\<C-v>")))
+
+			Assert False(Region([0, 5, 1, 0], [0, 5, 7, 0], "\<C-v>").
+						\istouching(Region([0, 2, 3, 0], [0, 4, 5, 0], "\<C-v>")))
+
+			Assert False(Region([0, 1, 1, 0], [0, 5, 2, 0], "\<C-v>").
+						\istouching(Region([0, 2, 3, 0], [0, 4, 5, 0], "\<C-v>")))
+
+			Assert False(Region([0, 1, 6, 0], [0, 5, 7, 0], "\<C-v>").
+						\istouching(Region([0, 2, 3, 0], [0, 4, 5, 0], "\<C-v>")))
+
+			Assert False(Region([0, 1, 1, 0], [0, 1, 2, 0], "\<C-v>").
+						\istouching(Region([0, 2, 3, 0], [0, 4, 5, 0], "\<C-v>")))
+
+			Assert False(Region([0, 1, 6, 0], [0, 1, 7, 0], "\<C-v>").
+						\istouching(Region([0, 2, 3, 0], [0, 4, 5, 0], "\<C-v>")))
+
+			Assert False(Region([0, 5, 1, 0], [0, 5, 2, 0], "\<C-v>").
+						\istouching(Region([0, 2, 3, 0], [0, 4, 5, 0], "\<C-v>")))
+
+			Assert False(Region([0, 5, 6, 0], [0, 5, 7, 0], "\<C-v>").
+						\istouching(Region([0, 2, 3, 0], [0, 4, 5, 0], "\<C-v>")))
+
+			Assert False(Region([0, 1, 3, 0], [0, 1, 5, 0], "\<C-v>").
+						\istouching(Region([0, 2, 3, 0], [0, 4, 5, 0], "\<C-v>")))
+
+			Assert False(Region([0, 5, 3, 0], [0, 5, 5, 0], "\<C-v>").
+						\istouching(Region([0, 2, 3, 0], [0, 4, 5, 0], "\<C-v>")))
+
+			Assert False(Region([0, 2, 1, 0], [0, 4, 2, 0], "\<C-v>").
+						\istouching(Region([0, 2, 3, 0], [0, 4, 5, 0], "\<C-v>")))
+
+			Assert False(Region([0, 2, 6, 0], [0, 4, 7, 0], "\<C-v>").
+						\istouching(Region([0, 2, 3, 0], [0, 4, 5, 0], "\<C-v>")))
 		End
 	End
 End
