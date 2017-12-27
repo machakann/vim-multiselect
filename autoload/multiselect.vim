@@ -44,6 +44,15 @@ function! s:Region(head, tail, ...) abort "{{{
 	endif
 	echoerr s:err_InvalidArgument('s:Region')
 endfunction "}}}
+function! s:Region.select() abort "{{{
+	execute 'normal! ' . self.type
+	call setpos('.', self.head)
+	normal! o
+	call setpos('.', self.tail)
+	if self.extended
+		normal! $
+	endif
+endfunction "}}}
 function! s:Region.includes(expr) abort "{{{
 	let type_expr = type(a:expr)
 	if type_expr == v:t_number
@@ -246,15 +255,6 @@ function! s:Item(bufnr, head, tail, type, ...) abort "{{{
 	let item.bufnr = a:bufnr
 	let item.highlight = s:Highlights.Highlight()
 	return item
-endfunction "}}}
-function! s:Item.select() abort "{{{
-	execute 'normal! ' . self.type
-	call setpos('.', self.head)
-	normal! o
-	call setpos('.', self.tail)
-	if self.extended
-		normal! $
-	endif
 endfunction "}}}
 function! s:Item.show(higroup) abort "{{{
 	if self.highlight.initialize(a:higroup, self)
