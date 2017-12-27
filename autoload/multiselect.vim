@@ -611,17 +611,17 @@ lockvar! s:Multiselector
 "}}}
 
 function! s:str2type(str) abort "{{{
-	if a:str[0] ==# 'V' || a:str ==# 'line'
+	if a:str ==# 'line' || a:str ==# 'V'
 		return 'line'
-	elseif a:str[0] ==# "\<C-v>" || a:str ==# 'block'
+	elseif a:str ==# 'block' || a:str[0] ==# "\<C-v>"
 		return 'block'
 	endif
 	return 'char'
 endfunction "}}}
 function! s:str2visualcmd(str) abort "{{{
-	if a:str[0] ==# 'V' || a:str ==# 'line'
+	if a:str ==# 'line' || a:str[0] ==# 'V'
 		return 'V'
-	elseif a:str[0] ==# "\<C-v>" || a:str ==# 'block'
+	elseif a:str ==# 'block' || a:str[0] ==# "\<C-v>"
 		return "\<C-v>"
 	endif
 	return 'v'
