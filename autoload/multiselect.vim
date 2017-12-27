@@ -44,6 +44,33 @@ function! s:Region(head, tail, ...) abort "{{{
 	endif
 	echoerr s:err_InvalidArgument('s:Region')
 endfunction "}}}
+function! s:Region.includes(expr) abort "{{{
+	let type_expr = type(a:expr)
+	if type_expr == v:t_number
+		let lnum = a:expr
+		if lnum == 0
+			return s:FALSE
+		endif
+		let region = s:Region(lnum, lnum)
+		return self.includes(region)
+	elseif type_expr == v:t_list
+		let pos = a:expr
+		if pos == s:NULLPOS
+			return s:FALSE
+		endif
+		let region = s:Region(pos, pos, 'v')
+		return self.includes(region)
+	elseif type_expr == v:t_dict
+		let region = a:expr
+		if region.head == s:NULLPOS || region.tail == s:NULLPOS
+			return s:FALSE
+		endif
+		let targettype = s:type2typestring(region.type)
+		let selftype = s:type2typestring(self.type)
+		return s:{targettype}_is_included_in_{selftype}(region, self)
+	endif
+	echoerr s:err_InvalidArgument('region.istouching')
+endfunction "}}}
 function! s:Region.isinside(region) abort  "{{{
 	if a:region.head == s:NULLPOS || a:region.tail == s:NULLPOS
 		return s:FALSE
