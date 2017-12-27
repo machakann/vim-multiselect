@@ -717,6 +717,8 @@ let s:MultiselectModule = {
 	\	'percolate': function('s:percolate'),
 	\	'inorderof': function('s:inorderof'),
 	\	'inbetween': function('s:inbetween'),
+	\	'str2type': function('s:str2type'),
+	\	'str2visualcmd': function('s:str2visualcmd'),
 	\	}
 function! s:MultiselectModule.load() abort "{{{
 	return s:multiselector
