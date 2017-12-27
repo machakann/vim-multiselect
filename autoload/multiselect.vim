@@ -54,7 +54,7 @@ function! s:Region.select() abort "{{{
 		normal! $
 	endif
 endfunction "}}}
-function! s:Region.includes(expr) abort "{{{
+function! s:Region.isincluding(expr) abort "{{{
 	let type_expr = type(a:expr)
 	if type_expr == v:t_number
 		let lnum = a:expr
@@ -62,14 +62,14 @@ function! s:Region.includes(expr) abort "{{{
 			return s:FALSE
 		endif
 		let region = s:Region(lnum, lnum)
-		return self.includes(region)
+		return self.isincluding(region)
 	elseif type_expr == v:t_list
 		let pos = a:expr
 		if pos == s:NULLPOS
 			return s:FALSE
 		endif
 		let region = s:Region(pos, pos, 'v')
-		return self.includes(region)
+		return self.isincluding(region)
 	elseif type_expr == v:t_dict
 		let region = a:expr
 		if region.head == s:NULLPOS || region.tail == s:NULLPOS

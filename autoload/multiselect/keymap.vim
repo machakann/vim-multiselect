@@ -30,18 +30,18 @@ function! multiselect#keymap#checksearched(mode) abort "{{{
 	call setpos('.', Region.head)
 
 	let head = s:searchpos(lastpattern, 'cW')
-	if head == s:NULLPOS || !Region.includes(head)
+	if head == s:NULLPOS || !Region.isincluding(head)
 		call winrestview(view)
 		return
 	endif
 	while 1
 		let tail = s:searchpos(lastpattern, 'ceW')
-		if !Region.includes(tail)
+		if !Region.isincluding(tail)
 			break
 		endif
 		call s:multiselector.check(head, tail, 'v')
 		let head = s:searchpos(lastpattern, 'W')
-		if head == s:NULLPOS || !Region.includes(head)
+		if head == s:NULLPOS || !Region.isincluding(head)
 			break
 		endif
 	endwhile
