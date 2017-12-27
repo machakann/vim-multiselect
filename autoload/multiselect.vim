@@ -17,7 +17,7 @@ let s:Region = {
 	\	'__CLASS__': 'Region',
 	\	'head': copy(s:NULLPOS),
 	\	'tail': copy(s:NULLPOS),
-	\	'type': 'v',
+	\	'type': 'char',
 	\	'extended': s:FALSE,
 	\	}
 function! s:Region(head, tail, ...) abort "{{{
@@ -25,19 +25,19 @@ function! s:Region(head, tail, ...) abort "{{{
 		let region = deepcopy(s:Region)
 		let region.head = [0, a:head, 1, 0]
 		let region.tail = [0, a:tail, col([a:tail, '$']), 0]
-		let region.type = 'V'
+		let region.type = 'line'
 		return region
 	elseif type(a:head) == v:t_list && type(a:tail) == v:t_list
 		let region = deepcopy(s:Region)
-		let region.type = s:str2v(get(a:000, 0, 'v'))
-		if region.type ==# 'V'
+		let region.type = s:str2type(get(a:000, 0, 'char'))
+		if region.type ==# 'line'
 			let region.head = [0, a:head[1], 1, 0]
 			let region.tail = [0, a:tail[1], col([a:tail[1], '$']), 0]
 		else
 			let region.head = copy(a:head)
 			let region.tail = copy(a:tail)
 		endif
-		if region.type ==# "\<C-v>"
+		if region.type ==# 'block'
 			let region.extended = get(a:000, 1, s:FALSE)
 		endif
 		return region
@@ -45,7 +45,8 @@ function! s:Region(head, tail, ...) abort "{{{
 	echoerr s:err_InvalidArgument('s:Region')
 endfunction "}}}
 function! s:Region.select() abort "{{{
-	execute 'normal! ' . self.type
+	let visualcmd = s:str2visualcmd(self.type)
+	execute 'normal! ' . visualcmd
 	call setpos('.', self.head)
 	normal! o
 	call setpos('.', self.tail)
@@ -74,9 +75,7 @@ function! s:Region.includes(expr) abort "{{{
 		if region.head == s:NULLPOS || region.tail == s:NULLPOS
 			return s:FALSE
 		endif
-		let targettype = s:type2typestring(region.type)
-		let selftype = s:type2typestring(self.type)
-		return s:{targettype}_is_included_in_{selftype}(region, self)
+		return s:{region.type}_is_included_in_{self.type}(region, self)
 	endif
 	echoerr s:err_InvalidArgument('region.istouching')
 endfunction "}}}
@@ -84,9 +83,7 @@ function! s:Region.isinside(region) abort  "{{{
 	if a:region.head == s:NULLPOS || a:region.tail == s:NULLPOS
 		return s:FALSE
 	endif
-	let itemtype = s:type2typestring(self.type)
-	let rangetype = s:type2typestring(a:region.type)
-	return s:{itemtype}_is_included_in_{rangetype}(self, a:region)
+	return s:{self.type}_is_included_in_{a:region.type}(self, a:region)
 endfunction "}}}
 function! s:Region.istouching(expr) abort "{{{
 	let type_expr = type(a:expr)
@@ -108,23 +105,11 @@ function! s:Region.istouching(expr) abort "{{{
 		if range.head == s:NULLPOS || range.tail == s:NULLPOS
 			return s:FALSE
 		endif
-		let itemtype = s:type2typestring(self.type)
-		let rangetype = s:type2typestring(range.type)
-		return s:{itemtype}_is_touching_{rangetype}(self, range)
+		return s:{self.type}_is_touching_{range.type}(self, range)
 	endif
 	echoerr s:err_InvalidArgument('region.istouching')
 endfunction "}}}
 
-function! s:type2typestring(type) abort "{{{
-	if a:type ==# 'v'
-		return 'char'
-	elseif a:type ==# 'V'
-		return 'line'
-	elseif a:type[0] ==# "\<C-v>"
-		return 'block'
-	endif
-	return a:type
-endfunction "}}}
 function! s:char_is_included_in_char(item, region) abort "{{{
 	return !s:inorderof(a:item.head, a:region.head) &&
 		\  !s:inorderof(a:region.tail, a:item.tail)
@@ -154,7 +139,7 @@ function! s:char_is_included_in_block(item, region) abort "{{{
 endfunction "}}}
 function! s:line_is_included_in_char(item, region) abort "{{{
 	let item = s:Region(a:item.head[1], a:item.tail[1])
-	let item.type = 'v'
+	let item.type = 'char'
 	return s:char_is_included_in_char(item, a:region)
 endfunction "}}}
 function! s:line_is_included_in_line(item, region) abort "{{{
@@ -163,7 +148,7 @@ function! s:line_is_included_in_line(item, region) abort "{{{
 endfunction "}}}
 function! s:line_is_included_in_block(item, region) abort "{{{
 	let item = s:Region(a:item.head[1], a:item.tail[1])
-	let item.type = 'v'
+	let item.type = 'char'
 	return s:char_is_included_in_block(item, a:region)
 endfunction "}}}
 function! s:block_is_included_in_char(item, region) abort "{{{
@@ -429,7 +414,11 @@ endfunction "}}}
 
 " main interfaces
 function! s:Multiselector.check(head, tail, type, ...) abort  "{{{
-	let extended = a:type ==# "\<C-v>" ? get(a:000, 0, 0) : 0
+	if s:str2type(a:type) ==# 'block'
+		let extended = get(a:000, 0, 0)
+	else
+		let extended = 0
+	endif
 	let newitem = s:Item(self._bufnr, a:head, a:tail, a:type, extended)
 	call self.add(newitem)
 	return newitem
@@ -621,7 +610,15 @@ endfunction "}}}
 lockvar! s:Multiselector
 "}}}
 
-function! s:str2v(str) abort "{{{
+function! s:str2type(str) abort "{{{
+	if a:str[0] ==# 'V' || a:str ==# 'line'
+		return 'line'
+	elseif a:str[0] ==# "\<C-v>" || a:str ==# 'block'
+		return 'block'
+	endif
+	return 'char'
+endfunction "}}}
+function! s:str2visualcmd(str) abort "{{{
 	if a:str[0] ==# 'V' || a:str ==# 'line'
 		return 'V'
 	elseif a:str[0] ==# "\<C-v>" || a:str ==# 'block'
@@ -720,7 +717,6 @@ let s:MultiselectModule = {
 	\	'percolate': function('s:percolate'),
 	\	'inorderof': function('s:inorderof'),
 	\	'inbetween': function('s:inbetween'),
-	\	'str2v': function('s:str2v'),
 	\	}
 function! s:MultiselectModule.load() abort "{{{
 	return s:multiselector

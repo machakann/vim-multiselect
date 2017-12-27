@@ -127,11 +127,11 @@ endfunction "}}}
 lockvar! s:Highlight
 
 function! s:highlight_order(item) abort "{{{
-	if a:item.type ==# 'v'
+	if a:item.type ==# 'char'
 		let orderlist = s:highlight_order_charwise(a:item)
-	elseif a:item.type ==# 'V'
+	elseif a:item.type ==# 'line'
 		let orderlist = s:highlight_order_linewise(a:item)
-	elseif a:item.type[0] ==# "\<C-v>"
+	elseif a:item.type[0] ==# 'block'
 		let orderlist = s:highlight_order_blockwise(a:item)
 	else
 		return []
