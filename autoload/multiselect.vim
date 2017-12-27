@@ -5,8 +5,6 @@ let s:TRUE = 1
 let s:FALSE = 0
 let s:NULLPOS = [0, 0, 0, 0]
 let s:HIGROUP = 'MultiselectCheckedItem'
-let s:EVENTCHECKPOST = 'MultiselectCheckPost'
-let s:EVENTUNCHECKPOST = 'MultiselectUncheckPost'
 
 let s:table = []
 
@@ -691,8 +689,8 @@ lockvar! s:MultiselectModule
 let s:multiselector = s:MultiselectModule.Multiselector({
 	\	'name': 'multiselect',
 	\	'higroup': s:HIGROUP,
-	\	'checkpostevent': s:EVENTCHECKPOST,
-	\	'uncheckpostevent': s:EVENTUNCHECKPOST,
+	\	'checkpostevent': 'MultiselectCheckPost',
+	\	'uncheckpostevent': 'MultiselectUncheckPost',
 	\	})
 " vim:set foldmethod=marker:
 " vim:set commentstring="%s:
