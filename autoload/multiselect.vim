@@ -3,6 +3,7 @@
 let s:Highlights = multiselect#highlight#import()
 let s:TRUE = 1
 let s:FALSE = 0
+let s:MAXCOL = 2147483647
 let s:NULLPOS = [0, 0, 0, 0]
 let s:HIGROUP = 'MultiselectCheckedItem'
 
@@ -25,7 +26,7 @@ function! s:Region(head, tail, ...) abort "{{{
 	let region.type = s:str2type(get(a:000, 0, 'char'))
 	if region.type ==# 'line'
 		let region.head = [0, a:head[1], 1, 0]
-		let region.tail = [0, a:tail[1], col([a:tail[1], '$']), 0]
+		let region.tail = [0, a:tail[1], s:MAXCOL, 0]
 	else
 		let region.head = copy(a:head)
 		let region.tail = copy(a:tail)
@@ -118,6 +119,7 @@ endfunction "}}}
 function! s:line_is_included_in_char(item, region) abort "{{{
 	let item = s:Region(a:item.head, a:item.tail, 'line')
 	let item.type = 'char'
+	let item.tail[2] = col([item.tail[1], '$'])
 	return s:char_is_included_in_char(item, a:region)
 endfunction "}}}
 function! s:line_is_included_in_line(item, region) abort "{{{
@@ -127,6 +129,7 @@ endfunction "}}}
 function! s:line_is_included_in_block(item, region) abort "{{{
 	let item = s:Region(a:item.head, a:item.tail, 'line')
 	let item.type = 'char'
+	let item.tail[2] = col([item.tail[1], '$'])
 	return s:char_is_included_in_block(item, a:region)
 endfunction "}}}
 function! s:block_is_included_in_char(item, region) abort "{{{
