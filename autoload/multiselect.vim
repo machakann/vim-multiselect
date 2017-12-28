@@ -507,9 +507,6 @@ function! s:Multiselector.remove(i, ...) abort	"{{{
 	call self._uncheckpost([removed])
 	return removed
 endfunction "}}}
-function! s:Multiselector.bufnr() abort "{{{
-	return self._bufnr
-endfunction "}}}
 function! s:Multiselector.itemnum() abort "{{{
 	return len(self.itemlist)
 endfunction "}}}
