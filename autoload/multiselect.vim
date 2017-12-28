@@ -21,28 +21,19 @@ let s:Region = {
 	\	'extended': s:FALSE,
 	\	}
 function! s:Region(head, tail, ...) abort "{{{
-	if type(a:head) == v:t_number && type(a:tail) == v:t_number
-		let region = deepcopy(s:Region)
-		let region.head = [0, a:head, 1, 0]
-		let region.tail = [0, a:tail, col([a:tail, '$']), 0]
-		let region.type = 'line'
-		return region
-	elseif type(a:head) == v:t_list && type(a:tail) == v:t_list
-		let region = deepcopy(s:Region)
-		let region.type = s:str2type(get(a:000, 0, 'char'))
-		if region.type ==# 'line'
-			let region.head = [0, a:head[1], 1, 0]
-			let region.tail = [0, a:tail[1], col([a:tail[1], '$']), 0]
-		else
-			let region.head = copy(a:head)
-			let region.tail = copy(a:tail)
-		endif
-		if region.type ==# 'block'
-			let region.extended = get(a:000, 1, s:FALSE)
-		endif
-		return region
+	let region = deepcopy(s:Region)
+	let region.type = s:str2type(get(a:000, 0, 'char'))
+	if region.type ==# 'line'
+		let region.head = [0, a:head[1], 1, 0]
+		let region.tail = [0, a:tail[1], col([a:tail[1], '$']), 0]
+	else
+		let region.head = copy(a:head)
+		let region.tail = copy(a:tail)
 	endif
-	echoerr s:err_InvalidArgument('s:Region')
+	if region.type ==# 'block'
+		let region.extended = get(a:000, 1, s:FALSE)
+	endif
+	return region
 endfunction "}}}
 function! s:Region.select() abort "{{{
 	let visualcmd = s:str2visualcmd(self.type)
@@ -56,14 +47,7 @@ function! s:Region.select() abort "{{{
 endfunction "}}}
 function! s:Region.isincluding(expr) abort "{{{
 	let type_expr = type(a:expr)
-	if type_expr == v:t_number
-		let lnum = a:expr
-		if lnum == 0
-			return s:FALSE
-		endif
-		let region = s:Region(lnum, lnum)
-		return self.isincluding(region)
-	elseif type_expr == v:t_list
+	if type_expr == v:t_list
 		let pos = a:expr
 		if pos == s:NULLPOS
 			return s:FALSE
@@ -77,7 +61,7 @@ function! s:Region.isincluding(expr) abort "{{{
 		endif
 		return s:{region.type}_is_included_in_{self.type}(region, self)
 	endif
-	echoerr s:err_InvalidArgument('region.istouching')
+	echoerr s:err_InvalidArgument('region.isincluding')
 endfunction "}}}
 function! s:Region.isinside(region) abort  "{{{
 	if a:region.head == s:NULLPOS || a:region.tail == s:NULLPOS
@@ -87,13 +71,7 @@ function! s:Region.isinside(region) abort  "{{{
 endfunction "}}}
 function! s:Region.istouching(expr) abort "{{{
 	let type_expr = type(a:expr)
-	if type_expr == v:t_number
-		let lnum = a:expr
-		if lnum == 0
-			return s:FALSE
-		endif
-		return self.head[1] <= lnum && lnum <= self.tail[1]
-	elseif type_expr == v:t_list
+	if type_expr == v:t_list
 		let pos = a:expr
 		if pos == s:NULLPOS
 			return s:FALSE
@@ -138,7 +116,7 @@ function! s:char_is_included_in_block(item, region) abort "{{{
 	return regionleft <= itemleft && itemright <= regionright
 endfunction "}}}
 function! s:line_is_included_in_char(item, region) abort "{{{
-	let item = s:Region(a:item.head[1], a:item.tail[1])
+	let item = s:Region(a:item.head, a:item.tail, 'line')
 	let item.type = 'char'
 	return s:char_is_included_in_char(item, a:region)
 endfunction "}}}
@@ -147,7 +125,7 @@ function! s:line_is_included_in_line(item, region) abort "{{{
 		\  a:item.tail[1] <= a:region.tail[1]
 endfunction "}}}
 function! s:line_is_included_in_block(item, region) abort "{{{
-	let item = s:Region(a:item.head[1], a:item.tail[1])
+	let item = s:Region(a:item.head, a:item.tail, 'line')
 	let item.type = 'char'
 	return s:char_is_included_in_block(item, a:region)
 endfunction "}}}
