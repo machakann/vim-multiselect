@@ -494,10 +494,6 @@ function! s:Multiselector.sort(...) abort "{{{
 	let itemlist = a:0 ? a:1 : self.itemlist
 	return sort(copy(itemlist), 's:sort_items')
 endfunction "}}}
-function! s:Multiselector.get(i, ...) abort "{{{
-	let default = get(a:000, 0, 0)
-	return get(self.itemlist, a:i, default)
-endfunction "}}}
 function! s:Multiselector.itemnum() abort "{{{
 	return len(self.itemlist)
 endfunction "}}}
