@@ -266,7 +266,6 @@ let s:Event = {
 function! s:Event(name) abort "{{{
 	let event = deepcopy(s:Event)
 	let event.name = a:name
-	call event.on()
 	return event
 endfunction "}}}
 function! s:Event.on() abort "{{{
@@ -379,17 +378,20 @@ function! s:Multiselector(...) abort "{{{
 	let options = get(a:000, 0, {})
 	let multiselector = deepcopy(s:Multiselector)
 	let multiselector.higroup = get(options, 'higroup', s:HIGROUP)
-	let multiselector._bufnr = bufnr('%')
 	let multiselector.name = get(options, 'name', '')
 
+	let EVENTINIT = get(options, 'initializeevent', '')
 	let EVENTCHECKPOST = get(options, 'checkpostevent', '')
 	let EVENTUNCHECKPOST = get(options, 'uncheckpostevent', '')
+	let multiselector.initializeevent = EVENTINIT
 	let multiselector.checkpostevent = EVENTCHECKPOST
 	let multiselector.uncheckpostevent = EVENTUNCHECKPOST
+	let multiselector.event.Init = s:UniqueEvent(EVENTINIT)
 	let multiselector.event.CheckPost = s:UniqueEvent(EVENTCHECKPOST)
 	let multiselector.event.UncheckPost = s:UniqueEvent(EVENTUNCHECKPOST)
 
 	call add(s:table, multiselector)
+	call multiselector._initialize()
 	return multiselector
 endfunction "}}}
 
@@ -564,6 +566,7 @@ function! s:Multiselector._initialize() abort "{{{
 	for event in values(self.event)
 		call event.on()
 	endfor
+	call self.event.Init.trigger()
 endfunction "}}}
 function! s:Multiselector._checkpost(added) abort "{{{
 	for item in a:added
@@ -702,6 +705,7 @@ lockvar! s:MultiselectModule
 let s:multiselector = s:MultiselectModule.Multiselector({
 	\	'name': 'multiselect',
 	\	'higroup': s:HIGROUP,
+	\	'initializeevent': 'MultiselectInit',
 	\	'checkpostevent': 'MultiselectCheckPost',
 	\	'uncheckpostevent': 'MultiselectUncheckPost',
 	\	})
