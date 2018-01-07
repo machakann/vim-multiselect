@@ -131,7 +131,7 @@ function! s:highlight_order(item) abort "{{{
 		let orderlist = s:highlight_order_charwise(a:item)
 	elseif a:item.type ==# 'line'
 		let orderlist = s:highlight_order_linewise(a:item)
-	elseif a:item.type[0] ==# 'block'
+	elseif a:item.type ==# 'block'
 		let orderlist = s:highlight_order_blockwise(a:item)
 	else
 		return []
