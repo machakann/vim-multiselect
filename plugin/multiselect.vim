@@ -8,7 +8,7 @@ let g:loaded_multiselect = 1
 
 
 " keymappings
-nnoremap <silent> <Plug>(multiselect-check) viw<Esc>:call multiselect#keymap#check('n')<CR>
+nnoremap <silent> <Plug>(multiselect-check) zRviw<Esc>:call multiselect#keymap#check('n')<CR>
 xnoremap <silent> <Plug>(multiselect-check) <Esc>:call multiselect#keymap#check('x')<CR>
 nnoremap <silent> <Plug>(multiselect-checksearched) :<C-u>call multiselect#keymap#check('n')<CR>
 xnoremap <silent> <Plug>(multiselect-checksearched) <Esc>:call multiselect#keymap#check('x')<CR>
