@@ -215,8 +215,8 @@ function! s:Item(bufnr, head, tail, type, ...) abort "{{{
 		return {}
 	endif
 
-	let super = s:Region(a:head, a:tail, a:type, get(a:000, 0, s:FALSE))
-	let item = extend(super, deepcopy(s:Item), 'force')
+	let args = [a:head, a:tail, a:type, get(a:000, 0, s:FALSE)]
+	let item = s:inherit('Region', 'Item', args)
 	let item.id = s:itemid()
 	let item.bufnr = a:bufnr
 	let item.highlight = s:Highlights.Highlight()
@@ -314,9 +314,7 @@ let s:UniqueEvent = {
 	\	'doautocmd': '',
 	\	}
 function! s:UniqueEvent(name) abort "{{{
-	let super = s:Event(a:name)
-	let super._on = super.on
-	let uniqueevent = extend(super, deepcopy(s:UniqueEvent), 'force')
+	let uniqueevent = s:inherit('Event', 'UniqueEvent', [a:name])
 	if empty(a:name)
 		call uniqueevent.off()
 	else
@@ -329,7 +327,7 @@ function! s:UniqueEvent.on() abort "{{{
 	if empty(self.name)
 		return
 	endif
-	call self._on()
+	call self.super_on()
 endfunction "}}}
 function! s:UniqueEvent.trigger() abort "{{{
 	if empty(self.doautocmd) || !self.isdefined()
@@ -582,6 +580,20 @@ endfunction "}}}
 lockvar! s:Multiselector
 "}}}
 
+function! s:inherit(supername, subname, args) abort "{{{
+	let Constructor_super = 's:' . a:supername
+	let super = call(Constructor_super, a:args)
+	let sub = deepcopy(s:[a:subname])
+	call extend(sub, super, 'keep')
+	" FIXME: Please find out a better way to handle super class methods
+	let sub.super = {}
+	for [key, l:Val] in items(super)
+		if type(l:Val) == v:t_func
+			let sub['super_' . key] = l:Val
+		endif
+	endfor
+	return sub
+endfunction "}}}
 function! s:str2type(str) abort "{{{
 	if a:str ==# 'line' || a:str ==# 'V'
 		return 'line'
