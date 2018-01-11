@@ -359,8 +359,6 @@ let s:Multiselector = {
 	\	'itemlist': [],
 	\	'name': '',
 	\	'higroup': '',
-	\	'checkpostevent': '',
-	\	'uncheckpostevent': '',
 	\	'last':{
 	\			'event': '',
 	\			'itemlist': [],
@@ -380,12 +378,9 @@ function! s:Multiselector(...) abort "{{{
 	let multiselector.higroup = get(options, 'higroup', s:HIGROUP)
 	let multiselector.name = get(options, 'name', '')
 
-	let EVENTINIT = get(options, 'initializeevent', '')
-	let EVENTCHECKPOST = get(options, 'checkpostevent', '')
-	let EVENTUNCHECKPOST = get(options, 'uncheckpostevent', '')
-	let multiselector.initializeevent = EVENTINIT
-	let multiselector.checkpostevent = EVENTCHECKPOST
-	let multiselector.uncheckpostevent = EVENTUNCHECKPOST
+	let EVENTINIT = get(options, 'eventinit', '')
+	let EVENTCHECKPOST = get(options, 'eventcheckpost', '')
+	let EVENTUNCHECKPOST = get(options, 'eventuncheckpost', '')
 	let multiselector.event.Init = s:UniqueEvent(EVENTINIT)
 	let multiselector.event.CheckPost = s:UniqueEvent(EVENTCHECKPOST)
 	let multiselector.event.UncheckPost = s:UniqueEvent(EVENTUNCHECKPOST)
@@ -705,9 +700,9 @@ lockvar! s:MultiselectModule
 let s:multiselector = s:MultiselectModule.Multiselector({
 	\	'name': 'multiselect',
 	\	'higroup': s:HIGROUP,
-	\	'initializeevent': 'MultiselectInit',
-	\	'checkpostevent': 'MultiselectCheckPost',
-	\	'uncheckpostevent': 'MultiselectUncheckPost',
+	\	'eventinit': 'MultiselectInit',
+	\	'eventcheckpost': 'MultiselectCheckPost',
+	\	'eventuncheckpost': 'MultiselectUncheckPost',
 	\	})
 " vim:set foldmethod=marker:
 " vim:set commentstring="%s:
