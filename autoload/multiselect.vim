@@ -368,6 +368,9 @@ let s:Multiselector = {
 	\			'TextChanged': s:Event('TextChanged'),
 	\			'InsertEnter': s:Event('InsertEnter'),
 	\			'WinNew': s:Event('WinNew'),
+	\			'Init': {},
+	\			'CheckPost': {},
+	\			'UncheckPost': {},
 	\		},
 	\	}
 function! s:Multiselector(...) abort "{{{
