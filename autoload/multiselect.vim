@@ -215,8 +215,8 @@ function! s:Item(bufnr, head, tail, type, ...) abort "{{{
 		return {}
 	endif
 
-	let origin = s:Region(a:head, a:tail, a:type, get(a:000, 0, s:FALSE))
-	let item = extend(origin, deepcopy(s:Item), 'force')
+	let super = s:Region(a:head, a:tail, a:type, get(a:000, 0, s:FALSE))
+	let item = extend(super, deepcopy(s:Item), 'force')
 	let item.id = s:itemid()
 	let item.bufnr = a:bufnr
 	let item.highlight = s:Highlights.Highlight()
@@ -314,9 +314,9 @@ let s:UniqueEvent = {
 	\	'doautocmd': '',
 	\	}
 function! s:UniqueEvent(name) abort "{{{
-	let origin = s:Event(a:name)
-	let origin._on = origin.on
-	let uniqueevent = extend(origin, deepcopy(s:UniqueEvent), 'force')
+	let super = s:Event(a:name)
+	let super._on = super.on
+	let uniqueevent = extend(super, deepcopy(s:UniqueEvent), 'force')
 	if empty(a:name)
 		call uniqueevent.off()
 	else
