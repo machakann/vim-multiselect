@@ -453,6 +453,91 @@ function! s:Multiselector.filter(Filterexpr) abort "{{{
 endfunction
 "}}}
 
+" keymap interfaces
+function! s:Multiselector.keymap_check(mode) abort "{{{
+	if a:mode ==# 'n'
+		normal! zRviw
+		execute "normal! \<Esc>"
+	endif
+	let head = getpos("'<")
+	let tail = getpos("'>")
+	let type = visualmode()
+	let extended = a:mode ==# 'x' && type ==# "\<C-v>" ? s:is_extended() : 0
+	let newitem = self.check(head, tail, type, extended)
+	call s:foldopen(newitem.head[1])
+endfunction "}}}
+function! s:Multiselector.keymap_checksearched(mode) abort "{{{
+	if empty(@/)
+		return
+	endif
+
+	let view = winsaveview()
+	let lastpattern = @/
+	if a:mode ==# 'x'
+		let start = getpos("'<")
+		let end = getpos("'>")
+	else
+		let start = [0, 1, 1, 0]
+		let end = [0, line('$'), col([line('$'), '$']), 0]
+	endif
+	let region = s:Region(start, end)
+	call setpos('.', region.head)
+
+	let head = s:searchpos(lastpattern, 'cW')
+	if head == s:NULLPOS || !region.isincluding(head)
+		call winrestview(view)
+		return
+	endif
+	while 1
+		let tail = s:searchpos(lastpattern, 'ceW')
+		if !region.isincluding(tail)
+			break
+		endif
+		let newitem = self.check(head, tail, 'v')
+		call s:foldopen(newitem.head[1])
+		let head = s:searchpos(lastpattern, 'W')
+		if head == s:NULLPOS || !region.isincluding(head)
+			break
+		endif
+	endwhile
+	call winrestview(view)
+endfunction "}}}
+function! s:Multiselector.keymap_uncheck(mode) abort "{{{
+	if a:mode ==# 'x'
+		call s:multiselector.uncheck(getpos("'<"), getpos("'>"))
+	else
+		call s:multiselector.uncheck()
+	endif
+endfunction "}}}
+function! s:Multiselector.keymap_uncheckall() abort "{{{
+	call s:multiselector.uncheckall()
+endfunction "}}}
+function! s:is_extended() abort "{{{
+	let view = winsaveview()
+	normal! gv
+	let extended = winsaveview().curswant == s:MAXCOL
+	execute "normal! \<Esc>"
+	call winrestview(view)
+	return extended
+endfunction
+"}}}
+function! s:searchpos(pat, flag) abort "{{{
+	return [0] + searchpos(a:pat, a:flag) + [0]
+endfunction "}}}
+function! s:foldopen(lnum) abort "{{{
+	if g:multiselect#keymap#openfold is s:FALSE
+		return
+	endif
+	if a:lnum == 0 || foldclosed(a:lnum) == -1
+		return
+	endif
+
+	let view = winsaveview()
+	call cursor(a:lnum, 1)
+	normal! zR
+	call winrestview(view)
+endfunction "}}}
+
 " low-level interfaces
 function! s:Multiselector.extend(itemlist) abort "{{{
 	if empty(a:itemlist)
