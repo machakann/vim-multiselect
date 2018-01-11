@@ -17,6 +17,7 @@ xnoremap <silent> <Plug>(multiselect-uncheck) <Esc>:call multiselect#keymap#unch
 nnoremap <silent> <Plug>(multiselect-uncheckall) :<C-u>call multiselect#keymap#uncheckall()<CR>
 xnoremap <silent> <Plug>(multiselect-uncheckall) <Esc>:call multiselect#keymap#uncheckall()<CR>
 nnoremap <silent> <Plug>(multiselect-toggle) :<C-u>call multiselect#keymap#toggle('n')<CR>
+xnoremap <silent> <Plug>(multiselect-toggle) <Esc>:call multiselect#keymap#toggle('x')<CR>
 " vim:set foldmethod=marker:
 " vim:set commentstring="%s:
 " vim:set noet ts=4 sw=4 sts=4:

@@ -512,6 +512,19 @@ endfunction "}}}
 function! s:Multiselector.keymap_uncheckall() abort "{{{
 	call s:multiselector.uncheckall()
 endfunction "}}}
+function! s:Multiselector.keymap_toggle(mode) abort "{{{
+	let itemlist = []
+	if a:mode ==# 'x'
+		let selectedregion = s:Region(getpos("'<"), getpos("'>"))
+		let itemlist = s:multiselector.emit_inside(selectedregion)
+	else
+		let curpos = getpos('.')
+		let itemlist = s:multiselector.emit_touching(curpos)
+	endif
+	if empty(itemlist)
+		call self.keymap_check(a:mode)
+	endif
+endfunction "}}}
 function! s:is_extended() abort "{{{
 	let view = winsaveview()
 	normal! gv
