@@ -12,8 +12,8 @@ let g:multiselect#keymap#openfold = get(g:, 'multiselect#keymap#openfold', s:TRU
 function! multiselect#keymap#check(mode) abort  "{{{
 	call s:multiselector.keymap_check(a:mode)
 endfunction "}}}
-function! multiselect#keymap#checksearched(mode) abort "{{{
-	call s:multiselector.keymap_checksearched(a:mode)
+function! multiselect#keymap#checkpattern(mode, pat) abort "{{{
+	call s:multiselector.keymap_checkpattern(a:mode, a:pat)
 endfunction "}}}
 function! multiselect#keymap#uncheck(mode) abort  "{{{
 	call s:multiselector.keymap_uncheck(a:mode)

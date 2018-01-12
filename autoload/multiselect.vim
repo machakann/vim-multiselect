@@ -466,13 +466,12 @@ function! s:Multiselector.keymap_check(mode) abort "{{{
 	let newitem = self.check(head, tail, type, extended)
 	call s:foldopen(newitem.head[1])
 endfunction "}}}
-function! s:Multiselector.keymap_checksearched(mode) abort "{{{
-	if empty(@/)
+function! s:Multiselector.keymap_checkpattern(mode, pat) abort "{{{
+	if empty(a:pat)
 		return
 	endif
 
 	let view = winsaveview()
-	let lastpattern = @/
 	if a:mode ==# 'x'
 		let start = getpos("'<")
 		let end = getpos("'>")
@@ -483,19 +482,19 @@ function! s:Multiselector.keymap_checksearched(mode) abort "{{{
 	let region = s:Region(start, end)
 	call setpos('.', region.head)
 
-	let head = s:searchpos(lastpattern, 'cW')
+	let head = s:searchpos(a:pat, 'cW')
 	if head == s:NULLPOS || !region.isincluding(head)
 		call winrestview(view)
 		return
 	endif
 	while 1
-		let tail = s:searchpos(lastpattern, 'ceW')
+		let tail = s:searchpos(a:pat, 'ceW')
 		if !region.isincluding(tail)
 			break
 		endif
 		let newitem = self.check(head, tail, 'v')
 		call s:foldopen(newitem.head[1])
-		let head = s:searchpos(lastpattern, 'W')
+		let head = s:searchpos(a:pat, 'W')
 		if head == s:NULLPOS || !region.isincluding(head)
 			break
 		endif
