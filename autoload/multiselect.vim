@@ -410,7 +410,8 @@ function! s:Multiselector.uncheck(...) abort  "{{{
 		" match by range
 		let head = a:1
 		let tail = a:2
-		let unchecked = self.emit_includedin(head, tail)
+		let region = s:Region(head, tail)
+		let unchecked = self.emit_inside(region)
 	endif
 	return unchecked
 endfunction "}}}
