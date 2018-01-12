@@ -466,7 +466,7 @@ endfunction "}}}
 " keymap interfaces
 function! s:Multiselector.keymap_check(mode) abort "{{{
 	if a:mode ==# 'n'
-		normal! zRviw
+		normal! zOviw
 		execute "normal! \<Esc>"
 	endif
 	let head = getpos("'<")
@@ -556,7 +556,7 @@ function! s:foldopen(lnum) abort "{{{
 
 	let view = winsaveview()
 	call cursor(a:lnum, 1)
-	normal! zR
+	normal! zO
 	call winrestview(view)
 endfunction "}}}
 
