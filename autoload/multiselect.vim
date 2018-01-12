@@ -571,7 +571,7 @@ function! s:Multiselector.extend(itemlist) abort "{{{
 
 	let added = []
 	for newitem in a:itemlist
-		if empty(newitem)
+		if empty(newitem) || newitem.bufnr != self.bufnr
 			continue
 		endif
 		call self.filter({_, olditem -> !newitem.istouching(olditem)})
