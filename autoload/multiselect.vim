@@ -207,7 +207,7 @@ let s:Item = {
 	\	'bufnr': 0,
 	\	'highlight': {},
 	\	}
-function! s:Item(bufnr, head, tail, type, ...) abort "{{{
+function! s:Item(head, tail, type, ...) abort "{{{
 	if !bufexists(a:bufnr)
 		return {}
 	endif
@@ -218,7 +218,7 @@ function! s:Item(bufnr, head, tail, type, ...) abort "{{{
 	let args = [a:head, a:tail, a:type, get(a:000, 0, s:FALSE)]
 	let item = s:inherit('Region', 'Item', args)
 	let item.id = s:itemid()
-	let item.bufnr = a:bufnr
+	let item.bufnr = bufnr('%')
 	let item.highlight = s:Highlights.Highlight()
 	return item
 endfunction "}}}
@@ -353,7 +353,7 @@ endfunction "}}}
 unlockvar! s:Multiselector
 let s:Multiselector = {
 	\	'__CLASS__': 'Multiselector',
-	\	'_bufnr': -1,
+	\	'bufnr': -1,
 	\	'itemlist': [],
 	\	'name': '',
 	\	'higroup': '',
@@ -398,7 +398,7 @@ function! s:Multiselector.check(head, tail, type, ...) abort  "{{{
 	else
 		let extended = 0
 	endif
-	let newitem = s:Item(self._bufnr, a:head, a:tail, a:type, extended)
+	let newitem = s:Item(a:head, a:tail, a:type, extended)
 	call self.add(newitem)
 	return newitem
 endfunction "}}}
@@ -651,7 +651,7 @@ endfunction "}}}
 
 " private methods
 function! s:Multiselector._initialize() abort "{{{
-	let self._bufnr = bufnr('%')
+	let self.bufnr = bufnr('%')
 	call self.uncheckall()
 	let self.last.event = ''
 	let self.last.itemlist = []
