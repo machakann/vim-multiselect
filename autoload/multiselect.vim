@@ -211,8 +211,8 @@ let s:Item = {
 	\	'bufnr': 0,
 	\	'highlight': {},
 	\	}
-function! s:Item(head, tail, type, ...) abort "{{{
-	let args = [a:head, a:tail, a:type, get(a:000, 0, s:FALSE)]
+function! s:Item(head, tail, ...) abort "{{{
+	let args = [a:head, a:tail] + a:000
 	let item = s:inherit('Region', 'Item', args)
 	if empty(item)
 		return item
@@ -396,13 +396,8 @@ function! s:Multiselector(...) abort "{{{
 endfunction "}}}
 
 " main interfaces
-function! s:Multiselector.check(head, tail, type, ...) abort  "{{{
-	if s:str2type(a:type) ==# 'block'
-		let extended = get(a:000, 0, 0)
-	else
-		let extended = 0
-	endif
-	let newitem = s:Item(a:head, a:tail, a:type, extended)
+function! s:Multiselector.check(head, tail, ...) abort  "{{{
+	let newitem = call('s:Item', [a:head, a:tail] + a:000)
 	call self.add(newitem)
 	return newitem
 endfunction "}}}
