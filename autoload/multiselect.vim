@@ -386,6 +386,9 @@ function! s:Multiselector(...) abort "{{{
 	let multiselector.event.Init = s:UniqueEvent(EVENTINIT)
 	let multiselector.event.CheckPost = s:UniqueEvent(EVENTCHECKPOST)
 	let multiselector.event.UncheckPost = s:UniqueEvent(EVENTUNCHECKPOST)
+	for event in values(multiselector.event)
+		call event.on()
+	endfor
 
 	call add(s:table, multiselector)
 	call multiselector._initialize()
@@ -656,9 +659,6 @@ function! s:Multiselector._initialize() abort "{{{
 	call self.uncheckall()
 	let self.last.event = ''
 	let self.last.itemlist = []
-	for event in values(self.event)
-		call event.on()
-	endfor
 	call self.event.Init.trigger()
 endfunction "}}}
 function! s:Multiselector._checkpost(added) abort "{{{
