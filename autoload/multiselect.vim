@@ -220,31 +220,31 @@ function! s:Item(head, tail, type, ...) abort "{{{
 
 	let item.id = s:itemid()
 	let item.bufnr = bufnr('%')
-	let item.highlight = s:Highlights.Highlight()
+	let item._highlight = s:Highlights.Highlight()
 	return item
 endfunction "}}}
 function! s:Item.show(higroup) abort "{{{
-	if self.highlight.initialize(a:higroup, self)
-		call self.highlight.quench()
+	if self._highlight.initialize(a:higroup, self)
+		call self._highlight.quench()
 	endif
-	call self.highlight.show()
+	call self._highlight.show()
 endfunction "}}}
 function! s:Item.quench() abort "{{{
-	call self.highlight.quench()
+	call self._highlight.quench()
 endfunction "}}}
 function! s:Item._showlocal(higroup) abort "{{{
-	if self.highlight.initialize(a:higroup, self)
-		call self.highlight.quench()
-		call self.highlight.show()
+	if self._highlight.initialize(a:higroup, self)
+		call self._highlight.quench()
+		call self._highlight.show()
 	else
-		call self.highlight.showlocal()
+		call self._highlight.showlocal()
 	endif
 endfunction "}}}
 function! s:Item._quenchlocal() abort "{{{
-	call self.highlight.quenchlocal()
+	call self._highlight.quenchlocal()
 endfunction "}}}
 function! s:Item._histatus(winid) abort "{{{
-	return self.highlight.status(a:winid)
+	return self._highlight.status(a:winid)
 endfunction "}}}
 lockvar! s:Item
 
@@ -261,7 +261,7 @@ unlockvar! s:Event
 let s:Event = {
 	\	'__CLASS__': 'Event',
 	\	'name': '',
-	\	'state': s:OFF,
+	\	'_state': s:OFF,
 	\	'_skipcount': -1,
 	\	}
 function! s:Event(name) abort "{{{
@@ -270,14 +270,14 @@ function! s:Event(name) abort "{{{
 	return event
 endfunction "}}}
 function! s:Event.on() abort "{{{
-	let self.state = s:ON
+	let self._state = s:ON
 	let self._skipcount = -1
-	return self.state
+	return self._state
 endfunction "}}}
 function! s:Event.off() abort "{{{
-	let self.state = s:OFF
+	let self._state = s:OFF
 	let self._skipcount = -1
-	return self.state
+	return self._state
 endfunction "}}}
 function! s:Event.skip(...) abort "{{{
 	let n = get(a:000, 0, 1)
@@ -288,10 +288,10 @@ function! s:Event.skip(...) abort "{{{
 	let self._skipcount = n
 endfunction "}}}
 function! s:Event.isactive() abort "{{{
-	return self.state
+	return self._state
 endfunction "}}}
 function! s:Event._decrement_skipcount() abort "{{{
-	if self.state is s:ON
+	if self._state is s:ON
 		return
 	endif
 	if self._skipcount > 0
@@ -299,7 +299,7 @@ function! s:Event._decrement_skipcount() abort "{{{
 	endif
 endfunction "}}}
 function! s:Event._check_skipcount() abort "{{{
-	if self.state is s:ON
+	if self._state is s:ON
 		return
 	endif
 	if self._skipcount == 0
@@ -311,16 +311,16 @@ lockvar! s:Event
 " UniqueEvent class (inherits Event class){{{
 let s:UniqueEvent = {
 	\	'__CLASS__': 'UniqueEvent',
-	\	'eventdefinition': '',
-	\	'doautocmd': '',
+	\	'_eventdefinition': '',
+	\	'_doautocmd': '',
 	\	}
 function! s:UniqueEvent(name) abort "{{{
 	let uniqueevent = s:inherit('Event', 'UniqueEvent', [a:name])
 	if empty(a:name)
 		call uniqueevent.off()
 	else
-		let uniqueevent.eventdefinition = '#User#' . a:name
-		let uniqueevent.doautocmd = 'doautocmd <nomodeline> User ' . a:name
+		let uniqueevent._eventdefinition = '#User#' . a:name
+		let uniqueevent._doautocmd = 'doautocmd <nomodeline> User ' . a:name
 	endif
 	return uniqueevent
 endfunction "}}}
@@ -331,7 +331,7 @@ function! s:UniqueEvent.on() abort "{{{
 	call self.super_on()
 endfunction "}}}
 function! s:UniqueEvent.trigger() abort "{{{
-	if empty(self.doautocmd) || !self.isdefined()
+	if empty(self._doautocmd) || !self.isdefined()
 		return
 	endif
 
@@ -341,27 +341,23 @@ function! s:UniqueEvent.trigger() abort "{{{
 		return
 	endif
 
-	execute self.doautocmd
+	execute self._doautocmd
 endfunction "}}}
 function! s:UniqueEvent.isdefined() abort "{{{
-	if empty(self.eventdefinition)
+	if empty(self._eventdefinition)
 		return s:FALSE
 	endif
-	return exists(self.eventdefinition)
+	return exists(self._eventdefinition)
 endfunction "}}}
 "}}}
 " Multiselector class "{{{
 unlockvar! s:Multiselector
 let s:Multiselector = {
 	\	'__CLASS__': 'Multiselector',
+	\	'name': '',
 	\	'bufnr': -1,
 	\	'itemlist': [],
-	\	'name': '',
 	\	'higroup': '',
-	\	'last':{
-	\		'event': '',
-	\		'itemlist': [],
-	\		},
 	\	'event': {
 	\		'BufLeave': s:Event('BufLeave'),
 	\		'TabLeave': s:Event('TabLeave'),
@@ -372,6 +368,10 @@ let s:Multiselector = {
 	\		'Init': {},
 	\		'CheckPost': {},
 	\		'UncheckPost': {},
+	\		},
+	\	'_last':{
+	\		'event': '',
+	\		'itemlist': [],
 	\		},
 	\	}
 function! s:Multiselector(...) abort "{{{
@@ -605,8 +605,8 @@ function! s:Multiselector.isempty() abort "{{{
 	return empty(self.itemlist)
 endfunction "}}}
 function! s:Multiselector.lastevent() abort "{{{
-	let last = copy(self.last)
-	let last.itemlist = copy(self.last.itemlist)
+	let last = copy(self._last)
+	let last.itemlist = copy(self._last.itemlist)
 	return last
 endfunction "}}}
 function! s:Multiselector.show(...) abort "{{{
@@ -657,24 +657,24 @@ endfunction "}}}
 function! s:Multiselector._initialize() abort "{{{
 	let self.bufnr = bufnr('%')
 	call self.uncheckall()
-	let self.last.event = ''
-	let self.last.itemlist = []
+	let self._last.event = ''
+	let self._last.itemlist = []
 	call self.event.Init.trigger()
 endfunction "}}}
 function! s:Multiselector._checkpost(added) abort "{{{
 	for item in a:added
 		call item.show(self.higroup)
 	endfor
-	let self.last.event = 'check'
-	let self.last.itemlist = a:added
+	let self._last.event = 'check'
+	let self._last.itemlist = a:added
 	call self.event.CheckPost.trigger()
 endfunction "}}}
 function! s:Multiselector._uncheckpost(removed) abort "{{{
 	for item in a:removed
 		call item.quench()
 	endfor
-	let self.last.event = 'uncheck'
-	let self.last.itemlist = a:removed
+	let self._last.event = 'uncheck'
+	let self._last.itemlist = a:removed
 	call self.event.UncheckPost.trigger()
 endfunction "}}}
 lockvar! s:Multiselector
