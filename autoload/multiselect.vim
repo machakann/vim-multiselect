@@ -469,7 +469,10 @@ endfunction "}}}
 " keymap interfaces
 function! s:Multiselector.keymap_check(mode) abort "{{{
 	if a:mode ==# 'n'
-		normal! zOviw
+		if foldclosed(line('.')) != -1
+			normal! zO
+		endif
+		normal! viw
 		execute "normal! \<Esc>"
 	endif
 	let head = getpos("'<")
