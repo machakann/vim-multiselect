@@ -16,7 +16,7 @@ Describe Event
 		It turns on/off initialize process
 			let multiselector = g:MS.Multiselector()
 			call multiselector.extend([
-				\ Item(bufnr('%'), [0, 1, 1, 0], [0, 1, 1, 0], 'v'),
+				\ Item([0, 1, 1, 0], [0, 1, 1, 0], 'v'),
 				\ ])
 
 			Assert True(multiselector.event.BufLeave.isactive())
@@ -24,7 +24,7 @@ Describe Event
 			Assert True(empty(multiselector.itemlist))
 
 			call multiselector.extend([
-				\ Item(bufnr('%'), [0, 1, 1, 0], [0, 1, 1, 0], 'v'),
+				\ Item([0, 1, 1, 0], [0, 1, 1, 0], 'v'),
 				\ ])
 			call multiselector.event.BufLeave.off()
 			Assert False(multiselector.event.BufLeave.isactive())
@@ -40,7 +40,7 @@ Describe Event
 
 			let multiselector = g:MS.Multiselector()
 			call multiselector.extend([
-				\ Item(bufnr('%'), [0, 1, 1, 0], [0, 1, 1, 0], 'v'),
+				\ Item([0, 1, 1, 0], [0, 1, 1, 0], 'v'),
 				\ ])
 
 			Assert True(multiselector.event.TabLeave.isactive())
@@ -48,7 +48,7 @@ Describe Event
 			Assert True(empty(multiselector.itemlist))
 
 			call multiselector.extend([
-				\ Item(bufnr('%'), [0, 1, 1, 0], [0, 1, 1, 0], 'v'),
+				\ Item([0, 1, 1, 0], [0, 1, 1, 0], 'v'),
 				\ ])
 			call multiselector.event.TabLeave.off()
 			Assert False(multiselector.event.TabLeave.isactive())
@@ -64,7 +64,7 @@ Describe Event
 
 			let multiselector = g:MS.Multiselector()
 			call multiselector.extend([
-				\ Item(bufnr('%'), [0, 1, 1, 0], [0, 1, 1, 0], 'v'),
+				\ Item([0, 1, 1, 0], [0, 1, 1, 0], 'v'),
 				\ ])
 
 			Assert True(multiselector.event.CmdwinLeave.isactive())
@@ -72,7 +72,7 @@ Describe Event
 			Assert True(empty(multiselector.itemlist))
 
 			call multiselector.extend([
-				\ Item(bufnr('%'), [0, 1, 1, 0], [0, 1, 1, 0], 'v'),
+				\ Item([0, 1, 1, 0], [0, 1, 1, 0], 'v'),
 				\ ])
 			call multiselector.event.CmdwinLeave.off()
 			Assert False(multiselector.event.CmdwinLeave.isactive())
@@ -88,7 +88,7 @@ Describe Event
 		It turns on/off auto-uncheckall process
 			let multiselector = g:MS.Multiselector()
 			call multiselector.extend([
-				\ Item(bufnr('%'), [0, 1, 1, 0], [0, 1, 1, 0], 'v'),
+				\ Item([0, 1, 1, 0], [0, 1, 1, 0], 'v'),
 				\ ])
 
 			Assert True(multiselector.event.TextChanged.isactive())
@@ -96,7 +96,7 @@ Describe Event
 			Assert True(empty(multiselector.itemlist))
 
 			call multiselector.extend([
-				\ Item(bufnr('%'), [0, 1, 1, 0], [0, 1, 1, 0], 'v'),
+				\ Item([0, 1, 1, 0], [0, 1, 1, 0], 'v'),
 				\ ])
 			call multiselector.event.TextChanged.off()
 			Assert False(multiselector.event.TextChanged.isactive())
@@ -112,7 +112,7 @@ Describe Event
 
 			let multiselector = g:MS.Multiselector()
 			call multiselector.extend([
-				\ Item(bufnr('%'), [0, 1, 1, 0], [0, 1, 1, 0], 'v'),
+				\ Item([0, 1, 1, 0], [0, 1, 1, 0], 'v'),
 				\ ])
 
 			Assert True(multiselector.event.InsertEnter.isactive())
@@ -120,7 +120,7 @@ Describe Event
 			Assert True(empty(multiselector.itemlist))
 
 			call multiselector.extend([
-				\ Item(bufnr('%'), [0, 1, 1, 0], [0, 1, 1, 0], 'v'),
+				\ Item([0, 1, 1, 0], [0, 1, 1, 0], 'v'),
 				\ ])
 			call multiselector.event.InsertEnter.off()
 			Assert False(multiselector.event.InsertEnter.isactive())
@@ -136,7 +136,7 @@ Describe Event
 		It turns on/off auto-highlight process for a new window
 			let multiselector = g:MS.Multiselector()
 			call multiselector.extend([
-				\ Item(bufnr('%'), [0, 1, 1, 0], [0, 1, 1, 0], 'v'),
+				\ Item([0, 1, 1, 0], [0, 1, 1, 0], 'v'),
 				\ ])
 			call multiselector.itemlist[0].quench()
 
@@ -151,7 +151,7 @@ Describe Event
 		It sets a count to ignore autocmd events
 			let multiselector = g:MS.Multiselector()
 			call multiselector.extend([
-				\ Item(bufnr('%'), [0, 1, 1, 0], [0, 1, 1, 0], 'v'),
+				\ Item([0, 1, 1, 0], [0, 1, 1, 0], 'v'),
 				\ ])
 			Assert True(multiselector.event.BufLeave.isactive())
 			call multiselector.event.BufLeave.skip(1)
@@ -168,7 +168,7 @@ Describe Event
 
 			let multiselector = g:MS.Multiselector()
 			call multiselector.extend([
-				\ Item(bufnr('%'), [0, 1, 1, 0], [0, 1, 1, 0], 'v'),
+				\ Item([0, 1, 1, 0], [0, 1, 1, 0], 'v'),
 				\ ])
 			Assert True(multiselector.event.BufLeave.isactive())
 			call multiselector.event.BufLeave.skip(2)
@@ -188,7 +188,7 @@ Describe Event
 
 			let multiselector = g:MS.Multiselector()
 			call multiselector.extend([
-				\ Item(bufnr('%'), [0, 1, 1, 0], [0, 1, 1, 0], 'v'),
+				\ Item([0, 1, 1, 0], [0, 1, 1, 0], 'v'),
 				\ ])
 			Assert True(multiselector.event.BufLeave.isactive())
 			call multiselector.event.BufLeave.skip(0)

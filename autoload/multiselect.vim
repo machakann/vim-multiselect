@@ -22,6 +22,10 @@ let s:Region = {
 	\	'extended': s:FALSE,
 	\	}
 function! s:Region(head, tail, ...) abort "{{{
+	if a:head == s:NULLPOS || a:tail == s:NULLPOS || s:inorderof(a:tail, a:head)
+		return {}
+	endif
+
 	let region = deepcopy(s:Region)
 	let region.type = s:str2type(get(a:000, 0, 'char'))
 	if region.type ==# 'line'
@@ -208,15 +212,12 @@ let s:Item = {
 	\	'highlight': {},
 	\	}
 function! s:Item(head, tail, type, ...) abort "{{{
-	if !bufexists(a:bufnr)
-		return {}
-	endif
-	if a:head == s:NULLPOS || a:tail == s:NULLPOS || s:inorderof(a:tail, a:head)
-		return {}
-	endif
-
 	let args = [a:head, a:tail, a:type, get(a:000, 0, s:FALSE)]
 	let item = s:inherit('Region', 'Item', args)
+	if empty(item)
+		return item
+	endif
+
 	let item.id = s:itemid()
 	let item.bufnr = bufnr('%')
 	let item.highlight = s:Highlights.Highlight()
@@ -682,6 +683,10 @@ lockvar! s:Multiselector
 function! s:inherit(supername, subname, args) abort "{{{
 	let Constructor_super = 's:' . a:supername
 	let super = call(Constructor_super, a:args)
+	if empty(super)
+		return super
+	endif
+
 	let sub = deepcopy(s:[a:subname])
 	call extend(sub, super, 'keep')
 	" FIXME: Please find out a better way to handle super class methods

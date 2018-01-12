@@ -31,7 +31,7 @@ Describe Multiselector
 			Assert Equals(multiselector.itemlist, [])
 
 			let added = [
-				\ Item(bufnr('%'), [0, 1, 1, 0], [0, 1, 1, 0], 'v'),
+				\ Item([0, 1, 1, 0], [0, 1, 1, 0], 'v'),
 				\ ]
 			call multiselector.extend(added)
 			Assert Equals(len(multiselector.itemlist), 1)
@@ -40,8 +40,8 @@ Describe Multiselector
 			Assert Equals(multiselector.last.itemlist, added)
 
 			let added = [
-				\ Item(bufnr('%'), [0, 2, 1, 0], [0, 2, 1, 0], 'v'),
-				\ Item(bufnr('%'), [0, 3, 1, 0], [0, 3, 1, 0], 'v'),
+				\ Item([0, 2, 1, 0], [0, 2, 1, 0], 'v'),
+				\ Item([0, 3, 1, 0], [0, 3, 1, 0], 'v'),
 				\ ]
 			call multiselector.extend(added)
 			Assert Equals(len(multiselector.itemlist), 3)
@@ -59,13 +59,13 @@ Describe Multiselector
 			Assert True(empty(multiselector.itemlist))
 
 			call multiselector.extend([
-				\ Item(bufnr('%'), [0, 1, 1, 0], [0, 1, 1, 0], 'v'),
+				\ Item([0, 1, 1, 0], [0, 1, 1, 0], 'v'),
 				\ ])
 			Assert Equals(multiselector.itemlist[0]['_histatus'](win_getid()), ON)
 
 			call multiselector.extend([
-				\ Item(bufnr('%'), [0, 2, 1, 0], [0, 2, 1, 0], 'v'),
-				\ Item(bufnr('%'), [0, 3, 1, 0], [0, 3, 1, 0], 'v'),
+				\ Item([0, 2, 1, 0], [0, 2, 1, 0], 'v'),
+				\ Item([0, 3, 1, 0], [0, 3, 1, 0], 'v'),
 				\ ])
 			Assert Equals(multiselector.itemlist[0]['_histatus'](win_getid()), ON)
 			Assert Equals(multiselector.itemlist[1]['_histatus'](win_getid()), ON)
@@ -85,13 +85,13 @@ Describe Multiselector
 			Assert Equals(g:autocmdcount, 0)
 
 			call multiselector.extend([
-				\ Item(bufnr('%'), [0, 1, 1, 0], [0, 1, 1, 0], 'v'),
+				\ Item([0, 1, 1, 0], [0, 1, 1, 0], 'v'),
 				\ ])
 			Assert Equals(g:autocmdcount, 1)
 
 			call multiselector.extend([
-				\ Item(bufnr('%'), [0, 2, 1, 0], [0, 2, 1, 0], 'v'),
-				\ Item(bufnr('%'), [0, 3, 1, 0], [0, 3, 1, 0], 'v'),
+				\ Item([0, 2, 1, 0], [0, 2, 1, 0], 'v'),
+				\ Item([0, 3, 1, 0], [0, 3, 1, 0], 'v'),
 				\ ])
 			Assert Equals(g:autocmdcount, 2)
 		End
@@ -104,14 +104,14 @@ Describe Multiselector
 			let OFF = g:FALSE
 			Assert True(empty(multiselector.itemlist))
 
-			let added = Item(bufnr('%'), [0, 1, 1, 0], [0, 1, 1, 0], 'v')
+			let added = Item([0, 1, 1, 0], [0, 1, 1, 0], 'v')
 			call multiselector.add(added)
 			Assert Equals(len(multiselector.itemlist), 1)
 			Assert Equals(multiselector.itemlist[0]['head'], [0, 1, 1, 0])
 			Assert Equals(multiselector.last.event, 'check')
 			Assert Equals(multiselector.last.itemlist, [added])
 
-			let added = Item(bufnr('%'), [0, 2, 1, 0], [0, 2, 1, 0], 'v')
+			let added = Item([0, 2, 1, 0], [0, 2, 1, 0], 'v')
 			call multiselector.add(added)
 			Assert Equals(len(multiselector.itemlist), 2)
 			Assert Equals(multiselector.itemlist[0]['head'], [0, 1, 1, 0])
@@ -119,7 +119,7 @@ Describe Multiselector
 			Assert Equals(multiselector.last.event, 'check')
 			Assert Equals(multiselector.last.itemlist, [added])
 
-			let added = Item(bufnr('%'), [0, 3, 1, 0], [0, 3, 1, 0], 'v')
+			let added = Item([0, 3, 1, 0], [0, 3, 1, 0], 'v')
 			call multiselector.add(added)
 			Assert Equals(len(multiselector.itemlist), 3)
 			Assert Equals(multiselector.itemlist[0]['head'], [0, 1, 1, 0])
@@ -136,18 +136,18 @@ Describe Multiselector
 			Assert True(empty(multiselector.itemlist))
 
 			call multiselector.add(
-				\ Item(bufnr('%'), [0, 1, 1, 0], [0, 1, 1, 0], 'v')
+				\ Item([0, 1, 1, 0], [0, 1, 1, 0], 'v')
 				\ )
 			Assert Equals(multiselector.itemlist[0]['_histatus'](win_getid()), ON)
 
 			call multiselector.add(
-				\ Item(bufnr('%'), [0, 2, 1, 0], [0, 2, 1, 0], 'v')
+				\ Item([0, 2, 1, 0], [0, 2, 1, 0], 'v')
 				\ )
 			Assert Equals(multiselector.itemlist[0]['_histatus'](win_getid()), ON)
 			Assert Equals(multiselector.itemlist[1]['_histatus'](win_getid()), ON)
 
 			call multiselector.add(
-				\ Item(bufnr('%'), [0, 3, 1, 0], [0, 3, 1, 0], 'v')
+				\ Item([0, 3, 1, 0], [0, 3, 1, 0], 'v')
 				\ )
 			Assert Equals(multiselector.itemlist[0]['_histatus'](win_getid()), ON)
 			Assert Equals(multiselector.itemlist[1]['_histatus'](win_getid()), ON)
@@ -164,17 +164,17 @@ Describe Multiselector
 			Assert True(empty(multiselector.itemlist))
 
 			call multiselector.add(
-				\ Item(bufnr('%'), [0, 1, 1, 0], [0, 1, 1, 0], 'v')
+				\ Item([0, 1, 1, 0], [0, 1, 1, 0], 'v')
 				\ )
 			Assert Equals(g:autocmdcount, 1)
 
 			call multiselector.add(
-				\ Item(bufnr('%'), [0, 2, 1, 0], [0, 2, 1, 0], 'v')
+				\ Item([0, 2, 1, 0], [0, 2, 1, 0], 'v')
 				\ )
 			Assert Equals(g:autocmdcount, 2)
 
 			call multiselector.add(
-				\ Item(bufnr('%'), [0, 3, 1, 0], [0, 3, 1, 0], 'v')
+				\ Item([0, 3, 1, 0], [0, 3, 1, 0], 'v')
 				\ )
 			Assert Equals(g:autocmdcount, 3)
 		End
@@ -184,9 +184,9 @@ Describe Multiselector
 		It removes an (i+1)-th item from self.itemlist and return the item
 			let multiselector = MS.Multiselector(DEFAULTS)
 			call multiselector.extend([
-				\ Item(bufnr('%'), [0, 1, 1, 0], [0, 1, 1, 0], 'v'),
-				\ Item(bufnr('%'), [0, 2, 1, 0], [0, 2, 1, 0], 'v'),
-				\ Item(bufnr('%'), [0, 3, 1, 0], [0, 3, 1, 0], 'v'),
+				\ Item([0, 1, 1, 0], [0, 1, 1, 0], 'v'),
+				\ Item([0, 2, 1, 0], [0, 2, 1, 0], 'v'),
+				\ Item([0, 3, 1, 0], [0, 3, 1, 0], 'v'),
 				\ ])
 			Assert Equals(len(multiselector.itemlist), 3)
 
@@ -221,9 +221,9 @@ Describe Multiselector
 			let ON = g:TRUE
 			let OFF = g:FALSE
 			call multiselector.extend([
-				\ Item(bufnr('%'), [0, 1, 1, 0], [0, 1, 1, 0], 'v'),
-				\ Item(bufnr('%'), [0, 2, 1, 0], [0, 2, 1, 0], 'v'),
-				\ Item(bufnr('%'), [0, 3, 1, 0], [0, 3, 1, 0], 'v'),
+				\ Item([0, 1, 1, 0], [0, 1, 1, 0], 'v'),
+				\ Item([0, 2, 1, 0], [0, 2, 1, 0], 'v'),
+				\ Item([0, 3, 1, 0], [0, 3, 1, 0], 'v'),
 				\ ])
 			Assert Equals(len(multiselector.itemlist), 3)
 
@@ -243,9 +243,9 @@ Describe Multiselector
 		It triggers autocmd event 'MultiselectUncheckPost' evry after removing
 			let multiselector = MS.Multiselector(DEFAULTS)
 			call multiselector.extend([
-				\ Item(bufnr('%'), [0, 1, 1, 0], [0, 1, 1, 0], 'v'),
-				\ Item(bufnr('%'), [0, 2, 1, 0], [0, 2, 1, 0], 'v'),
-				\ Item(bufnr('%'), [0, 3, 1, 0], [0, 3, 1, 0], 'v'),
+				\ Item([0, 1, 1, 0], [0, 1, 1, 0], 'v'),
+				\ Item([0, 2, 1, 0], [0, 2, 1, 0], 'v'),
+				\ Item([0, 3, 1, 0], [0, 3, 1, 0], 'v'),
 				\ ])
 			let g:autocmdcount = 0
 			augroup test-multiselect
@@ -270,9 +270,9 @@ Describe Multiselector
 		It removes (i+1) to (j+1)-th items from self.itemlist and return as a list
 			let multiselector = MS.Multiselector(DEFAULTS)
 			call multiselector.extend([
-				\ Item(bufnr('%'), [0, 1, 1, 0], [0, 1, 1, 0], 'v'),
-				\ Item(bufnr('%'), [0, 2, 1, 0], [0, 2, 1, 0], 'v'),
-				\ Item(bufnr('%'), [0, 3, 1, 0], [0, 3, 1, 0], 'v'),
+				\ Item([0, 1, 1, 0], [0, 1, 1, 0], 'v'),
+				\ Item([0, 2, 1, 0], [0, 2, 1, 0], 'v'),
+				\ Item([0, 3, 1, 0], [0, 3, 1, 0], 'v'),
 				\ ])
 			Assert Equals(len(multiselector.itemlist), 3)
 
@@ -288,9 +288,9 @@ Describe Multiselector
 
 			let multiselector = MS.Multiselector(DEFAULTS)
 			call multiselector.extend([
-				\ Item(bufnr('%'), [0, 1, 1, 0], [0, 1, 1, 0], 'v'),
-				\ Item(bufnr('%'), [0, 2, 1, 0], [0, 2, 1, 0], 'v'),
-				\ Item(bufnr('%'), [0, 3, 1, 0], [0, 3, 1, 0], 'v'),
+				\ Item([0, 1, 1, 0], [0, 1, 1, 0], 'v'),
+				\ Item([0, 2, 1, 0], [0, 2, 1, 0], 'v'),
+				\ Item([0, 3, 1, 0], [0, 3, 1, 0], 'v'),
 				\ ])
 			Assert Equals(len(multiselector.itemlist), 3)
 
@@ -306,9 +306,9 @@ Describe Multiselector
 
 			let multiselector = MS.Multiselector(DEFAULTS)
 			call multiselector.extend([
-				\ Item(bufnr('%'), [0, 1, 1, 0], [0, 1, 1, 0], 'v'),
-				\ Item(bufnr('%'), [0, 2, 1, 0], [0, 2, 1, 0], 'v'),
-				\ Item(bufnr('%'), [0, 3, 1, 0], [0, 3, 1, 0], 'v'),
+				\ Item([0, 1, 1, 0], [0, 1, 1, 0], 'v'),
+				\ Item([0, 2, 1, 0], [0, 2, 1, 0], 'v'),
+				\ Item([0, 3, 1, 0], [0, 3, 1, 0], 'v'),
 				\ ])
 			Assert Equals(len(multiselector.itemlist), 3)
 
@@ -325,9 +325,9 @@ Describe Multiselector
 
 			let multiselector = MS.Multiselector(DEFAULTS)
 			call multiselector.extend([
-				\ Item(bufnr('%'), [0, 1, 1, 0], [0, 1, 1, 0], 'v'),
-				\ Item(bufnr('%'), [0, 2, 1, 0], [0, 2, 1, 0], 'v'),
-				\ Item(bufnr('%'), [0, 3, 1, 0], [0, 3, 1, 0], 'v'),
+				\ Item([0, 1, 1, 0], [0, 1, 1, 0], 'v'),
+				\ Item([0, 2, 1, 0], [0, 2, 1, 0], 'v'),
+				\ Item([0, 3, 1, 0], [0, 3, 1, 0], 'v'),
 				\ ])
 			Assert Equals(len(multiselector.itemlist), 3)
 
@@ -348,9 +348,9 @@ Describe Multiselector
 			let ON = g:TRUE
 			let OFF = g:FALSE
 			call multiselector.extend([
-				\ Item(bufnr('%'), [0, 1, 1, 0], [0, 1, 1, 0], 'v'),
-				\ Item(bufnr('%'), [0, 2, 1, 0], [0, 2, 1, 0], 'v'),
-				\ Item(bufnr('%'), [0, 3, 1, 0], [0, 3, 1, 0], 'v'),
+				\ Item([0, 1, 1, 0], [0, 1, 1, 0], 'v'),
+				\ Item([0, 2, 1, 0], [0, 2, 1, 0], 'v'),
+				\ Item([0, 3, 1, 0], [0, 3, 1, 0], 'v'),
 				\ ])
 			Assert Equals(len(multiselector.itemlist), 3)
 
@@ -361,9 +361,9 @@ Describe Multiselector
 
 			let multiselector = MS.Multiselector(DEFAULTS)
 			call multiselector.extend([
-				\ Item(bufnr('%'), [0, 1, 1, 0], [0, 1, 1, 0], 'v'),
-				\ Item(bufnr('%'), [0, 2, 1, 0], [0, 2, 1, 0], 'v'),
-				\ Item(bufnr('%'), [0, 3, 1, 0], [0, 3, 1, 0], 'v'),
+				\ Item([0, 1, 1, 0], [0, 1, 1, 0], 'v'),
+				\ Item([0, 2, 1, 0], [0, 2, 1, 0], 'v'),
+				\ Item([0, 3, 1, 0], [0, 3, 1, 0], 'v'),
 				\ ])
 			Assert Equals(len(multiselector.itemlist), 3)
 
@@ -374,9 +374,9 @@ Describe Multiselector
 
 			let multiselector = MS.Multiselector(DEFAULTS)
 			call multiselector.extend([
-				\ Item(bufnr('%'), [0, 1, 1, 0], [0, 1, 1, 0], 'v'),
-				\ Item(bufnr('%'), [0, 2, 1, 0], [0, 2, 1, 0], 'v'),
-				\ Item(bufnr('%'), [0, 3, 1, 0], [0, 3, 1, 0], 'v'),
+				\ Item([0, 1, 1, 0], [0, 1, 1, 0], 'v'),
+				\ Item([0, 2, 1, 0], [0, 2, 1, 0], 'v'),
+				\ Item([0, 3, 1, 0], [0, 3, 1, 0], 'v'),
 				\ ])
 			Assert Equals(len(multiselector.itemlist), 3)
 
@@ -395,9 +395,9 @@ Describe Multiselector
 
 			let multiselector = MS.Multiselector(DEFAULTS)
 			call multiselector.extend([
-				\ Item(bufnr('%'), [0, 1, 1, 0], [0, 1, 1, 0], 'v'),
-				\ Item(bufnr('%'), [0, 2, 1, 0], [0, 2, 1, 0], 'v'),
-				\ Item(bufnr('%'), [0, 3, 1, 0], [0, 3, 1, 0], 'v'),
+				\ Item([0, 1, 1, 0], [0, 1, 1, 0], 'v'),
+				\ Item([0, 2, 1, 0], [0, 2, 1, 0], 'v'),
+				\ Item([0, 3, 1, 0], [0, 3, 1, 0], 'v'),
 				\ ])
 			Assert Equals(len(multiselector.itemlist), 3)
 			Assert Equals(g:autocmdcount, 0)
@@ -407,9 +407,9 @@ Describe Multiselector
 
 			let multiselector = MS.Multiselector(DEFAULTS)
 			call multiselector.extend([
-				\ Item(bufnr('%'), [0, 1, 1, 0], [0, 1, 1, 0], 'v'),
-				\ Item(bufnr('%'), [0, 2, 1, 0], [0, 2, 1, 0], 'v'),
-				\ Item(bufnr('%'), [0, 3, 1, 0], [0, 3, 1, 0], 'v'),
+				\ Item([0, 1, 1, 0], [0, 1, 1, 0], 'v'),
+				\ Item([0, 2, 1, 0], [0, 2, 1, 0], 'v'),
+				\ Item([0, 3, 1, 0], [0, 3, 1, 0], 'v'),
 				\ ])
 			Assert Equals(len(multiselector.itemlist), 3)
 
@@ -418,9 +418,9 @@ Describe Multiselector
 
 			let multiselector = MS.Multiselector(DEFAULTS)
 			call multiselector.extend([
-				\ Item(bufnr('%'), [0, 1, 1, 0], [0, 1, 1, 0], 'v'),
-				\ Item(bufnr('%'), [0, 2, 1, 0], [0, 2, 1, 0], 'v'),
-				\ Item(bufnr('%'), [0, 3, 1, 0], [0, 3, 1, 0], 'v'),
+				\ Item([0, 1, 1, 0], [0, 1, 1, 0], 'v'),
+				\ Item([0, 2, 1, 0], [0, 2, 1, 0], 'v'),
+				\ Item([0, 3, 1, 0], [0, 3, 1, 0], 'v'),
 				\ ])
 			Assert Equals(len(multiselector.itemlist), 3)
 
@@ -440,9 +440,9 @@ Describe Multiselector
 				autocmd User MultiselectUncheckPost let g:autocmdcount += 1
 			augroup End
 			call multiselector.extend([
-				\ Item(bufnr('%'), [0, 1, 1, 0], [0, 1, 1, 0], 'v'),
-				\ Item(bufnr('%'), [0, 2, 1, 0], [0, 2, 1, 0], 'v'),
-				\ Item(bufnr('%'), [0, 3, 1, 0], [0, 3, 1, 0], 'v'),
+				\ Item([0, 1, 1, 0], [0, 1, 1, 0], 'v'),
+				\ Item([0, 2, 1, 0], [0, 2, 1, 0], 'v'),
+				\ Item([0, 3, 1, 0], [0, 3, 1, 0], 'v'),
 				\ ])
 			Assert Equals(len(multiselector.itemlist), 3)
 
@@ -473,9 +473,9 @@ Describe Multiselector
 			augroup End
 			let g:autocmdcount = 0
 			call multiselector.extend([
-				\ Item(bufnr('%'), [0, 1, 1, 0], [0, 1, 1, 0], 'v'),
-				\ Item(bufnr('%'), [0, 2, 1, 0], [0, 2, 1, 0], 'v'),
-				\ Item(bufnr('%'), [0, 3, 1, 0], [0, 3, 1, 0], 'v'),
+				\ Item([0, 1, 1, 0], [0, 1, 1, 0], 'v'),
+				\ Item([0, 2, 1, 0], [0, 2, 1, 0], 'v'),
+				\ Item([0, 3, 1, 0], [0, 3, 1, 0], 'v'),
 				\ ])
 			Assert Equals(len(multiselector.itemlist), 3)
 
@@ -504,9 +504,9 @@ Describe Multiselector
 				autocmd User MultiselectUncheckPost let g:autocmdcount += 1
 			augroup End
 			let added = [
-				\ Item(bufnr('%'), [0, 1, 1, 0], [0, 1, 1, 0], 'v'),
-				\ Item(bufnr('%'), [0, 2, 1, 0], [0, 2, 1, 0], 'v'),
-				\ Item(bufnr('%'), [0, 3, 1, 0], [0, 3, 1, 0], 'v'),
+				\ Item([0, 1, 1, 0], [0, 1, 1, 0], 'v'),
+				\ Item([0, 2, 1, 0], [0, 2, 1, 0], 'v'),
+				\ Item([0, 3, 1, 0], [0, 3, 1, 0], 'v'),
 				\ ]
 			call multiselector.extend(added)
 			Assert Equals(len(multiselector.itemlist), 3)
@@ -540,9 +540,9 @@ Describe Multiselector
 			augroup End
 			let g:autocmdcount = 0
 			let added = [
-				\ Item(bufnr('%'), [0, 1, 1, 0], [0, 1, 1, 0], 'v'),
-				\ Item(bufnr('%'), [0, 2, 1, 0], [0, 2, 1, 0], 'v'),
-				\ Item(bufnr('%'), [0, 3, 1, 0], [0, 3, 1, 0], 'v'),
+				\ Item([0, 1, 1, 0], [0, 1, 1, 0], 'v'),
+				\ Item([0, 2, 1, 0], [0, 2, 1, 0], 'v'),
+				\ Item([0, 3, 1, 0], [0, 3, 1, 0], 'v'),
 				\ ]
 			call multiselector.extend(added)
 			Assert Equals(len(multiselector.itemlist), 3)
@@ -574,9 +574,9 @@ Describe Multiselector
 			augroup End
 			let g:autocmdcount = 0
 			let added = [
-				\ Item(bufnr('%'), [0, 1, 1, 0], [0, 1, 1, 0], 'v'),
-				\ Item(bufnr('%'), [0, 2, 1, 0], [0, 2, 1, 0], 'v'),
-				\ Item(bufnr('%'), [0, 3, 1, 0], [0, 3, 1, 0], 'v'),
+				\ Item([0, 1, 1, 0], [0, 1, 1, 0], 'v'),
+				\ Item([0, 2, 1, 0], [0, 2, 1, 0], 'v'),
+				\ Item([0, 3, 1, 0], [0, 3, 1, 0], 'v'),
 				\ ]
 			call multiselector.extend(added)
 			Assert Equals(len(multiselector.itemlist), 3)
@@ -597,9 +597,9 @@ Describe Multiselector
 			let multiselector = MS.Multiselector(DEFAULTS)
 			let g:autocmdcount = 0
 			let added = [
-				\ Item(bufnr('%'), [0, 1, 1, 0], [0, 1, 1, 0], 'v'),
-				\ Item(bufnr('%'), [0, 2, 1, 0], [0, 2, 1, 0], 'v'),
-				\ Item(bufnr('%'), [0, 3, 1, 0], [0, 3, 1, 0], 'v'),
+				\ Item([0, 1, 1, 0], [0, 1, 1, 0], 'v'),
+				\ Item([0, 2, 1, 0], [0, 2, 1, 0], 'v'),
+				\ Item([0, 3, 1, 0], [0, 3, 1, 0], 'v'),
 				\ ]
 			call multiselector.extend(added)
 			Assert Equals(len(multiselector.itemlist), 3)
@@ -636,9 +636,9 @@ Describe Multiselector
 			Assert Equals(sorted[2]['head'], [0, 3, 1, 0])
 
 			let list = [
-				\ Item(bufnr('%'), [0, 2, 1, 0], [0, 2, 1, 0], 'v'),
-				\ Item(bufnr('%'), [0, 3, 1, 0], [0, 3, 1, 0], 'v'),
-				\ Item(bufnr('%'), [0, 1, 1, 0], [0, 1, 1, 0], 'v'),
+				\ Item([0, 2, 1, 0], [0, 2, 1, 0], 'v'),
+				\ Item([0, 3, 1, 0], [0, 3, 1, 0], 'v'),
+				\ Item([0, 1, 1, 0], [0, 1, 1, 0], 'v'),
 				\ ]
 			let sorted = multiselector.sort(list)
 			Assert Same(sorted, list)
