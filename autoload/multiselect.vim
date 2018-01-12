@@ -791,9 +791,13 @@ endfunction "}}}
 
 " Multiselect module{{{
 unlockvar! s:MultiselectModule
+function! s:load() abort "{{{
+	return s:multiselector
+endfunction "}}}
 let s:MultiselectModule = {
 	\	'__MODULE__': 'Multiselect',
 	\	'DEFAULTHIGHLIGHTGROUP': s:HIGROUP,
+	\	'load': function('s:load'),
 	\	'Region': function('s:Region'),
 	\	'Item': function('s:Item'),
 	\	'Multiselector': function('s:Multiselector'),
@@ -803,9 +807,6 @@ let s:MultiselectModule = {
 	\	'str2type': function('s:str2type'),
 	\	'str2visualcmd': function('s:str2visualcmd'),
 	\	}
-function! s:MultiselectModule.load() abort "{{{
-	return s:multiselector
-endfunction "}}}
 lockvar! s:MultiselectModule
 "}}}
 let s:multiselector = s:MultiselectModule.Multiselector({
