@@ -452,6 +452,15 @@ function! s:Multiselector.filter(Filterexpr) abort "{{{
 	return self.itemlist
 endfunction
 "}}}
+function! s:Multiselector.sort(itemlist) abort "{{{
+	return sort(a:itemlist, 's:sort_items')
+endfunction "}}}
+function! s:sort_items(i1, i2) abort "{{{
+	if a:i1.head == a:i2.head
+		return 0
+	endif
+	return s:inorderof(a:i1.head, a:i2.head) ? -1 : 1
+endfunction "}}}
 
 " keymap interfaces
 function! s:Multiselector.keymap_check(mode) abort "{{{
@@ -585,10 +594,6 @@ function! s:Multiselector.remove(i, ...) abort	"{{{
 	call self._uncheckpost([removed])
 	return removed
 endfunction "}}}
-function! s:Multiselector.sort(...) abort "{{{
-	let itemlist = a:0 ? a:1 : self.itemlist
-	return sort(copy(itemlist), 's:sort_items')
-endfunction "}}}
 function! s:Multiselector.itemnum() abort "{{{
 	return len(self.itemlist)
 endfunction "}}}
@@ -642,12 +647,6 @@ function! s:percolate(iter, Filterexpr) abort "{{{
 		echoerr s:err_InvalidArgument('percolate')
 	endif
 	return filtered
-endfunction "}}}
-function! s:sort_items(i1, i2) abort "{{{
-	if a:i1.head == a:i2.head
-		return 0
-	endif
-	return s:inorderof(a:i1.head, a:i2.head) ? -1 : 1
 endfunction "}}}
 
 " private methods

@@ -619,28 +619,6 @@ Describe Multiselector
 		End
 	End
 
-	Context .sort()
-		It sorts the items in a copy of self.itemlist
-			let multiselector = MS.Multiselector(DEFAULTS)
-			let added = [
-				\ Item(bufnr('%'), [0, 2, 1, 0], [0, 2, 1, 0], 'v'),
-				\ Item(bufnr('%'), [0, 3, 1, 0], [0, 3, 1, 0], 'v'),
-				\ Item(bufnr('%'), [0, 1, 1, 0], [0, 1, 1, 0], 'v'),
-				\ ]
-			call multiselector.extend(added)
-			Assert Equals(len(multiselector.itemlist), 3)
-			Assert Equals(multiselector.last.event, 'check')
-			Assert Equals(multiselector.last.itemlist, added)
-
-			let sorted = multiselector.sort()
-			Assert NotSame(sorted, multiselector.itemlist)
-			Assert Equals(len(multiselector.itemlist), 3)
-			Assert Equals(sorted[0]['head'], [0, 1, 1, 0])
-			Assert Equals(sorted[1]['head'], [0, 2, 1, 0])
-			Assert Equals(sorted[2]['head'], [0, 3, 1, 0])
-		End
-	End
-
 	Context .sort(list)
 		It sorts the copy of a:list
 			let multiselector = MS.Multiselector(DEFAULTS)
@@ -651,7 +629,7 @@ Describe Multiselector
 				\ Region([0, 1, 1, 0], [0, 1, 1, 0], 'v'),
 				\ ]
 			let sorted = multiselector.sort(list)
-			Assert NotSame(sorted, list)
+			Assert Same(sorted, list)
 			Assert Equals(len(sorted), 3)
 			Assert Equals(sorted[0]['head'], [0, 1, 1, 0])
 			Assert Equals(sorted[1]['head'], [0, 2, 1, 0])
@@ -663,7 +641,7 @@ Describe Multiselector
 				\ Item(bufnr('%'), [0, 1, 1, 0], [0, 1, 1, 0], 'v'),
 				\ ]
 			let sorted = multiselector.sort(list)
-			Assert NotSame(sorted, list)
+			Assert Same(sorted, list)
 			Assert Equals(len(sorted), 3)
 			Assert Equals(sorted[0]['head'], [0, 1, 1, 0])
 			Assert Equals(sorted[1]['head'], [0, 2, 1, 0])
