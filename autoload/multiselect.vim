@@ -10,7 +10,7 @@ let s:HIGROUP = 'MultiselectCheckedItem'
 let s:table = []
 
 function! multiselect#import() abort "{{{
-	return s:MultiselectModule
+	return s:Multiselect
 endfunction "}}}
 
 " Region class{{{
@@ -790,11 +790,11 @@ endfunction "}}}
 "}}}
 
 " Multiselect module{{{
-unlockvar! s:MultiselectModule
+unlockvar! s:Multiselect
 function! s:load() abort "{{{
 	return s:multiselector
 endfunction "}}}
-let s:MultiselectModule = {
+let s:Multiselect = {
 	\	'__MODULE__': 'Multiselect',
 	\	'DEFAULTHIGHLIGHTGROUP': s:HIGROUP,
 	\	'load': function('s:load'),
@@ -807,9 +807,9 @@ let s:MultiselectModule = {
 	\	'str2type': function('s:str2type'),
 	\	'str2visualcmd': function('s:str2visualcmd'),
 	\	}
-lockvar! s:MultiselectModule
+lockvar! s:Multiselect
 "}}}
-let s:multiselector = s:MultiselectModule.Multiselector({
+let s:multiselector = s:Multiselect.Multiselector({
 	\	'name': 'multiselect',
 	\	'higroup': s:HIGROUP,
 	\	'eventinit': 'MultiselectInit',
