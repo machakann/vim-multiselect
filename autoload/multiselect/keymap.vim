@@ -21,8 +21,8 @@ endfunction "}}}
 function! multiselect#keymap#uncheckall() abort  "{{{
 	call s:multiselector.keymap_uncheckall()
 endfunction "}}}
-function! multiselect#keymap#toggle(mode) abort "{{{
-	call s:multiselector.keymap_toggle(a:mode)
+function! multiselect#keymap#select(mode) abort "{{{
+	call s:multiselector.keymap_select(a:mode)
 endfunction "}}}
 
 " vim:set foldmethod=marker:

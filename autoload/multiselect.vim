@@ -528,17 +528,28 @@ endfunction "}}}
 function! s:Multiselector.keymap_uncheckall() abort "{{{
 	call s:multiselector.uncheckall()
 endfunction "}}}
-function! s:Multiselector.keymap_toggle(mode) abort "{{{
+function! s:Multiselector.keymap_select(mode) abort "{{{
 	let itemlist = []
 	if a:mode ==# 'x'
-		let selectedregion = s:Region(getpos("'<"), getpos("'>"))
-		let itemlist = s:multiselector.emit_inside(selectedregion)
+		let type = visualmode()
+		let extended = type[0] ==# "\<C-v>" ? s:is_extended() : s:FALSE
+		let region = s:Region(getpos("'<"), getpos("'>"), type, extended)
+		let itemlist = s:multiselector.list({_, item -> item.isinside(region)})
+		if empty(itemlist)
+			call self.keymap_check(a:mode)
+		else
+			if len(itemlist) < s:multiselector.itemnum()
+				call s:multiselector.emit({_, item -> !item.isinside(region)})
+			endif
+		endif
+		return
 	else
 		let curpos = getpos('.')
 		let itemlist = s:multiselector.emit_touching(curpos)
-	endif
-	if empty(itemlist)
-		call self.keymap_check(a:mode)
+		if empty(itemlist)
+			let pat = printf('\<%s\>', expand('<cword>'))
+			call self.keymap_checkpattern(a:mode, pat)
+		endif
 	endif
 endfunction "}}}
 function! s:is_extended() abort "{{{
@@ -588,7 +599,7 @@ endfunction "}}}
 function! s:Multiselector.add(item) abort "{{{
 	return self.extend([a:item])
 endfunction "}}}
-function! s:Multiselector.remove(i, ...) abort	"{{{
+function! s:Multiselector.remove(i, ...) abort "{{{
 	if self.itemnum() == 0
 		return []
 	endif
