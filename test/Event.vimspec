@@ -239,5 +239,208 @@ Describe Event
 			call filter(multiselector, 0)
 		End
 	End
+
+	Context Init event
+		It is triggered when a Multiselector instance is produced
+			let g:count = 0
+			augroup test
+				autocmd!
+				autocmd User TestInit let g:count += 1
+			augroup End
+
+			Assert Equals(g:count, 0)
+			let multiselector = g:MS.Multiselector({'eventinit': 'TestInit'})
+			Assert Equals(g:count, 1)
+
+			augroup test
+				autocmd!
+			augroup End
+			unlet! g:count
+			call filter(multiselector, 0)
+		End
+
+		It is triggered when BufLeave event is triggered
+			let multiselector = g:MS.Multiselector({'eventinit': 'TestInit'})
+			let g:count = 0
+			augroup test
+				autocmd!
+				autocmd User TestInit let g:count += 1
+			augroup End
+
+			Assert Equals(g:count, 0)
+			doautocmd <nomodeline> multiselect-events BufLeave
+			Assert Equals(g:count, 1)
+
+			augroup test
+				autocmd!
+			augroup End
+			unlet! g:count
+			call filter(multiselector, 0)
+		End
+
+		It is triggered when TabLeave event is triggered
+			let multiselector = g:MS.Multiselector({'eventinit': 'TestInit'})
+			let g:count = 0
+			augroup test
+				autocmd!
+				autocmd User TestInit let g:count += 1
+			augroup End
+
+			Assert Equals(g:count, 0)
+			doautocmd <nomodeline> multiselect-events TabLeave
+			Assert Equals(g:count, 1)
+
+			augroup test
+				autocmd!
+			augroup End
+			unlet! g:count
+			call filter(multiselector, 0)
+		End
+
+		It is triggered when CmdwinLeave event is triggered
+			let multiselector = g:MS.Multiselector({'eventinit': 'TestInit'})
+			let g:count = 0
+			augroup test
+				autocmd!
+				autocmd User TestInit let g:count += 1
+			augroup End
+
+			Assert Equals(g:count, 0)
+			doautocmd <nomodeline> multiselect-events CmdwinLeave
+			Assert Equals(g:count, 1)
+
+			augroup test
+				autocmd!
+			augroup End
+			unlet! g:count
+			call filter(multiselector, 0)
+		End
+	End
+
+	Context CheckPost event
+		It is triggered when Multiselect.check() method is called
+			let multiselector = g:MS.Multiselector({'eventcheckpost': 'TestCheckPost'})
+			let g:count = 0
+			augroup test
+				autocmd!
+				autocmd User TestCheckPost let g:count += 1
+			augroup End
+
+			Assert Equals(g:count, 0)
+			call multiselector.check([0, 1, 1, 0], [0, 1, 1, 0])
+			Assert Equals(g:count, 1)
+
+			augroup test
+				autocmd!
+			augroup End
+			unlet! g:count
+			call filter(multiselector, 0)
+		End
+
+		It is triggered when Multiselect.extend() method is called
+			let multiselector = g:MS.Multiselector({'eventcheckpost': 'TestCheckPost'})
+			let item = g:MS.Item([0, 1, 1, 0], [0, 1, 1, 0])
+			let g:count = 0
+			augroup test
+				autocmd!
+				autocmd User TestCheckPost let g:count += 1
+			augroup End
+
+			Assert Equals(g:count, 0)
+			call multiselector.extend([item])
+			Assert Equals(g:count, 1)
+
+			augroup test
+				autocmd!
+			augroup End
+			unlet! g:count
+			call filter(multiselector, 0)
+		End
+
+		It is triggered when Multiselect.add() method is called
+			let multiselector = g:MS.Multiselector({'eventcheckpost': 'TestCheckPost'})
+			let item = g:MS.Item([0, 1, 1, 0], [0, 1, 1, 0])
+			let g:count = 0
+			augroup test
+				autocmd!
+				autocmd User TestCheckPost let g:count += 1
+			augroup End
+
+			Assert Equals(g:count, 0)
+			call multiselector.add(item)
+			Assert Equals(g:count, 1)
+
+			augroup test
+				autocmd!
+			augroup End
+			unlet! g:count
+			call filter(multiselector, 0)
+		End
+	End
+
+	Context UncheckPost event
+		It is triggered when Multiselect.uncheck() method is called
+			let multiselector = g:MS.Multiselector({'eventuncheckpost': 'TestUncheckPost'})
+			let g:count = 0
+			augroup test
+				autocmd!
+				autocmd User TestUncheckPost let g:count += 1
+			augroup End
+
+			Assert Equals(g:count, 0)
+			call multiselector.check([0, 1, 1, 0], [0, 1, 1, 0])
+			Assert Equals(g:count, 0)
+			call multiselector.uncheck([0, 1, 1, 0])
+			Assert Equals(g:count, 1)
+
+			augroup test
+				autocmd!
+			augroup End
+			unlet! g:count
+			call filter(multiselector, 0)
+		End
+
+		It is triggered when Multiselect.emit() method is called
+			let multiselector = g:MS.Multiselector({'eventuncheckpost': 'TestUncheckPost'})
+			let g:count = 0
+			augroup test
+				autocmd!
+				autocmd User TestUncheckPost let g:count += 1
+			augroup End
+
+			Assert Equals(g:count, 0)
+			call multiselector.check([0, 1, 1, 0], [0, 1, 1, 0])
+			Assert Equals(g:count, 0)
+			call multiselector.emit()
+			Assert Equals(g:count, 1)
+
+			augroup test
+				autocmd!
+			augroup End
+			unlet! g:count
+			call filter(multiselector, 0)
+		End
+
+		It is triggered when Multiselect.remove() method is called
+			let multiselector = g:MS.Multiselector({'eventuncheckpost': 'TestUncheckPost'})
+			let g:count = 0
+			augroup test
+				autocmd!
+				autocmd User TestUncheckPost let g:count += 1
+			augroup End
+
+			Assert Equals(g:count, 0)
+			call multiselector.check([0, 1, 1, 0], [0, 1, 1, 0])
+			Assert Equals(g:count, 0)
+			call multiselector.remove(0)
+			Assert Equals(g:count, 1)
+
+			augroup test
+				autocmd!
+			augroup End
+			unlet! g:count
+			call filter(multiselector, 0)
+		End
+	End
 End
 " vim:set noet ts=4 sw=4 sts=-1:
