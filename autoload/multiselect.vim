@@ -481,7 +481,9 @@ function! s:Multiselector.keymap_check(mode) abort "{{{
 	let type = visualmode()
 	let extended = a:mode ==# 'x' && type ==# "\<C-v>" ? s:is_extended() : 0
 	let newitem = self.check(head, tail, type, extended)
+	let view = winsaveview()
 	call s:foldopen(newitem.head[1])
+	call winrestview(view)
 endfunction "}}}
 function! s:Multiselector.keymap_checkpattern(mode, pat) abort "{{{
 	if empty(a:pat)
@@ -499,23 +501,28 @@ function! s:Multiselector.keymap_checkpattern(mode, pat) abort "{{{
 	let region = s:Region(start, end)
 	call setpos('.', region.head)
 
+	let itemlist = []
 	let head = s:searchpos(a:pat, 'cW')
-	if head == s:NULLPOS || !region.isincluding(head)
-		call winrestview(view)
-		return
-	endif
-	while 1
+	while head != s:NULLPOS && region.isincluding(head)
 		let tail = s:searchpos(a:pat, 'ceW')
 		if !region.isincluding(tail)
 			break
 		endif
-		let newitem = self.check(head, tail, 'v')
+		let newitem = s:Item(head, tail, 'v')
+		call add(itemlist, newitem)
 		call s:foldopen(newitem.head[1])
 		let head = s:searchpos(a:pat, 'W')
-		if head == s:NULLPOS || !region.isincluding(head)
-			break
-		endif
 	endwhile
+
+	" It is sure that the items in 'itemlist' has no overlap
+	if !empty(itemlist)
+		call filter(itemlist, '!empty(v:val)')
+		for newitem in itemlist
+			call self.filter({_, olditem -> !newitem.istouching(olditem)})
+		endfor
+		call extend(self.itemlist, itemlist)
+		call self._checkpost(itemlist)
+	endif
 	call winrestview(view)
 endfunction "}}}
 function! s:Multiselector.keymap_uncheck(mode) abort "{{{
@@ -572,10 +579,8 @@ function! s:foldopen(lnum) abort "{{{
 		return
 	endif
 
-	let view = winsaveview()
 	call cursor(a:lnum, 1)
 	normal! zO
-	call winrestview(view)
 endfunction "}}}
 
 " low-level interfaces
