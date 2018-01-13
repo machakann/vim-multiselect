@@ -258,16 +258,42 @@ endfunction "}}}
 let s:ON = s:TRUE
 let s:OFF = s:FALSE
 unlockvar! s:Event
+let s:eventid = 1
 let s:Event = {
 	\	'__CLASS__': 'Event',
 	\	'name': '',
 	\	'_state': s:OFF,
+	\	'_orderlist': [],
 	\	'_skipcount': -1,
 	\	}
 function! s:Event(name) abort "{{{
 	let event = deepcopy(s:Event)
 	let event.name = a:name
 	return event
+endfunction "}}}
+function! s:Event.set(expr) abort "{{{
+	let order = [s:eventid, type(a:expr), a:expr]
+	call add(self._orderlist, order)
+	let s:eventid += 1
+	return order[0]
+endfunction "}}}
+function! s:Event.unset(id) abort "{{{
+	call filter(self._orderlist, 'v:val[0] != a:id')
+endfunction "}}}
+function! s:Event.trigger() abort "{{{
+	call self._decrement_skipcount()
+	if !self.isactive()
+		call self._check_skipcount()
+		return
+	endif
+
+	for [_, type, l:Expr] in self._orderlist
+		if type == v:t_string
+			execute l:Expr
+		elseif type == v:t_func
+			call call(l:Expr, [self.name])
+		endif
+	endfor
 endfunction "}}}
 function! s:Event.on() abort "{{{
 	let self._state = s:ON
@@ -316,11 +342,11 @@ let s:UniqueEvent = {
 	\	}
 function! s:UniqueEvent(name) abort "{{{
 	let uniqueevent = s:inherit('Event', 'UniqueEvent', [a:name])
-	if empty(a:name)
-		call uniqueevent.off()
-	else
+	if !empty(a:name)
 		let uniqueevent._eventdefinition = '#User#' . a:name
 		let uniqueevent._doautocmd = 'doautocmd <nomodeline> User ' . a:name
+		let l:Triggerfunc = function(uniqueevent._trigger, [], uniqueevent)
+		call uniqueevent.set(l:Triggerfunc)
 	endif
 	return uniqueevent
 endfunction "}}}
@@ -330,24 +356,17 @@ function! s:UniqueEvent.on() abort "{{{
 	endif
 	call self.super_on()
 endfunction "}}}
-function! s:UniqueEvent.trigger() abort "{{{
-	if empty(self._doautocmd) || !self.isdefined()
-		return
-	endif
-
-	call self._decrement_skipcount()
-	if !self.isactive()
-		call self._check_skipcount()
-		return
-	endif
-
-	execute self._doautocmd
-endfunction "}}}
 function! s:UniqueEvent.isdefined() abort "{{{
 	if empty(self._eventdefinition)
 		return s:FALSE
 	endif
 	return exists(self._eventdefinition)
+endfunction "}}}
+function! s:UniqueEvent._trigger(...) abort "{{{
+	if !self.isdefined()
+		return
+	endif
+	execute self._doautocmd
 endfunction "}}}
 "}}}
 " Multiselector class "{{{
@@ -386,6 +405,16 @@ function! s:Multiselector(...) abort "{{{
 	let multiselector.event.Init = s:UniqueEvent(EVENTINIT)
 	let multiselector.event.CheckPost = s:UniqueEvent(EVENTCHECKPOST)
 	let multiselector.event.UncheckPost = s:UniqueEvent(EVENTUNCHECKPOST)
+
+	let l:Initializefunc = function(multiselector._initialize, [], multiselector)
+	let l:Uncheckallfunc = function(multiselector._uncheckall, [], multiselector)
+	let l:Showfunc = function(multiselector._show, [], multiselector)
+	call multiselector.event.BufLeave.set(l:Initializefunc)
+	call multiselector.event.TabLeave.set(l:Initializefunc)
+	call multiselector.event.CmdwinLeave.set(l:Initializefunc)
+	call multiselector.event.TextChanged.set(l:Uncheckallfunc)
+	call multiselector.event.InsertEnter.set(l:Uncheckallfunc)
+	call multiselector.event.WinNew.set(l:Showfunc)
 	for event in values(multiselector.event)
 		call event.on()
 	endfor
@@ -653,12 +682,21 @@ function! s:percolate(iter, Filterexpr) abort "{{{
 endfunction "}}}
 
 " private methods
-function! s:Multiselector._initialize() abort "{{{
+function! s:Multiselector._initialize(...) abort "{{{
 	let self.bufnr = bufnr('%')
 	call self.uncheckall()
-	let self._last.event = ''
-	let self._last.itemlist = []
 	call self.event.Init.trigger()
+endfunction "}}}
+function! s:Multiselector._uncheckall(...) abort "{{{
+	call self.uncheckall()
+endfunction "}}}
+function! s:Multiselector._show(...) abort "{{{
+	let winid = win_getid()
+	for item in self.itemlist
+		if item._histatus(winid) is s:Highlights.OFF
+			call item._showlocal(self.higroup)
+		endif
+	endfor
 endfunction "}}}
 function! s:Multiselector._checkpost(added) abort "{{{
 	for item in a:added
@@ -748,47 +786,18 @@ augroup END
 " uncheck if the buffer is edited
 augroup multiselect-events
 	autocmd!
-	autocmd BufLeave * call multiselect#_event_initializeall('BufLeave')
-	autocmd TabLeave * call multiselect#_event_initializeall('TabLeave')
-	autocmd CmdwinLeave * call multiselect#_event_initializeall('CmdwinLeave')
-	autocmd TextChanged * call multiselect#_event_uncheckall('TextChanged')
-	autocmd InsertEnter * call multiselect#_event_uncheckall('InsertEnter')
-	autocmd WinNew * call multiselect#_event_highlight('WinNew')
+	autocmd BufLeave * call multiselect#_doautocmd('BufLeave')
+	autocmd TabLeave * call multiselect#_doautocmd('TabLeave')
+	autocmd CmdwinLeave * call multiselect#_doautocmd('CmdwinLeave')
+	autocmd TextChanged * call multiselect#_doautocmd('TextChanged')
+	autocmd InsertEnter * call multiselect#_doautocmd('InsertEnter')
+	autocmd WinNew * call multiselect#_doautocmd('WinNew')
 augroup END
 
-function! multiselect#_event_uncheckall(event) abort "{{{
+function! multiselect#_doautocmd(event) abort "{{{
+	call filter(s:table, '!empty(v:val)')
 	for ms in s:table
-		call ms.event[a:event]._decrement_skipcount()
-		if !ms.event[a:event].isactive()
-			call ms.event[a:event]._check_skipcount()
-			continue
-		endif
-		call ms.uncheckall()
-	endfor
-endfunction "}}}
-function! multiselect#_event_initializeall(event) abort "{{{
-	for ms in s:table
-		call ms.event[a:event]._decrement_skipcount()
-		if !ms.event[a:event].isactive()
-			call ms.event[a:event]._check_skipcount()
-			continue
-		endif
-		call ms._initialize()
-	endfor
-endfunction "}}}
-function! multiselect#_event_highlight(event) abort "{{{
-	let winid = win_getid()
-	for ms in s:table
-		call ms.event[a:event]._decrement_skipcount()
-		if !ms.event[a:event].isactive()
-			call ms.event[a:event]._check_skipcount()
-			continue
-		endif
-		for item in ms.itemlist
-			if item._histatus(winid) is s:Highlights.OFF
-				call item._showlocal(ms.higroup)
-			endif
-		endfor
+		call ms.event[a:event].trigger()
 	endfor
 endfunction "}}}
 "}}}
