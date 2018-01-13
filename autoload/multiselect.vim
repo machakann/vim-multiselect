@@ -332,42 +332,13 @@ function! s:Event._check_skipcount() abort "{{{
 		call self.on()
 	endif
 endfunction "}}}
+function! s:douserautocmd(name) abort "{{{
+	if !exists('#User#' . a:name)
+		return
+	endif
+	execute 'doautocmd <nomodeline> User ' . a:name
+endfunction "}}}
 lockvar! s:Event
-"}}}
-" UniqueEvent class (inherits Event class){{{
-let s:UniqueEvent = {
-	\	'__CLASS__': 'UniqueEvent',
-	\	'_eventdefinition': '',
-	\	'_doautocmd': '',
-	\	}
-function! s:UniqueEvent(name) abort "{{{
-	let uniqueevent = s:inherit('Event', 'UniqueEvent', [a:name])
-	if !empty(a:name)
-		let uniqueevent._eventdefinition = '#User#' . a:name
-		let uniqueevent._doautocmd = 'doautocmd <nomodeline> User ' . a:name
-		let l:Triggerfunc = function(uniqueevent._trigger, [], uniqueevent)
-		call uniqueevent.set(l:Triggerfunc)
-	endif
-	return uniqueevent
-endfunction "}}}
-function! s:UniqueEvent.on() abort "{{{
-	if empty(self.name)
-		return
-	endif
-	call self.super_on()
-endfunction "}}}
-function! s:UniqueEvent.isdefined() abort "{{{
-	if empty(self._eventdefinition)
-		return s:FALSE
-	endif
-	return exists(self._eventdefinition)
-endfunction "}}}
-function! s:UniqueEvent._trigger(...) abort "{{{
-	if !self.isdefined()
-		return
-	endif
-	execute self._doautocmd
-endfunction "}}}
 "}}}
 " Multiselector class "{{{
 unlockvar! s:Multiselector
@@ -402,9 +373,9 @@ function! s:Multiselector(...) abort "{{{
 	let EVENTINIT = get(options, 'eventinit', '')
 	let EVENTCHECKPOST = get(options, 'eventcheckpost', '')
 	let EVENTUNCHECKPOST = get(options, 'eventuncheckpost', '')
-	let multiselector.event.Init = s:UniqueEvent(EVENTINIT)
-	let multiselector.event.CheckPost = s:UniqueEvent(EVENTCHECKPOST)
-	let multiselector.event.UncheckPost = s:UniqueEvent(EVENTUNCHECKPOST)
+	let multiselector.event.Init = s:Event(EVENTINIT)
+	let multiselector.event.CheckPost = s:Event(EVENTCHECKPOST)
+	let multiselector.event.UncheckPost = s:Event(EVENTUNCHECKPOST)
 
 	let l:Initializefunc = function(multiselector._initialize, [], multiselector)
 	let l:Uncheckallfunc = function(multiselector._uncheckall, [], multiselector)
@@ -415,8 +386,13 @@ function! s:Multiselector(...) abort "{{{
 	call multiselector.event.TextChanged.set(l:Uncheckallfunc)
 	call multiselector.event.InsertEnter.set(l:Uncheckallfunc)
 	call multiselector.event.WinNew.set(l:Showfunc)
+	call multiselector.event.Init.set(function('s:douserautocmd'))
+	call multiselector.event.CheckPost.set(function('s:douserautocmd'))
+	call multiselector.event.UncheckPost.set(function('s:douserautocmd'))
 	for event in values(multiselector.event)
-		call event.on()
+		if !empty(event.name)
+			call event.on()
+		endif
 	endfor
 
 	call add(s:table, multiselector)
