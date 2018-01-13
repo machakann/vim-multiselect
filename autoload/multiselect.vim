@@ -213,7 +213,7 @@ let s:Item = {
 	\	}
 function! s:Item(head, tail, ...) abort "{{{
 	let args = [a:head, a:tail] + a:000
-	let item = s:inherit('Region', 'Item', args)
+	let item = s:inherit('Item', 'Region', args)
 	if empty(item)
 		return item
 	endif
@@ -704,23 +704,43 @@ endfunction "}}}
 lockvar! s:Multiselector
 "}}}
 
-function! s:inherit(supername, subname, args) abort "{{{
-	let Constructor_super = 's:' . a:supername
-	let super = call(Constructor_super, a:args)
+function! s:inherit(subname, supername, args) abort "{{{
+	let super = call('s:' . a:supername, a:args)
 	if empty(super)
 		return super
 	endif
 
 	let sub = deepcopy(s:[a:subname])
 	call extend(sub, super, 'keep')
-	" FIXME: Please find out a better way to handle super class methods
-	let sub.super = {}
+	let sub.__SUPER__ = {}
 	for [key, l:Val] in items(super)
-		if type(l:Val) == v:t_func
-			let sub['super_' . key] = l:Val
+		if type(l:Val) == v:t_func || key ==# '__SUPER__'
+			let sub.__SUPER__[key] = l:Val
 		endif
 	endfor
 	return sub
+endfunction "}}}
+function! s:super(sub, ...) abort "{{{
+	if !has_key(a:sub, '__SUPER__')
+		return {}
+	endif
+
+	let level = get(a:000, 0, 1)
+	let supermethods = a:sub
+	for _ in range(level)
+		let supermethods = supermethods.__SUPER__
+	endfor
+
+	let super = {}
+	for [key, l:Val] in items(supermethods)
+		if type(l:Val) == v:t_func
+			let super[key] = function('s:supercall', [a:sub, l:Val])
+		endif
+	endfor
+	return super
+endfunction "}}}
+function! s:supercall(sub, Funcref, ...) abort "{{{
+	return call(a:Funcref, a:000, a:sub)
 endfunction "}}}
 function! s:str2type(str) abort "{{{
 	if a:str ==# 'line' || a:str ==# 'V'
@@ -806,6 +826,7 @@ let s:Multiselect = {
 	\	'inbetween': function('s:inbetween'),
 	\	'str2type': function('s:str2type'),
 	\	'str2visualcmd': function('s:str2visualcmd'),
+	\	'super': function('s:super'),
 	\	}
 lockvar! s:Multiselect
 "}}}
