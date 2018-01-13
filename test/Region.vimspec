@@ -33,6 +33,388 @@ Describe Region
 		End
 	End
 
+	Context .isincluding(pos)
+		It returns TRUE if itself is including the position
+			Assert True(Region([0, 2, 5, 0], [0, 3, 4, 0], 'v').
+						\isincluding([0, 3, 4, 0]))
+
+			Assert True(Region([0, 3, 1, 0], [0, 3, 7, 0], 'v').
+						\isincluding([0, 3, 4, 0]))
+
+			Assert True(Region([0, 3, 4, 0], [0, 4, 3, 0], 'v').
+						\isincluding([0, 3, 4, 0]))
+
+			Assert True(Region([0, 2, 5, 0], [0, 3, 3, 0], 'V').
+						\isincluding([0, 3, 4, 0]))
+
+			Assert True(Region([0, 3, 1, 0], [0, 3, 7, 0], 'V').
+						\isincluding([0, 3, 4, 0]))
+
+			Assert True(Region([0, 3, 5, 0], [0, 4, 3, 0], 'V').
+						\isincluding([0, 3, 4, 0]))
+
+			Assert True(Region([0, 2, 3, 0], [0, 3, 4, 0], "\<C-v>").
+						\isincluding([0, 3, 4, 0]))
+
+			Assert True(Region([0, 2, 3, 0], [0, 4, 5, 0], "\<C-v>").
+						\isincluding([0, 3, 4, 0]))
+
+			Assert True(Region([0, 3, 4, 0], [0, 4, 5, 0], "\<C-v>").
+						\isincluding([0, 3, 4, 0]))
+		End
+
+		It returns FALSE if itself is not including the position
+			Assert False(Region([0, 1, 5, 0], [0, 3, 3, 0], 'v').
+						\isincluding([0, 3, 4, 0]))
+
+			Assert False(Region([0, 3, 5, 0], [0, 5, 3, 0], 'v').
+						\isincluding([0, 3, 4, 0]))
+
+			Assert False(Region([0, 1, 5, 0], [0, 2, 3, 0], 'V').
+						\isincluding([0, 3, 4, 0]))
+
+			Assert False(Region([0, 4, 5, 0], [0, 5, 3, 0], 'V').
+						\isincluding([0, 3, 4, 0]))
+
+			Assert False(Region([0, 1, 5, 0], [0, 3, 3, 0], "\<C-v>").
+						\isincluding([0, 3, 4, 0]))
+
+			Assert False(Region([0, 3, 5, 0], [0, 5, 7, 0], "\<C-v>").
+						\isincluding([0, 3, 4, 0]))
+		End
+	End
+
+	Context .isincluding(region)
+		It returns TRUE if itself is including the region
+			" a characterwise item includes a characterwise region
+			Assert True(Region([0, 1, 1, 0], [0, 2, 4, 0], 'v').
+						\isincluding(Region([0, 1, 1, 0], [0, 1, 3, 0], 'v')))
+
+			Assert True(Region([0, 4, 4, 0], [0, 5, 7, 0], 'v').
+						\isincluding(Region([0, 5, 5, 0], [0, 5, 7, 0], 'v')))
+
+			Assert True(Region([0, 1, 1, 0], [0, 5, 7, 0], 'v').
+						\isincluding(Region([0, 1, 1, 0], [0, 5, 7, 0], 'v')))
+
+			Assert True(Region([0, 1, 1, 0], [0, 5, 7, 0], 'v').
+						\isincluding(Region([0, 3, 3, 0], [0, 3, 3, 0], 'v')))
+
+			Assert True(Region([0, 3, 3, 0], [0, 3, 3, 0], 'v').
+						\isincluding(Region([0, 3, 3, 0], [0, 3, 3, 0], 'v')))
+
+
+			" a characterwise item includes a linewise region
+			Assert True(Region([0, 1, 1, 0], [0, 2, 1, 0], 'v').
+						\isincluding(Region([0, 1, 4, 0], [0, 1, 4, 0], 'V')))
+
+			Assert True(Region([0, 1, 1, 0], [0, 1, 8, 0], 'v').
+						\isincluding(Region([0, 1, 1, 0], [0, 1, 1, 0], 'V')))
+
+			Assert True(Region([0, 1, 1, 0], [0, 3, 1, 0], 'v').
+						\isincluding(Region([0, 2, 1, 0], [0, 2, 1, 0], 'V')))
+
+			" a characterwise item includes a blockwise region
+			Assert True(Region([0, 2, 3, 0], [0, 4, 5, 0], 'v').
+						\isincluding(Region([0, 2, 3, 0], [0, 4, 5, 0], "\<C-v>")))
+
+			Assert True(Region([0, 2, 3, 0], [0, 4, 5, 0], 'v').
+						\isincluding(Region([0, 2, 3, 0], [0, 3, 5, 0], "\<C-v>")))
+
+			Assert True(Region([0, 2, 3, 0], [0, 4, 5, 0], 'v').
+						\isincluding(Region([0, 3, 1, 0], [0, 4, 2, 0], "\<C-v>")))
+
+			Assert True(Region([0, 2, 3, 0], [0, 4, 5, 0], 'v').
+						\isincluding(Region([0, 2, 3, 0], [0, 3, 5, 0], "\<C-v>")))
+
+			Assert True(Region([0, 2, 3, 0], [0, 4, 5, 0], 'v').
+						\isincluding(Region([0, 3, 3, 0], [0, 4, 5, 0], "\<C-v>")))
+
+			" a linewise item includes a characterwise region
+			Assert True(Region([0, 2, 1, 0], [0, 2, 1, 0], 'V').
+						\isincluding(Region([0, 2, 3, 0], [0, 2, 5, 0], 'v')))
+
+			Assert True(Region([0, 2, 1, 0], [0, 2, 1, 0], 'V').
+						\isincluding(Region([0, 2, 1, 0], [0, 2, 8, 0], 'v')))
+
+			Assert True(Region([0, 2, 1, 0], [0, 4, 1, 0], 'V').
+						\isincluding(Region([0, 2, 3, 0], [0, 4, 5, 0], 'v')))
+
+			Assert True(Region([0, 2, 1, 0], [0, 4, 1, 0], 'V').
+						\isincluding(Region([0, 3, 3, 0], [0, 3, 5, 0], 'v')))
+
+			Assert True(Region([0, 2, 1, 0], [0, 4, 1, 0], 'V').
+						\isincluding(Region([0, 4, 3, 0], [0, 4, 5, 0], 'v')))
+
+			Assert True(Region([0, 2, 1, 0], [0, 4, 1, 0], 'V').
+						\isincluding(Region([0, 2, 1, 0], [0, 4, 8, 0], 'v')))
+
+			" a linewise item includes a linewise region
+			Assert True(Region([0, 3, 1, 0], [0, 3, 1, 0], 'V').
+						\isincluding(Region([0, 3, 1, 0], [0, 3, 1, 0], 'V')))
+
+			Assert True(Region([0, 2, 1, 0], [0, 4, 1, 0], 'V').
+						\isincluding(Region([0, 2, 1, 0], [0, 2, 1, 0], 'V')))
+
+			Assert True(Region([0, 2, 1, 0], [0, 4, 1, 0], 'V').
+						\isincluding(Region([0, 3, 1, 0], [0, 3, 1, 0], 'V')))
+
+			Assert True(Region([0, 2, 1, 0], [0, 4, 1, 0], 'V').
+						\isincluding(Region([0, 2, 1, 0], [0, 4, 1, 0], 'V')))
+
+			" a linewise item includes a blockwise region
+			Assert True(Region([0, 2, 1, 0], [0, 2, 1, 0], 'V').
+						\isincluding(Region([0, 2, 3, 0], [0, 2, 5, 0], "\<C-v>")))
+
+			Assert True(Region([0, 2, 1, 0], [0, 4, 1, 0], 'V').
+						\isincluding(Region([0, 2, 1, 0], [0, 4, 7, 0], "\<C-v>")))
+
+			Assert True(Region([0, 2, 1, 0], [0, 4, 1, 0], 'V').
+						\isincluding(Region([0, 2, 1, 0], [0, 3, 3, 0], "\<C-v>")))
+
+			Assert True(Region([0, 2, 1, 0], [0, 4, 1, 0], 'V').
+						\isincluding(Region([0, 2, 5, 0], [0, 3, 7, 0], "\<C-v>")))
+
+			Assert True(Region([0, 2, 1, 0], [0, 4, 1, 0], 'V').
+						\isincluding(Region([0, 3, 1, 0], [0, 4, 3, 0], "\<C-v>")))
+
+			Assert True(Region([0, 2, 1, 0], [0, 4, 1, 0], 'V').
+						\isincluding(Region([0, 3, 5, 0], [0, 4, 7, 0], "\<C-v>")))
+
+			Assert True(Region([0, 2, 1, 0], [0, 4, 1, 0], 'V').
+						\isincluding(Region([0, 2, 3, 0], [0, 4, 5, 0], "\<C-v>")))
+
+			" a blockwise item includes a characterwise region
+			Assert True(Region([0, 3, 1, 0], [0, 3, 7, 0], "\<C-v>").
+						\isincluding(Region([0, 3, 3, 0], [0, 3, 5, 0], 'v')))
+
+			Assert True(Region([0, 3, 3, 0], [0, 3, 5, 0], "\<C-v>").
+						\isincluding(Region([0, 3, 3, 0], [0, 3, 5, 0], 'v')))
+
+			Assert True(Region([0, 2, 3, 0], [0, 4, 5, 0], "\<C-v>").
+						\isincluding(Region([0, 2, 3, 0], [0, 2, 5, 0], 'v')))
+
+			Assert True(Region([0, 2, 3, 0], [0, 4, 5, 0], "\<C-v>").
+						\isincluding(Region([0, 3, 3, 0], [0, 3, 5, 0], 'v')))
+
+			Assert True(Region([0, 2, 3, 0], [0, 4, 5, 0], "\<C-v>").
+						\isincluding(Region([0, 4, 3, 0], [0, 4, 5, 0], 'v')))
+
+			Assert True(Region([0, 2, 1, 0], [0, 4, 8, 0], "\<C-v>").
+						\isincluding(Region([0, 2, 3, 0], [0, 4, 5, 0], 'v')))
+
+			" a blockwise item includes a linewise region
+			Assert True(Region([0, 3, 1, 0], [0, 3, 8, 0], "\<C-v>").
+						\isincluding(Region([0, 3, 1, 0], [0, 3, 1, 0], 'V')))
+
+			Assert True(Region([0, 2, 1, 0], [0, 4, 8, 0], "\<C-v>").
+						\isincluding(Region([0, 2, 1, 0], [0, 2, 1, 0], 'V')))
+
+			Assert True(Region([0, 2, 1, 0], [0, 4, 8, 0], "\<C-v>").
+						\isincluding(Region([0, 3, 1, 0], [0, 3, 1, 0], 'V')))
+
+			Assert True(Region([0, 2, 1, 0], [0, 4, 8, 0], "\<C-v>").
+						\isincluding(Region([0, 4, 1, 0], [0, 4, 1, 0], 'V')))
+
+			" a blockwise item includes a blockwise region
+			Assert True(Region([0, 3, 3, 0], [0, 3, 5, 0], "\<C-v>").
+						\isincluding(Region([0, 3, 3, 0], [0, 3, 5, 0], "\<C-v>")))
+
+			Assert True(Region([0, 2, 3, 0], [0, 4, 5, 0], "\<C-v>").
+						\isincluding(Region([0, 2, 3, 0], [0, 3, 4, 0], "\<C-v>")))
+
+			Assert True(Region([0, 2, 3, 0], [0, 4, 5, 0], "\<C-v>").
+						\isincluding(Region([0, 2, 4, 0], [0, 3, 5, 0], "\<C-v>")))
+
+			Assert True(Region([0, 2, 3, 0], [0, 4, 5, 0], "\<C-v>").
+						\isincluding(Region([0, 3, 3, 0], [0, 4, 4, 0], "\<C-v>")))
+
+			Assert True(Region([0, 2, 3, 0], [0, 4, 5, 0], "\<C-v>").
+						\isincluding(Region([0, 3, 4, 0], [0, 4, 5, 0], "\<C-v>")))
+
+			Assert True(Region([0, 2, 3, 0], [0, 4, 5, 0], "\<C-v>").
+						\isincluding(Region([0, 2, 3, 0], [0, 4, 3, 0], "\<C-v>")))
+
+			Assert True(Region([0, 2, 3, 0], [0, 4, 5, 0], "\<C-v>").
+						\isincluding(Region([0, 2, 3, 0], [0, 4, 5, 0], "\<C-v>")))
+		End
+
+		It returns FALSE if itself is not including the region
+			" a characterwise item does not include a characterwise region
+			Assert False(Region([0, 1, 1, 0], [0, 2, 3, 0], 'v').
+						\isincluding(Region([0, 2, 4, 0], [0, 4, 4, 0], 'v')))
+
+			Assert False(Region([0, 4, 5, 0], [0, 5, 7, 0], 'v').
+						\isincluding(Region([0, 2, 4, 0], [0, 4, 4, 0], 'v')))
+
+			Assert False(Region([0, 1, 1, 0], [0, 2, 3, 0], 'v').
+						\isincluding(Region([0, 2, 3, 0], [0, 2, 4, 0], 'v')))
+
+			Assert False(Region([0, 1, 1, 0], [0, 2, 3, 0], 'v').
+						\isincluding(Region([0, 1, 1, 0], [0, 2, 4, 0], 'v')))
+
+			Assert False(Region([0, 4, 5, 0], [0, 4, 7, 0], 'v').
+						\isincluding(Region([0, 4, 4, 0], [0, 4, 5, 0], 'v')))
+
+			Assert False(Region([0, 4, 5, 0], [0, 4, 7, 0], 'v').
+						\isincluding(Region([0, 4, 4, 0], [0, 4, 7, 0], 'v')))
+
+			" a characterwise item does not include a linewise region
+			Assert False(Region([0, 1, 1, 0], [0, 1, 7, 0], 'v').
+						\isincluding(Region([0, 1, 4, 0], [0, 1, 4, 0], 'V')))
+
+			Assert False(Region([0, 2, 3, 0], [0, 4, 5, 0], 'v').
+						\isincluding(Region([0, 1, 4, 0], [0, 2, 4, 0], 'V')))
+
+			Assert False(Region([0, 2, 3, 0], [0, 4, 5, 0], 'v').
+						\isincluding(Region([0, 2, 4, 0], [0, 4, 4, 0], 'V')))
+
+			Assert False(Region([0, 2, 3, 0], [0, 4, 5, 0], 'v').
+						\isincluding(Region([0, 4, 4, 0], [0, 5, 4, 0], 'V')))
+
+			" a characterwise item does not include a blockwise region
+			Assert False(Region([0, 1, 1, 0], [0, 1, 7, 0], 'v').
+						\isincluding(Region([0, 2, 3, 0], [0, 4, 5, 0], "\<C-v>")))
+
+			Assert False(Region([0, 5, 1, 0], [0, 5, 7, 0], 'v').
+						\isincluding(Region([0, 2, 3, 0], [0, 4, 5, 0], "\<C-v>")))
+
+			Assert False(Region([0, 2, 1, 0], [0, 2, 3, 0], 'v').
+						\isincluding(Region([0, 2, 3, 0], [0, 4, 5, 0], "\<C-v>")))
+
+			Assert False(Region([0, 2, 5, 0], [0, 2, 7, 0], 'v').
+						\isincluding(Region([0, 2, 3, 0], [0, 4, 5, 0], "\<C-v>")))
+
+			Assert False(Region([0, 3, 1, 0], [0, 3, 3, 0], 'v').
+						\isincluding(Region([0, 2, 3, 0], [0, 4, 5, 0], "\<C-v>")))
+
+			Assert False(Region([0, 3, 5, 0], [0, 3, 7, 0], 'v').
+						\isincluding(Region([0, 2, 3, 0], [0, 4, 5, 0], "\<C-v>")))
+
+			Assert False(Region([0, 4, 1, 0], [0, 4, 3, 0], 'v').
+						\isincluding(Region([0, 2, 3, 0], [0, 4, 5, 0], "\<C-v>")))
+
+			Assert False(Region([0, 4, 5, 0], [0, 4, 7, 0], 'v').
+						\isincluding(Region([0, 2, 3, 0], [0, 4, 5, 0], "\<C-v>")))
+
+			Assert False(Region([0, 1, 1, 0], [0, 2, 3, 0], 'v').
+						\isincluding(Region([0, 2, 3, 0], [0, 4, 5, 0], "\<C-v>")))
+
+			Assert False(Region([0, 4, 5, 0], [0, 5, 7, 0], 'v').
+						\isincluding(Region([0, 2, 3, 0], [0, 4, 5, 0], "\<C-v>")))
+
+			" a linewise item does not include a characterwise region
+			Assert False(Region([0, 2, 1, 0], [0, 4, 1, 0], 'V').
+						\isincluding(Region([0, 1, 1, 0], [0, 2, 1, 0], 'v')))
+
+			Assert False(Region([0, 2, 1, 0], [0, 4, 1, 0], 'V').
+						\isincluding(Region([0, 4, 1, 0], [0, 5, 1, 0], 'v')))
+
+			Assert False(Region([0, 2, 1, 0], [0, 4, 1, 0], 'V').
+						\isincluding(Region([0, 1, 1, 0], [0, 5, 1, 0], 'v')))
+
+			" a linewise item does not include a linewise region
+			Assert False(Region([0, 1, 1, 0], [0, 1, 1, 0], 'V').
+						\isincluding(Region([0, 2, 1, 0], [0, 4, 1, 0], 'V')))
+
+			Assert False(Region([0, 5, 1, 0], [0, 5, 1, 0], 'V').
+						\isincluding(Region([0, 2, 1, 0], [0, 4, 1, 0], 'V')))
+
+			" a linewise item does not include a blockwise region
+			Assert False(Region([0, 1, 1, 0], [0, 1, 1, 0], 'V').
+						\isincluding(Region([0, 2, 3, 0], [0, 4, 5, 0], "\<C-v>")))
+
+			Assert False(Region([0, 5, 1, 0], [0, 5, 1, 0], 'V').
+						\isincluding(Region([0, 2, 3, 0], [0, 4, 5, 0], "\<C-v>")))
+
+			" a blockwise item does not include a characterwise region
+			Assert False(Region([0, 1, 1, 0], [0, 2, 2, 0], "\<C-v>").
+						\isincluding(Region([0, 2, 3, 0], [0, 4, 5, 0], 'v')))
+
+			Assert False(Region([0, 4, 6, 0], [0, 5, 7, 0], "\<C-v>").
+						\isincluding(Region([0, 2, 3, 0], [0, 4, 5, 0], 'v')))
+
+			Assert False(Region([0, 2, 3, 0], [0, 4, 5, 0], "\<C-v>").
+						\isincluding(Region([0, 2, 3, 0], [0, 4, 5, 0], 'v')))
+
+			Assert False(Region([0, 2, 3, 0], [0, 4, 5, 0], "\<C-v>").
+						\isincluding(Region([0, 2, 1, 0], [0, 2, 3, 0], 'v')))
+
+			Assert False(Region([0, 2, 3, 0], [0, 4, 5, 0], "\<C-v>").
+						\isincluding(Region([0, 2, 5, 0], [0, 2, 7, 0], 'v')))
+
+			Assert False(Region([0, 2, 3, 0], [0, 4, 5, 0], "\<C-v>").
+						\isincluding(Region([0, 3, 1, 0], [0, 3, 3, 0], 'v')))
+
+			Assert False(Region([0, 2, 3, 0], [0, 4, 5, 0], "\<C-v>").
+						\isincluding(Region([0, 3, 5, 0], [0, 3, 7, 0], 'v')))
+
+			Assert False(Region([0, 2, 3, 0], [0, 4, 5, 0], "\<C-v>").
+						\isincluding(Region([0, 4, 1, 0], [0, 4, 3, 0], 'v')))
+
+			Assert False(Region([0, 2, 3, 0], [0, 4, 5, 0], "\<C-v>").
+						\isincluding(Region([0, 4, 5, 0], [0, 4, 7, 0], 'v')))
+
+			" a blockwise item does not include a linewise region
+			Assert False(Region([0, 3, 3, 0], [0, 3, 5, 0], "\<C-v>").
+						\isincluding(Region([0, 3, 1, 0], [0, 3, 1, 0], 'V')))
+
+			Assert False(Region([0, 2, 3, 0], [0, 4, 5, 0], "\<C-v>").
+						\isincluding(Region([0, 1, 1, 0], [0, 1, 1, 0], 'V')))
+
+			Assert False(Region([0, 2, 3, 0], [0, 4, 5, 0], "\<C-v>").
+						\isincluding(Region([0, 2, 1, 0], [0, 2, 1, 0], 'V')))
+
+			Assert False(Region([0, 2, 3, 0], [0, 4, 5, 0], "\<C-v>").
+						\isincluding(Region([0, 3, 1, 0], [0, 3, 1, 0], 'V')))
+
+			Assert False(Region([0, 2, 3, 0], [0, 4, 5, 0], "\<C-v>").
+						\isincluding(Region([0, 4, 1, 0], [0, 4, 1, 0], 'V')))
+
+			Assert False(Region([0, 2, 3, 0], [0, 4, 5, 0], "\<C-v>").
+						\isincluding(Region([0, 5, 1, 0], [0, 5, 1, 0], 'V')))
+
+			Assert False(Region([0, 2, 3, 0], [0, 4, 5, 0], "\<C-v>").
+						\isincluding(Region([0, 1, 1, 0], [0, 5, 1, 0], 'V')))
+
+			Assert False(Region([0, 2, 3, 0], [0, 4, 5, 0], "\<C-v>").
+						\isincluding(Region([0, 2, 1, 0], [0, 4, 1, 0], 'V')))
+
+			" a blockwise item does not include a blockwise region
+			Assert False(Region([0, 3, 3, 0], [0, 3, 5, 0], "\<C-v>").
+						\isincluding(Region([0, 2, 3, 0], [0, 3, 5, 0], "\<C-v>")))
+
+			Assert False(Region([0, 3, 3, 0], [0, 3, 5, 0], "\<C-v>").
+						\isincluding(Region([0, 3, 1, 0], [0, 3, 3, 0], "\<C-v>")))
+
+			Assert False(Region([0, 3, 3, 0], [0, 3, 5, 0], "\<C-v>").
+						\isincluding(Region([0, 3, 5, 0], [0, 3, 7, 0], "\<C-v>")))
+
+			Assert False(Region([0, 3, 3, 0], [0, 3, 5, 0], "\<C-v>").
+						\isincluding(Region([0, 4, 3, 0], [0, 4, 5, 0], "\<C-v>")))
+
+			Assert False(Region([0, 2, 3, 0], [0, 4, 5, 0], "\<C-v>").
+						\isincluding(Region([0, 1, 1, 0], [0, 2, 3, 0], "\<C-v>")))
+
+			Assert False(Region([0, 2, 3, 0], [0, 4, 5, 0], "\<C-v>").
+						\isincluding(Region([0, 1, 5, 0], [0, 2, 7, 0], "\<C-v>")))
+
+			Assert False(Region([0, 2, 3, 0], [0, 4, 5, 0], "\<C-v>").
+						\isincluding(Region([0, 4, 1, 0], [0, 5, 3, 0], "\<C-v>")))
+
+			Assert False(Region([0, 2, 3, 0], [0, 4, 5, 0], "\<C-v>").
+						\isincluding(Region([0, 4, 5, 0], [0, 5, 7, 0], "\<C-v>")))
+
+			Assert False(Region([0, 2, 3, 0], [0, 4, 5, 0], "\<C-v>").
+						\isincluding(Region([0, 2, 1, 0], [0, 4, 7, 0], "\<C-v>")))
+
+			Assert False(Region([0, 2, 3, 0], [0, 4, 5, 0], "\<C-v>").
+						\isincluding(Region([0, 1, 3, 0], [0, 5, 3, 0], "\<C-v>")))
+
+			Assert False(Region([0, 2, 3, 0], [0, 4, 5, 0], "\<C-v>").
+						\isincluding(Region([0, 1, 1, 0], [0, 5, 7, 0], "\<C-v>")))
+		End
+	End
+
 	Context .isinside(region)
 		It returns TRUE if itself is inside the region
 			" a characterwise item in a characterwise region
@@ -340,7 +722,7 @@ Describe Region
 			Assert False(Region([0, 1, 5, 0], [0, 3, 3, 0], "\<C-v>").
 						\istouching([0, 3, 4, 0]))
 
-			Assert False(Region([0, 3, 5, 0], [0, 5, 3, 0], "\<C-v>").
+			Assert False(Region([0, 3, 5, 0], [0, 5, 7, 0], "\<C-v>").
 						\istouching([0, 3, 4, 0]))
 		End
 	End
