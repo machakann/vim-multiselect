@@ -14,6 +14,8 @@ nnoremap <silent> <Plug>(multiselect-uncheck) :<C-u>call multiselect#keymap#unch
 xnoremap <silent> <Plug>(multiselect-uncheck) <Esc>:call multiselect#keymap#uncheck('x')<CR>
 nnoremap <silent> <Plug>(multiselect-uncheckall) :<C-u>call multiselect#keymap#uncheckall()<CR>
 xnoremap <silent> <Plug>(multiselect-uncheckall) <Esc>:call multiselect#keymap#uncheckall()<CR>
+nnoremap <silent> <Plug>(multiselect-undo) :<C-u>call multiselect#keymap#undo()<CR>
+xnoremap <silent> <Plug>(multiselect-undo) <Esc>:call multiselect#keymap#undo()<CR>
 nnoremap <silent> <Plug>(multiselect) :<C-u>call multiselect#keymap#select('n')<CR>
 xnoremap <silent> <Plug>(multiselect) <Esc>:call multiselect#keymap#select('x')<CR>
 " vim:set foldmethod=marker:

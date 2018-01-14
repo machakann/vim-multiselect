@@ -535,6 +535,21 @@ endfunction "}}}
 function! s:Multiselector.keymap_uncheckall() abort "{{{
 	call s:multiselector.uncheckall()
 endfunction "}}}
+function! s:Multiselector.keymap_undo() abort "{{{
+	let last = self.lastevent()
+	if last.event ==# 'check'
+		let removed = []
+		for checked in last.itemlist
+			let i = self.search(checked)
+			if i != -1
+				call add(removed, remove(self.itemlist, i))
+			endif
+		endfor
+		call self._uncheckpost(removed)
+	elseif last.event ==# 'uncheck'
+		call self.extend(last.itemlist)
+	endif
+endfunction "}}}
 function! s:Multiselector.keymap_select(mode) abort "{{{
 	let itemlist = []
 	if a:mode ==# 'x'
