@@ -7,13 +7,14 @@ let s:NULLPOS = [0, 0, 0, 0]
 
 let s:inorderof = s:Multiselect.inorderof
 
-let g:multiselect#keymap#openfold = get(g:, 'multiselect#keymap#openfold', s:TRUE)
+let g:multiselect#keymap#openfold = get(g:, 'multiselect#keymap#openfold', s:FALSE)
 
 function! multiselect#keymap#check(mode) abort  "{{{
 	call s:multiselector.keymap_check(a:mode)
 endfunction "}}}
 function! multiselect#keymap#checkpattern(mode, pat) abort "{{{
-	call s:multiselector.keymap_checkpattern(a:mode, a:pat)
+	let options = {'openfold': g:multiselect#keymap#openfold}
+	call s:multiselector.keymap_checkpattern(a:mode, a:pat, options)
 endfunction "}}}
 function! multiselect#keymap#uncheck(mode) abort  "{{{
 	call s:multiselector.keymap_uncheck(a:mode)

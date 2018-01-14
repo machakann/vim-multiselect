@@ -482,14 +482,15 @@ function! s:Multiselector.keymap_check(mode) abort "{{{
 	let extended = a:mode ==# 'x' && type ==# "\<C-v>" ? s:is_extended() : 0
 	let newitem = self.check(head, tail, type, extended)
 	let view = winsaveview()
-	call s:foldopen(newitem.head[1])
 	call winrestview(view)
 endfunction "}}}
-function! s:Multiselector.keymap_checkpattern(mode, pat) abort "{{{
+function! s:Multiselector.keymap_checkpattern(mode, pat, ...) abort "{{{
 	if empty(a:pat)
 		return
 	endif
 
+	let options = get(a:000, 0, {})
+	let openfold = get(options, 'openfold', s:FALSE)
 	let view = winsaveview()
 	if a:mode ==# 'x'
 		let start = getpos("'<")
@@ -510,7 +511,9 @@ function! s:Multiselector.keymap_checkpattern(mode, pat) abort "{{{
 		endif
 		let newitem = s:Item(head, tail, 'v')
 		call add(itemlist, newitem)
-		call s:foldopen(newitem.head[1])
+		if openfold is s:TRUE
+			call s:foldopen(newitem.head[1])
+		endif
 		let head = s:searchpos(a:pat, 'W')
 	endwhile
 
@@ -587,13 +590,9 @@ function! s:searchpos(pat, flag) abort "{{{
 	return [0] + searchpos(a:pat, a:flag) + [0]
 endfunction "}}}
 function! s:foldopen(lnum) abort "{{{
-	if g:multiselect#keymap#openfold is s:FALSE
+	if foldclosed(a:lnum) == -1
 		return
 	endif
-	if a:lnum == 0 || foldclosed(a:lnum) == -1
-		return
-	endif
-
 	call cursor(a:lnum, 1)
 	normal! zO
 endfunction "}}}
