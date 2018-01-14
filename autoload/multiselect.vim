@@ -618,6 +618,16 @@ function! s:Multiselector.remove(i, ...) abort "{{{
 	call self._uncheckpost([removed])
 	return removed
 endfunction "}}}
+function! s:Multiselector.search(searched) abort "{{{
+	let i = 0
+	for item in self.itemlist
+		if item is# a:searched
+			return i
+		endif
+		let i += 1
+	endfor
+	return -1
+endfunction "}}}
 function! s:Multiselector.itemnum() abort "{{{
 	return len(self.itemlist)
 endfunction "}}}
