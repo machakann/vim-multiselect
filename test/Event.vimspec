@@ -96,31 +96,6 @@ Describe Event
 			Assert True(multiselector.event.TabLeave.isactive())
 			doautocmd <nomodeline> multiselect-events TabLeave
 			Assert True(empty(multiselector.itemlist))
-
-
-
-			let multiselector = g:MS.Multiselector()
-			call multiselector.extend([
-				\ Item([0, 1, 1, 0], [0, 1, 1, 0], 'v'),
-				\ ])
-
-			Assert True(multiselector.event.CmdwinLeave.isactive())
-			doautocmd <nomodeline> multiselect-events CmdwinLeave
-			Assert True(empty(multiselector.itemlist))
-
-			call multiselector.extend([
-				\ Item([0, 1, 1, 0], [0, 1, 1, 0], 'v'),
-				\ ])
-			call multiselector.event.CmdwinLeave.off()
-			Assert False(multiselector.event.CmdwinLeave.isactive())
-			doautocmd <nomodeline> multiselect-events CmdwinLeave
-			Assert False(empty(multiselector.itemlist))
-
-			call multiselector.event.CmdwinLeave.on()
-			Assert True(multiselector.event.CmdwinLeave.isactive())
-			doautocmd <nomodeline> multiselect-events CmdwinLeave
-			Assert True(empty(multiselector.itemlist))
-			call filter(multiselector, 0)
 		End
 
 		It turns on/off auto-uncheckall process
@@ -236,6 +211,46 @@ Describe Event
 			doautocmd <nomodeline> multiselect-events BufLeave
 			Assert True(multiselector.event.BufLeave.isactive())
 			Assert True(empty(multiselector.itemlist))
+			call filter(multiselector, 0)
+		End
+	End
+
+	Context CmdwinEnter/CmdwinLeave events
+		It suspend/resume Multiselect.itemlist
+			let multiselector = g:MS.Multiselector()
+			let item1 = Item([0, 1, 1, 0], [0, 1, 1, 0], 'v')
+			call multiselector.add(item1)
+
+			Assert Equals(len(multiselector.itemlist), 1)
+			Assert Same(multiselector.itemlist[0], item1)
+			Assert Equals(multiselector._last.event, 'check')
+			Assert Equals(multiselector._last.itemlist, [item1])
+
+			doautocmd <nomodeline> multiselect-events CmdwinEnter
+
+			let itemlist = multiselector.list()
+			Assert Equals(len(multiselector.itemlist), 0)
+			Assert Equals(multiselector._last.event, '')
+			Assert Equals(multiselector._last.itemlist, [])
+
+			let item2 = Item([0, 2, 1, 0], [0, 2, 1, 0], 'v')
+			let item3 = Item([0, 3, 1, 0], [0, 3, 1, 0], 'v')
+			call multiselector.extend([item2, item3])
+
+			let itemlist = multiselector.list()
+			Assert Equals(len(multiselector.itemlist), 2)
+			Assert Same(multiselector.itemlist[0], item2)
+			Assert Same(multiselector.itemlist[1], item3)
+			Assert Equals(multiselector._last.event, 'check')
+			Assert Equals(multiselector._last.itemlist, [item2, item3])
+
+			doautocmd <nomodeline> multiselect-events CmdwinLeave
+
+			Assert Equals(len(multiselector.itemlist), 1)
+			Assert Same(multiselector.itemlist[0], item1)
+			Assert Equals(multiselector._last.event, 'check')
+			Assert Equals(multiselector._last.itemlist, [item1])
+
 			call filter(multiselector, 0)
 		End
 	End

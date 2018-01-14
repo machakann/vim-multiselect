@@ -351,6 +351,7 @@ let s:Multiselector = {
 	\	'event': {
 	\		'BufLeave': s:Event('BufLeave'),
 	\		'TabLeave': s:Event('TabLeave'),
+	\		'CmdwinEnter': s:Event('CmdwinEnter'),
 	\		'CmdwinLeave': s:Event('CmdwinLeave'),
 	\		'TextChanged': s:Event('TextChanged'),
 	\		'InsertEnter': s:Event('InsertEnter'),
@@ -361,6 +362,11 @@ let s:Multiselector = {
 	\		},
 	\	'_last':{
 	\		'event': '',
+	\		'itemlist': [],
+	\		},
+	\	'_pending': {
+	\		'bufnr': -1,
+	\		'_last': {},
 	\		'itemlist': [],
 	\		},
 	\	}
@@ -378,11 +384,15 @@ function! s:Multiselector(...) abort "{{{
 	let multiselector.event.UncheckPost = s:Event(EVENTUNCHECKPOST)
 
 	let l:Initializefunc = function(multiselector._initialize, [], multiselector)
+	let l:Suspendfunc = function(multiselector._suspend, [], multiselector)
+	let l:Resumefunc = function(multiselector._resume, [], multiselector)
 	let l:Uncheckallfunc = function(multiselector._uncheckall, [], multiselector)
 	let l:Showfunc = function(multiselector._show, [], multiselector)
 	call multiselector.event.BufLeave.set(l:Initializefunc)
 	call multiselector.event.TabLeave.set(l:Initializefunc)
+	call multiselector.event.CmdwinEnter.set(l:Suspendfunc)
 	call multiselector.event.CmdwinLeave.set(l:Initializefunc)
+	call multiselector.event.CmdwinLeave.set(l:Resumefunc)
 	call multiselector.event.TextChanged.set(l:Uncheckallfunc)
 	call multiselector.event.InsertEnter.set(l:Uncheckallfunc)
 	call multiselector.event.WinNew.set(l:Showfunc)
@@ -717,6 +727,26 @@ function! s:Multiselector._initialize(...) abort "{{{
 	call self.uncheckall()
 	call self.event.Init.trigger()
 endfunction "}}}
+function! s:Multiselector._suspend(...) abort "{{{
+	let self._pending.bufnr = self.bufnr
+	let self._pending.itemlist = self.itemlist
+	let self._pending._last = self._last
+	let self.bufnr = bufnr('%')
+	let self.itemlist = []
+	let self._last = {}
+	let self._last.event = ''
+	let self._last.itemlist = []
+endfunction "}}}
+function! s:Multiselector._resume(...) abort "{{{
+	let self.bufnr = self._pending.bufnr
+	let self.itemlist = self._pending.itemlist
+	let self._last = self._pending._last
+	let self._pending.bufnr = -1
+	let self._pending.itemlist = []
+	let self._pending._last = {}
+	let self._pending._last.event = ''
+	let self._pending._last.itemlist = []
+endfunction "}}}
 function! s:Multiselector._uncheckall(...) abort "{{{
 	call self.uncheckall()
 endfunction "}}}
@@ -838,6 +868,7 @@ augroup multiselect-events
 	autocmd!
 	autocmd BufLeave * call multiselect#_doautocmd('BufLeave')
 	autocmd TabLeave * call multiselect#_doautocmd('TabLeave')
+	autocmd CmdwinEnter * call multiselect#_doautocmd('CmdwinEnter')
 	autocmd CmdwinLeave * call multiselect#_doautocmd('CmdwinLeave')
 	autocmd TextChanged * call multiselect#_doautocmd('TextChanged')
 	autocmd InsertEnter * call multiselect#_doautocmd('InsertEnter')
