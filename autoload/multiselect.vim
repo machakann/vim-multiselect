@@ -464,6 +464,20 @@ function! s:sort_items(i1, i2) abort "{{{
 	if a:i1.head == a:i2.head
 		return 0
 	endif
+	if a:i1.type ==# 'block' && a:i2.type ==# 'char'
+		if a:i1.head[1] <= a:i2.head[1] && a:i2.tail[1] <= a:i1.tail[1]
+			return virtcol(a:i1.head[1:2]) - virtcol(a:i2.head[1:2])
+		endif
+	elseif a:i1.type ==# 'char' && a:i2.type ==# 'block'
+		if a:i2.head[1] <= a:i1.head[1] && a:i1.tail[1] <= a:i2.tail[1]
+			return virtcol(a:i1.head[1:2]) - virtcol(a:i2.head[1:2])
+		endif
+	elseif a:i1.type ==# 'block' && a:i2.type ==# 'block'
+		if (a:i1.head[1] <= a:i2.head[1] && a:i2.head[1] <= a:i1.tail[1]) ||
+			\ (a:i2.head[1] <= a:i1.head[1] && a:i1.head[1] <= a:i2.tail[1])
+			return virtcol(a:i1.head[1:2]) - virtcol(a:i2.head[1:2])
+		endif
+	endif
 	return s:inorderof(a:i1.head, a:i2.head) ? -1 : 1
 endfunction "}}}
 

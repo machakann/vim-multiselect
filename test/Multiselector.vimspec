@@ -620,7 +620,7 @@ Describe Multiselector
 	End
 
 	Context .sort(list)
-		It sorts the copy of a:list
+		It sorts a:list in-place
 			let multiselector = MS.Multiselector(DEFAULTS)
 
 			let list = [
@@ -646,6 +646,82 @@ Describe Multiselector
 			Assert Equals(sorted[0]['head'], [0, 1, 1, 0])
 			Assert Equals(sorted[1]['head'], [0, 2, 1, 0])
 			Assert Equals(sorted[2]['head'], [0, 3, 1, 0])
+		End
+
+		It sorts charwise and blockwise items in their coulumn order
+			let multiselector = MS.Multiselector(DEFAULTS)
+
+			let list = [
+				\ Region([0, 3, 1, 0], [0, 3, 2, 0], 'v'),
+				\ Region([0, 2, 3, 0], [0, 4, 5, 0], "\<C-v>"),
+				\ Region([0, 3, 6, 0], [0, 3, 7, 0], 'v'),
+				\ ]
+			let sorted = multiselector.sort(list)
+			Assert Equals(sorted[0]['head'], [0, 3, 1, 0])
+			Assert Equals(sorted[1]['head'], [0, 2, 3, 0])
+			Assert Equals(sorted[2]['head'], [0, 3, 6, 0])
+
+			let list = [
+				\ Region([0, 3, 1, 0], [0, 3, 2, 0], "\<C-v>"),
+				\ Region([0, 2, 3, 0], [0, 4, 5, 0], "\<C-v>"),
+				\ Region([0, 3, 6, 0], [0, 3, 7, 0], "\<C-v>"),
+				\ ]
+			let sorted = multiselector.sort(list)
+			Assert Equals(sorted[0]['head'], [0, 3, 1, 0])
+			Assert Equals(sorted[1]['head'], [0, 2, 3, 0])
+			Assert Equals(sorted[2]['head'], [0, 3, 6, 0])
+
+			let list = [
+				\ Region([0, 1, 1, 0], [0, 1, 2, 0], 'v'),
+				\ Region([0, 2, 1, 0], [0, 2, 2, 0], 'v'),
+				\ Region([0, 2, 6, 0], [0, 2, 7, 0], 'v'),
+				\ Region([0, 2, 3, 0], [0, 4, 5, 0], "\<C-v>"),
+				\ Region([0, 4, 1, 0], [0, 4, 2, 0], 'v'),
+				\ Region([0, 4, 6, 0], [0, 4, 7, 0], 'v'),
+				\ Region([0, 5, 6, 0], [0, 5, 7, 0], 'v'),
+				\ ]
+			let sorted = multiselector.sort(list)
+			Assert Equals(sorted[0]['head'], [0, 1, 1, 0])
+			Assert Equals(sorted[1]['head'], [0, 2, 1, 0])
+			Assert Equals(sorted[2]['head'], [0, 4, 1, 0])
+			Assert Equals(sorted[3]['head'], [0, 2, 3, 0])
+			Assert Equals(sorted[4]['head'], [0, 2, 6, 0])
+			Assert Equals(sorted[5]['head'], [0, 4, 6, 0])
+			Assert Equals(sorted[6]['head'], [0, 5, 6, 0])
+
+			let list = [
+				\ Region([0, 1, 1, 0], [0, 1, 2, 0], "\<C-v>"),
+				\ Region([0, 2, 1, 0], [0, 2, 2, 0], "\<C-v>"),
+				\ Region([0, 2, 6, 0], [0, 2, 7, 0], "\<C-v>"),
+				\ Region([0, 2, 3, 0], [0, 4, 5, 0], "\<C-v>"),
+				\ Region([0, 4, 1, 0], [0, 4, 2, 0], "\<C-v>"),
+				\ Region([0, 4, 6, 0], [0, 4, 7, 0], "\<C-v>"),
+				\ Region([0, 5, 6, 0], [0, 5, 7, 0], "\<C-v>"),
+				\ ]
+			let sorted = multiselector.sort(list)
+			Assert Equals(sorted[0]['head'], [0, 1, 1, 0])
+			Assert Equals(sorted[1]['head'], [0, 2, 1, 0])
+			Assert Equals(sorted[2]['head'], [0, 4, 1, 0])
+			Assert Equals(sorted[3]['head'], [0, 2, 3, 0])
+			Assert Equals(sorted[4]['head'], [0, 2, 6, 0])
+			Assert Equals(sorted[5]['head'], [0, 4, 6, 0])
+			Assert Equals(sorted[6]['head'], [0, 5, 6, 0])
+
+			let list = [
+				\ Region([0, 1, 1, 0], [0, 2, 2, 0], "\<C-v>"),
+				\ Region([0, 4, 1, 0], [0, 5, 2, 0], "\<C-v>"),
+				\ Region([0, 2, 3, 0], [0, 4, 5, 0], "\<C-v>"),
+				\ Region([0, 1, 6, 0], [0, 2, 7, 0], "\<C-v>"),
+				\ Region([0, 4, 6, 0], [0, 4, 7, 0], "\<C-v>"),
+				\ ]
+			let sorted = multiselector.sort(list)
+			Assert Equals(sorted[0]['head'], [0, 1, 1, 0])
+			Assert Equals(sorted[1]['head'], [0, 4, 1, 0])
+			Assert Equals(sorted[2]['head'], [0, 2, 3, 0])
+			Assert Equals(sorted[3]['head'], [0, 1, 6, 0])
+			Assert Equals(sorted[4]['head'], [0, 4, 6, 0])
+
+			call filter(multiselector, 0)
 		End
 	End
 End
