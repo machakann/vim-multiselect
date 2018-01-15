@@ -670,8 +670,8 @@ function! s:Multiselector.itemnum(...) abort "{{{
 	if a:0 == 0
 		return len(self.itemlist)
 	endif
-	let l:Filterexpr = a:1
-	return len(filter(copy(self.itemlist), l:Filterexpr))
+	let Filterexpr = a:1
+	return len(filter(copy(self.itemlist), Filterexpr))
 endfunction "}}}
 function! s:Multiselector.isempty() abort "{{{
 	return empty(self.itemlist)
