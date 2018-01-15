@@ -84,11 +84,11 @@ function! s:Region.touches(expr) abort "{{{
 		let region = s:Region(pos, pos, 'v')
 		return self.touches(region)
 	elseif type_expr == v:t_dict
-		let range = a:expr
-		if range.head == s:NULLPOS || range.tail == s:NULLPOS
+		let region = a:expr
+		if region.head == s:NULLPOS || region.tail == s:NULLPOS
 			return s:FALSE
 		endif
-		return s:{self.type}_is_touching_{range.type}(self, range)
+		return s:{self.type}_is_touching_{region.type}(self, region)
 	endif
 	echoerr s:err_InvalidArgument('region.touches')
 endfunction "}}}
