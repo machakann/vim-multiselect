@@ -583,11 +583,11 @@ function! s:Multiselector.keymap_select(mode) abort "{{{
 		let type = visualmode()
 		let extended = type[0] ==# "\<C-v>" ? s:is_extended() : s:FALSE
 		let region = s:Region(getpos("'<"), getpos("'>"), type, extended)
-		let itemlist = s:multiselector.list({_, item -> item.isinside(region)})
-		if empty(itemlist)
+		let item_in_visual = s:multiselector.itemnum({_, item -> item.isinside(region)})
+		if item_in_visual == 0
 			call self.keymap_check(a:mode)
 		else
-			if len(itemlist) < s:multiselector.itemnum()
+			if item_in_visual != s:multiselector.itemnum()
 				call s:multiselector.emit({_, item -> !item.isinside(region)})
 			endif
 		endif
