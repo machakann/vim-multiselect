@@ -724,5 +724,43 @@ Describe Multiselector
 			call filter(multiselector, 0)
 		End
 	End
+
+	Context .itemnum()
+		It returns the number of items
+			let multiselector = MS.Multiselector(DEFAULTS)
+			Assert Equals(multiselector.itemnum(), 0)
+
+			call multiselector.extend([])
+			Assert Equals(multiselector.itemnum(), 0)
+
+			let added = [
+				\ Item([0, 1, 1, 0], [0, 1, 1, 0], 'v'),
+				\ ]
+			call multiselector.extend(added)
+			Assert Equals(multiselector.itemnum(), 1)
+
+			let added = [
+				\ Item([0, 2, 1, 0], [0, 2, 1, 0], 'v'),
+				\ Item([0, 3, 1, 0], [0, 3, 1, 0], 'v'),
+				\ ]
+			call multiselector.extend(added)
+			Assert Equals(multiselector.itemnum(), 3)
+		End
+	End
+
+	Context .itemnum(Filterexpr)
+		It returns the number of items that a:Filterexpr returns TRUE
+			let multiselector = MS.Multiselector(DEFAULTS)
+			let added = [
+				\ Item([0, 1, 1, 0], [0, 1, 1, 0], 'v'),
+				\ Item([0, 2, 1, 0], [0, 2, 1, 0], 'v'),
+				\ Item([0, 3, 1, 0], [0, 3, 1, 0], 'v'),
+				\ ]
+			call multiselector.extend(added)
+			Assert Equals(multiselector.itemnum({_, item -> item.head[1] == 1}), 1)
+			Assert Equals(multiselector.itemnum({_, item -> item.head[1] >= 2}), 2)
+			Assert Equals(multiselector.itemnum({_, item -> item.head[1] > 3}), 0)
+		End
+	End
 End
 " vim:set noet ts=4 sw=4 sts=-1:
