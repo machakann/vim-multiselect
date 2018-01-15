@@ -74,7 +74,7 @@ function! s:Region.isinside(region) abort  "{{{
 	endif
 	return s:{self.type}_is_included_in_{a:region.type}(self, a:region)
 endfunction "}}}
-function! s:Region.istouching(expr) abort "{{{
+function! s:Region.touches(expr) abort "{{{
 	let type_expr = type(a:expr)
 	if type_expr == v:t_list
 		let pos = a:expr
@@ -82,7 +82,7 @@ function! s:Region.istouching(expr) abort "{{{
 			return s:FALSE
 		endif
 		let region = s:Region(pos, pos, 'v')
-		return self.istouching(region)
+		return self.touches(region)
 	elseif type_expr == v:t_dict
 		let range = a:expr
 		if range.head == s:NULLPOS || range.tail == s:NULLPOS
@@ -90,7 +90,7 @@ function! s:Region.istouching(expr) abort "{{{
 		endif
 		return s:{self.type}_is_touching_{range.type}(self, range)
 	endif
-	echoerr s:err_InvalidArgument('region.istouching')
+	echoerr s:err_InvalidArgument('region.touches')
 endfunction "}}}
 
 function! s:char_is_included_in_char(item, region) abort "{{{
@@ -454,13 +454,13 @@ function! s:Multiselector.emit_inside(region) abort "{{{
 	return self.emit({_, item -> item.isinside(a:region)})
 endfunction "}}}
 function! s:Multiselector.emit_touching(expr) abort "{{{
-	return self.emit({_, item -> item.istouching(a:expr)})
+	return self.emit({_, item -> item.touches(a:expr)})
 endfunction "}}}
 function! s:Multiselector.list_inside(region) abort "{{{
 	return self.list({_, item -> item.isinside(a:region)})
 endfunction "}}}
 function! s:Multiselector.list_touching(expr) abort "{{{
-	return self.list({_, item -> item.istouching(a:expr)})
+	return self.list({_, item -> item.touches(a:expr)})
 endfunction "}}}
 function! s:Multiselector.filter(Filterexpr) abort "{{{
 	call self.emit({i1, i2 -> !a:Filterexpr(i1, i2)})
@@ -545,7 +545,7 @@ function! s:Multiselector.keymap_checkpattern(mode, pat, ...) abort "{{{
 	if !empty(itemlist)
 		call filter(itemlist, '!empty(v:val)')
 		for newitem in itemlist
-			call self.filter({_, olditem -> !newitem.istouching(olditem)})
+			call self.filter({_, olditem -> !newitem.touches(olditem)})
 		endfor
 		call extend(self.itemlist, itemlist)
 		call self._checkpost(itemlist)
@@ -632,7 +632,7 @@ function! s:Multiselector.extend(itemlist) abort "{{{
 		if empty(newitem) || newitem.bufnr != self.bufnr
 			continue
 		endif
-		call self.filter({_, olditem -> !newitem.istouching(olditem)})
+		call self.filter({_, olditem -> !newitem.touches(olditem)})
 		call add(self.itemlist, newitem)
 		call add(added, newitem)
 	endfor
