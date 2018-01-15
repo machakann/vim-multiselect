@@ -627,6 +627,10 @@ function! s:Multiselector.extend(itemlist) abort "{{{
 		return self.itemlist
 	endif
 
+	if self.bufnr == -1
+		let self.bufnr = bufnr('%')
+	endif
+
 	let added = []
 	for newitem in a:itemlist
 		if empty(newitem) || newitem.bufnr != self.bufnr
@@ -727,7 +731,7 @@ endfunction "}}}
 
 " private methods
 function! s:Multiselector._initialize(...) abort "{{{
-	let self.bufnr = bufnr('%')
+	let self.bufnr = -1
 	call self.uncheckall()
 	call self.event.Init.trigger()
 endfunction "}}}
@@ -735,7 +739,7 @@ function! s:Multiselector._suspend(...) abort "{{{
 	let self._pending.bufnr = self.bufnr
 	let self._pending.itemlist = self.itemlist
 	let self._pending._last = self._last
-	let self.bufnr = bufnr('%')
+	let self.bufnr = -1
 	let self.itemlist = []
 	let self._last = {}
 	let self._last.event = ''
