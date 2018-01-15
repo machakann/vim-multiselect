@@ -50,6 +50,22 @@ function! s:Region.select() abort "{{{
 		normal! $
 	endif
 endfunction "}}}
+function! s:Region.yank() abort "{{{
+	" FIXME: Should I restore visualmode() ?
+	let reg = ['"', getreg('"'), getregtype('"')]
+	let modhead = getpos("'<")
+	let modtail = getpos("'>")
+	try
+		call self.select()
+		normal! ""y
+		let text = @@
+	finally
+		call setpos("'<", modhead)
+		call setpos("'>", modtail)
+		call call('setreg', reg)
+	endtry
+	return text
+endfunction "}}}
 function! s:Region.includes(expr) abort "{{{
 	let type_expr = type(a:expr)
 	if type_expr == v:t_list
@@ -580,12 +596,17 @@ endfunction "}}}
 function! s:Multiselector.keymap_select(mode) abort "{{{
 	let itemlist = []
 	if a:mode ==# 'x'
-		let type = visualmode()
-		let extended = type[0] ==# "\<C-v>" ? s:is_extended() : s:FALSE
+		let type = s:str2type(visualmode())
+		let extended = type ==# 'block' ? s:is_extended() : s:FALSE
 		let region = s:Region(getpos("'<"), getpos("'>"), type, extended)
 		let item_in_visual = s:multiselector.itemnum({_, item -> item.isinside(region)})
 		if item_in_visual == 0
-			call self.keymap_check(a:mode)
+			if type ==# 'char'
+				let pat = s:patternofselection(region)
+				call self.keymap_checkpattern('n', pat)
+			else
+				call self.keymap_check(a:mode)
+			endif
 		else
 			if item_in_visual != s:multiselector.itemnum()
 				call s:multiselector.emit({_, item -> !item.isinside(region)})
@@ -619,6 +640,22 @@ function! s:foldopen(lnum) abort "{{{
 	endif
 	call cursor(a:lnum, 1)
 	normal! zO
+endfunction "}}}
+function! s:patternofselection(region) abort "{{{
+	let pat = ''
+	let view = winsaveview()
+	call setpos('.', a:region.head)
+	if searchpos('\<', 'cn', line('.')) == a:region.head[1:2]
+		let pat .= '\<'
+	endif
+
+	let pat .= substitute(escape(a:region.yank(), '\'), '\n', '\\n', 'g')
+
+	call setpos('.', a:region.tail)
+	if searchpos('.\>', 'cn', line('.')) == a:region.head[1:2]
+		let pat .= '\>'
+	endif
+	return pat
 endfunction "}}}
 
 " low-level interfaces
@@ -785,6 +822,7 @@ endfunction "}}}
 lockvar! s:Multiselector
 "}}}
 
+" class system
 function! s:inherit(subname, supername, args) abort "{{{
 	let super = call('s:' . a:supername, a:args)
 	if empty(super)
@@ -823,6 +861,7 @@ endfunction "}}}
 function! s:supercall(sub, Funcref, ...) abort "{{{
 	return call(a:Funcref, a:000, a:sub)
 endfunction "}}}
+
 function! s:str2type(str) abort "{{{
 	if a:str ==# 'line' || a:str ==# 'V'
 		return 'line'
