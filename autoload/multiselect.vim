@@ -50,7 +50,7 @@ function! s:Region.select() abort "{{{
 		normal! $
 	endif
 endfunction "}}}
-function! s:Region.isincluding(expr) abort "{{{
+function! s:Region.includes(expr) abort "{{{
 	let type_expr = type(a:expr)
 	if type_expr == v:t_list
 		let pos = a:expr
@@ -58,7 +58,7 @@ function! s:Region.isincluding(expr) abort "{{{
 			return s:FALSE
 		endif
 		let region = s:Region(pos, pos, 'v')
-		return self.isincluding(region)
+		return self.includes(region)
 	elseif type_expr == v:t_dict
 		let region = a:expr
 		if region.head == s:NULLPOS || region.tail == s:NULLPOS
@@ -66,7 +66,7 @@ function! s:Region.isincluding(expr) abort "{{{
 		endif
 		return s:{region.type}_is_included_in_{self.type}(region, self)
 	endif
-	echoerr s:err_InvalidArgument('region.isincluding')
+	echoerr s:err_InvalidArgument('region.includes')
 endfunction "}}}
 function! s:Region.isinside(region) abort  "{{{
 	if a:region.head == s:NULLPOS || a:region.tail == s:NULLPOS
@@ -528,9 +528,9 @@ function! s:Multiselector.keymap_checkpattern(mode, pat, ...) abort "{{{
 
 	let itemlist = []
 	let head = s:searchpos(a:pat, 'cW')
-	while head != s:NULLPOS && region.isincluding(head)
+	while head != s:NULLPOS && region.includes(head)
 		let tail = s:searchpos(a:pat, 'ceW')
-		if !region.isincluding(tail)
+		if !region.includes(tail)
 			break
 		endif
 		let newitem = s:Item(head, tail, 'v')
