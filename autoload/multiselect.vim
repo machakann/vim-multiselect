@@ -450,21 +450,21 @@ function! s:Multiselector.uncheckall() abort  "{{{
 	return self.remove(0, -1)
 endfunction "}}}
 function! s:Multiselector.emit(...) abort "{{{
-	if a:0
-		let Filterexpr = a:1
-		let filtered = s:percolate(self.itemlist, Filterexpr)
-		if filtered != []
-			call self._uncheckpost(filtered)
-		endif
-		return filtered
+	if a:0 == 0
+		return self.remove(0, -1)
 	endif
-	return self.remove(0, -1)
+	let Filterexpr = a:1
+	let filtered = s:percolate(self.itemlist, Filterexpr)
+	if filtered != []
+		call self._uncheckpost(filtered)
+	endif
+	return filtered
 endfunction "}}}
 function! s:Multiselector.list(...) abort "{{{
-	if a:0
-		return s:percolate(copy(self.itemlist), a:1)
+	if a:0 == 0
+		return copy(self.itemlist)
 	endif
-	return copy(self.itemlist)
+	return s:percolate(copy(self.itemlist), a:1)
 endfunction "}}}
 function! s:Multiselector.emit_inside(region) abort "{{{
 	return self.emit({_, item -> item.isinside(a:region)})
@@ -688,13 +688,13 @@ function! s:Multiselector.remove(i, ...) abort "{{{
 		return []
 	endif
 
-	if a:0
-		let removed = remove(self.itemlist, a:i, a:1)
-		call self._uncheckpost(removed)
+	if a:0 == 0
+		let removed = remove(self.itemlist, a:i)
+		call self._uncheckpost([removed])
 		return removed
 	endif
-	let removed = remove(self.itemlist, a:i)
-	call self._uncheckpost([removed])
+	let removed = remove(self.itemlist, a:i, a:1)
+	call self._uncheckpost(removed)
 	return removed
 endfunction "}}}
 function! s:Multiselector.search(searched) abort "{{{
@@ -723,22 +723,22 @@ function! s:Multiselector.lastevent() abort "{{{
 	return last
 endfunction "}}}
 function! s:Multiselector.show(...) abort "{{{
-	if a:0
+	if a:0 == 0
+		let itemlist = self.itemlist
+	else
 		let Filterexpr = a:1
 		let itemlist = self.list(Filterexpr)
-	else
-		let itemlist = self.itemlist
 	endif
 	for item in itemlist
 		call item.show(self.higroup)
 	endfor
 endfunction "}}}
 function! s:Multiselector.quench(...) abort "{{{
-	if a:0
+	if a:0 == 0
+		let itemlist = self.itemlist
+	else
 		let Filterexpr = a:1
 		let itemlist = self.list(Filterexpr)
-	else
-		let itemlist = self.itemlist
 	endif
 	for item in self.itemlist
 		call item.quench()
