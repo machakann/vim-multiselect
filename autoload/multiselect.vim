@@ -5,7 +5,7 @@ let s:TRUE = 1
 let s:FALSE = 0
 let s:MAXCOL = 2147483647
 let s:NULLPOS = [0, 0, 0, 0]
-let s:HIGROUP = 'MultiselectCheckedItem'
+let s:HIGROUP = 'MultiselectItem'
 
 let s:table = []
 
@@ -851,11 +851,11 @@ endfunction "}}}
 " highlight group{{{
 function! s:default_highlight() abort
 	if hlexists('VisualNOS')
-		highlight default link MultiselectCheckedItem VisualNOS
+		highlight default link MultiselectItem VisualNOS
 	elseif hlexists('Visual')
-		highlight default link MultiselectCheckedItem Visual
+		highlight default link MultiselectItem Visual
 	else
-		highlight default MultiselectCheckedItem cterm=reverse gui=reverse
+		highlight default MultiselectItem cterm=reverse gui=reverse
 	endif
 endfunction
 call s:default_highlight()

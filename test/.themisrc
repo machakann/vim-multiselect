@@ -10,7 +10,7 @@ let g:MS = multiselect#import()
 let g:TRUE = 1
 let g:FALSE = 0
 let g:DEFAULTS = {
-	\	'higroup': 'MultiselectCheckedItem',
+	\	'higroup': 'MultiselectItem',
 	\	'eventcheckpost': 'MultiselectCheckPost',
 	\	'eventuncheckpost': 'MultiselectUncheckPost',
 	\	}
