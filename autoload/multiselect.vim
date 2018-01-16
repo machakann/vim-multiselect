@@ -804,6 +804,9 @@ function! s:Multiselector._show(...) abort "{{{
 	endfor
 endfunction "}}}
 function! s:Multiselector._checkpost(added) abort "{{{
+	if empty(a:added)
+		return
+	endif
 	for item in a:added
 		call item.show(self.higroup)
 	endfor
@@ -812,6 +815,9 @@ function! s:Multiselector._checkpost(added) abort "{{{
 	call self.event.CheckPost.trigger()
 endfunction "}}}
 function! s:Multiselector._uncheckpost(removed) abort "{{{
+	if empty(a:removed)
+		return
+	endif
 	for item in a:removed
 		call item.quench()
 	endfor
