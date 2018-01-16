@@ -225,7 +225,7 @@ let s:Item = {
 	\	'__CLASS__': 'Item',
 	\	'id': 0,
 	\	'bufnr': 0,
-	\	'highlight': {},
+	\	'_highlight': {},
 	\	}
 function! s:Item(head, tail, ...) abort "{{{
 	let args = [a:head, a:tail] + a:000
