@@ -597,7 +597,7 @@ function! s:Multiselector.keymap_select(mode) abort "{{{
 			endif
 		else
 			if item_in_visual != s:multiselector.itemnum()
-				call s:multiselector.emit({_, item -> !item.isinside(region)})
+				call s:multiselector.filter({_, item -> item.isinside(region)})
 			endif
 		endif
 		return
