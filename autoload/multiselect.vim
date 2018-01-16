@@ -698,6 +698,14 @@ function! s:Multiselector.remove(...) abort "{{{
 	endif
 	return removed
 endfunction "}}}
+function! s:Multiselector.enumerate(...) abort "{{{
+	let itemlist = copy(self.itemlist)
+	call map(itemlist, {index, item -> [index, item]})
+	if a:0 == 0
+		return itemlist
+	endif
+	return filter(itemlist, {index, list -> call(a:1, [index, list[1]])})
+endfunction "}}}
 function! s:Multiselector.search(searched) abort "{{{
 	let i = 0
 	for item in self.itemlist
