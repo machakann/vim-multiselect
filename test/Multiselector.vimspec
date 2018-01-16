@@ -429,6 +429,99 @@ Describe Multiselector
 		End
 	End
 
+	Context .remove(indexlist)
+		It removes items from self.itemlist by given indexes
+			let multiselector = MS.Multiselector(DEFAULTS)
+			call multiselector.extend([
+				\ Item([0, 1, 1, 0], [0, 1, 1, 0], 'v'),
+				\ Item([0, 2, 1, 0], [0, 2, 1, 0], 'v'),
+				\ Item([0, 3, 1, 0], [0, 3, 1, 0], 'v'),
+				\ Item([0, 4, 1, 0], [0, 4, 1, 0], 'v'),
+				\ ])
+			Assert Equals(len(multiselector.itemlist), 4)
+
+			let removed = multiselector.remove([])
+			Assert Equals(len(multiselector.itemlist), 4)
+			Assert Equals(type(removed), v:t_list)
+			Assert True(empty(removed))
+			Assert Equals(multiselector.itemlist[0]['head'], [0, 1, 1, 0])
+			Assert Equals(multiselector.itemlist[1]['head'], [0, 2, 1, 0])
+			Assert Equals(multiselector.itemlist[2]['head'], [0, 3, 1, 0])
+			Assert Equals(multiselector.itemlist[3]['head'], [0, 4, 1, 0])
+			Assert Equals(multiselector._last.event, 'check')
+
+			let removed = multiselector.remove([0])
+			Assert Equals(len(multiselector.itemlist), 3)
+			Assert Equals(type(removed), v:t_list)
+			Assert Equals(len(removed), 1)
+			Assert Equals(removed[0]['head'], [0, 1, 1, 0])
+			Assert Equals(multiselector.itemlist[0]['head'], [0, 2, 1, 0])
+			Assert Equals(multiselector.itemlist[1]['head'], [0, 3, 1, 0])
+			Assert Equals(multiselector.itemlist[2]['head'], [0, 4, 1, 0])
+			Assert Equals(multiselector._last.event, 'uncheck')
+			Assert Equals(multiselector._last.itemlist, removed)
+
+			let removed = multiselector.remove([0, 2])
+			Assert Equals(len(multiselector.itemlist), 1)
+			Assert Equals(type(removed), v:t_list)
+			Assert Equals(len(removed), 2)
+			Assert Equals(removed[0]['head'], [0, 2, 1, 0])
+			Assert Equals(removed[1]['head'], [0, 4, 1, 0])
+			Assert Equals(multiselector.itemlist[0]['head'], [0, 3, 1, 0])
+			Assert Equals(multiselector._last.event, 'uncheck')
+			Assert Equals(multiselector._last.itemlist, removed)
+		End
+
+		It turns off the highlight of removed item
+			let multiselector = MS.Multiselector(DEFAULTS)
+			let ON = g:TRUE
+			let OFF = g:FALSE
+			call multiselector.extend([
+				\ Item([0, 1, 1, 0], [0, 1, 1, 0], 'v'),
+				\ Item([0, 2, 1, 0], [0, 2, 1, 0], 'v'),
+				\ Item([0, 3, 1, 0], [0, 3, 1, 0], 'v'),
+				\ ])
+			Assert Equals(len(multiselector.itemlist), 3)
+
+			let removed = multiselector.remove(1)
+			Assert Equals(removed._histatus(win_getid()), OFF)
+			Assert Equals(multiselector.itemlist[0]._histatus(win_getid()), ON)
+			Assert Equals(multiselector.itemlist[1]._histatus(win_getid()), ON)
+
+			let removed = multiselector.remove(0)
+			Assert Equals(removed._histatus(win_getid()), OFF)
+			Assert Equals(multiselector.itemlist[0]._histatus(win_getid()), ON)
+
+			let removed = multiselector.remove(0)
+			Assert Equals(removed._histatus(win_getid()), OFF)
+		End
+
+		It triggers autocmd event 'MultiselectUncheckPost' evry after removing
+			let multiselector = MS.Multiselector(DEFAULTS)
+			call multiselector.extend([
+				\ Item([0, 1, 1, 0], [0, 1, 1, 0], 'v'),
+				\ Item([0, 2, 1, 0], [0, 2, 1, 0], 'v'),
+				\ Item([0, 3, 1, 0], [0, 3, 1, 0], 'v'),
+				\ ])
+			let g:autocmdcount = 0
+			augroup test-multiselect
+				autocmd!
+				autocmd User MultiselectUncheckPost let g:autocmdcount += 1
+			augroup End
+			Assert Equals(len(multiselector.itemlist), 3)
+			Assert Equals(g:autocmdcount, 0)
+
+			let removed = multiselector.remove(1)
+			Assert Equals(g:autocmdcount, 1)
+
+			let removed = multiselector.remove(0)
+			Assert Equals(g:autocmdcount, 2)
+
+			let removed = multiselector.remove(0)
+			Assert Equals(g:autocmdcount, 3)
+		End
+	End
+
 	Context .emit()
 		It returns all the items in self.itemlist
 			let multiselector = MS.Multiselector(DEFAULTS)

@@ -581,14 +581,14 @@ endfunction "}}}
 function! s:Multiselector.keymap_undo() abort "{{{
 	let last = self.lastevent()
 	if last.event ==# 'check'
-		let removed = []
+		let removing = []
 		for checked in last.itemlist
 			let i = self.search(checked)
 			if i != -1
-				call add(removed, remove(self.itemlist, i))
+				call add(removing, i)
 			endif
 		endfor
-		call self._uncheckpost(removed)
+		call self.remove(removing)
 	elseif last.event ==# 'uncheck'
 		call self.extend(last.itemlist)
 	endif
@@ -683,18 +683,30 @@ endfunction "}}}
 function! s:Multiselector.add(item) abort "{{{
 	return self.extend([a:item])
 endfunction "}}}
-function! s:Multiselector.remove(i, ...) abort "{{{
+function! s:Multiselector.remove(...) abort "{{{
 	if self.itemnum() == 0
 		return []
 	endif
 
-	if a:0 == 0
-		let removed = remove(self.itemlist, a:i)
-		call self._uncheckpost([removed])
-		return removed
+	let removed = []
+	if a:0 == 1
+		let type_arg = type(a:1)
+		if type_arg == v:t_number
+			let removed = remove(self.itemlist, a:1)
+			call self._uncheckpost([removed])
+			return removed
+		elseif type_arg == v:t_list
+			for i in reverse(sort(copy(a:1), 'n'))
+				call add(removed, remove(self.itemlist, i))
+			endfor
+			call reverse(removed)
+		endif
+	elseif a:0 >= 2
+		let removed = remove(self.itemlist, a:1, a:2)
 	endif
-	let removed = remove(self.itemlist, a:i, a:1)
-	call self._uncheckpost(removed)
+	if !empty(removed)
+		call self._uncheckpost(removed)
+	endif
 	return removed
 endfunction "}}}
 function! s:Multiselector.search(searched) abort "{{{
