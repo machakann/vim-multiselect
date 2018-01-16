@@ -643,6 +643,7 @@ function! s:patternofselection(region) abort "{{{
 	if searchpos('.\>', 'cn', line('.')) == a:region.head[1:2]
 		let pat .= '\>'
 	endif
+	call winrestview(view)
 	return pat
 endfunction "}}}
 
