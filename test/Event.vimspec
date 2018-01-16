@@ -228,7 +228,6 @@ Describe Event
 
 			doautocmd <nomodeline> multiselect-events CmdwinEnter
 
-			let itemlist = multiselector.list()
 			Assert Equals(len(multiselector.itemlist), 0)
 			Assert Equals(multiselector._last.event, '')
 			Assert Equals(multiselector._last.itemlist, [])
@@ -237,7 +236,6 @@ Describe Event
 			let item3 = Item([0, 3, 1, 0], [0, 3, 1, 0], 'v')
 			call multiselector.extend([item2, item3])
 
-			let itemlist = multiselector.list()
 			Assert Equals(len(multiselector.itemlist), 2)
 			Assert Same(multiselector.itemlist[0], item2)
 			Assert Same(multiselector.itemlist[1], item3)

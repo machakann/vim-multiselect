@@ -460,23 +460,11 @@ function! s:Multiselector.emit(...) abort "{{{
 	endif
 	return filtered
 endfunction "}}}
-function! s:Multiselector.list(...) abort "{{{
-	if a:0 == 0
-		return copy(self.itemlist)
-	endif
-	return s:percolate(copy(self.itemlist), a:1)
-endfunction "}}}
 function! s:Multiselector.emit_inside(region) abort "{{{
 	return self.emit({_, item -> item.isinside(a:region)})
 endfunction "}}}
 function! s:Multiselector.emit_touching(expr) abort "{{{
 	return self.emit({_, item -> item.touches(a:expr)})
-endfunction "}}}
-function! s:Multiselector.list_inside(region) abort "{{{
-	return self.list({_, item -> item.isinside(a:region)})
-endfunction "}}}
-function! s:Multiselector.list_touching(expr) abort "{{{
-	return self.list({_, item -> item.touches(a:expr)})
 endfunction "}}}
 function! s:Multiselector.filter(Filterexpr) abort "{{{
 	call self.emit({i1, i2 -> !a:Filterexpr(i1, i2)})
