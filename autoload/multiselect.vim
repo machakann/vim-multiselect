@@ -21,22 +21,56 @@ let s:Region = {
 	\	'type': 'char',
 	\	'extended': s:FALSE,
 	\	}
-function! s:Region(head, tail, ...) abort "{{{
-	if a:head == s:NULLPOS || a:tail == s:NULLPOS || s:inorderof(a:tail, a:head)
+function! s:Region(expr, ...) abort "{{{
+	let head = s:NULLPOS
+	let tail = s:NULLPOS
+	let t_expr = type(a:expr)
+	if a:0 == 0
+		if t_expr == v:t_number
+			let lnum = a:expr
+			let head = [0, lnum, 1, 0]
+			let tail = [0, lnum, s:MAXCOL, 0]
+			let type = 'line'
+		elseif t_expr == v:t_list
+			let pos = a:expr
+			let head = copy(pos)
+			let tail = copy(pos)
+			let type = 'char'
+		else
+			echoerr s:err_InvalidArgument('Region')
+		endif
+	else
+		if t_expr == v:t_number && type(a:1) == v:t_number
+			let lnum1 = a:expr
+			let lnum2 = a:1
+			let head = [0, lnum1, 1, 0]
+			let tail = [0, lnum2, s:MAXCOL, 0]
+			let type = 'line'
+		elseif t_expr == v:t_list && type(a:1) == v:t_list
+			let pos1 = a:expr
+			let pos2 = a:1
+			let type = s:str2type(get(a:000, 1, 'char'))
+			if type ==# 'line'
+				let head = [0, pos1[1], 1, 0]
+				let tail = [0, pos2[1], s:MAXCOL, 0]
+			else
+				let head = copy(pos1)
+				let tail = copy(pos2)
+			endif
+		else
+			echoerr s:err_InvalidArgument('Region')
+		endif
+	endif
+	if head == s:NULLPOS || tail == s:NULLPOS || s:inorderof(tail, head)
 		return {}
 	endif
 
 	let region = deepcopy(s:Region)
-	let region.type = s:str2type(get(a:000, 0, 'char'))
-	if region.type ==# 'line'
-		let region.head = [0, a:head[1], 1, 0]
-		let region.tail = [0, a:tail[1], s:MAXCOL, 0]
-	else
-		let region.head = copy(a:head)
-		let region.tail = copy(a:tail)
-	endif
+	let region.head = head
+	let region.tail = tail
+	let region.type = type
 	if region.type ==# 'block'
-		let region.extended = get(a:000, 1, s:FALSE)
+		let region.extended = !!get(a:000, 2, s:FALSE)
 	endif
 	return region
 endfunction "}}}
@@ -66,47 +100,50 @@ function! s:Region.yank() abort "{{{
 	endtry
 	return text
 endfunction "}}}
-function! s:Region.includes(expr) abort "{{{
-	let type_expr = type(a:expr)
-	if type_expr == v:t_list
-		let pos = a:expr
-		if pos == s:NULLPOS
-			return s:FALSE
-		endif
-		let region = s:Region(pos, pos, 'v')
-		return self.includes(region)
-	elseif type_expr == v:t_dict
+function! s:Region.includes(expr, ...) abort "{{{
+	if a:0 == 0 && type(a:expr) == v:t_dict
 		let region = a:expr
 		if region.head == s:NULLPOS || region.tail == s:NULLPOS
 			return s:FALSE
 		endif
 		return s:{region.type}_is_included_in_{self.type}(region, self)
 	endif
-	echoerr s:err_InvalidArgument('region.includes')
+	try
+		let region = call('s:Region', [a:expr] + a:000)
+	catch /^Vim(echoerr):multiselect: Invalid argument for/
+		echoerr s:err_InvalidArgument('Region.includes')
+	endtry
+	return self.includes(region)
 endfunction "}}}
-function! s:Region.isinside(region) abort  "{{{
-	if a:region.head == s:NULLPOS || a:region.tail == s:NULLPOS
-		return s:FALSE
-	endif
-	return s:{self.type}_is_included_in_{a:region.type}(self, a:region)
-endfunction "}}}
-function! s:Region.touches(expr) abort "{{{
-	let type_expr = type(a:expr)
-	if type_expr == v:t_list
-		let pos = a:expr
-		if pos == s:NULLPOS
+function! s:Region.isinside(expr, ...) abort  "{{{
+	if a:0 == 0 && type(a:expr) == v:t_dict
+		let region = a:expr
+		if region.head == s:NULLPOS || region.tail == s:NULLPOS
 			return s:FALSE
 		endif
-		let region = s:Region(pos, pos, 'v')
-		return self.touches(region)
-	elseif type_expr == v:t_dict
+		return s:{self.type}_is_included_in_{region.type}(self, region)
+	endif
+	try
+		let region = call('s:Region', [a:expr] + a:000)
+	catch /^Vim(echoerr):multiselect: Invalid argument for/
+		echoerr s:err_InvalidArgument('Region.isinside')
+	endtry
+	return self.isinside(region)
+endfunction "}}}
+function! s:Region.touches(expr, ...) abort "{{{
+	if a:0 == 0 && type(a:expr) == v:t_dict
 		let region = a:expr
 		if region.head == s:NULLPOS || region.tail == s:NULLPOS
 			return s:FALSE
 		endif
 		return s:{self.type}_is_touching_{region.type}(self, region)
 	endif
-	echoerr s:err_InvalidArgument('region.touches')
+	try
+		let region = call('s:Region', [a:expr] + a:000)
+	catch /^Vim(echoerr):multiselect: Invalid argument for/
+		echoerr s:err_InvalidArgument('Region.touches')
+	endtry
+	return self.touches(region)
 endfunction "}}}
 
 function! s:char_is_included_in_char(item, region) abort "{{{
@@ -227,9 +264,12 @@ let s:Item = {
 	\	'bufnr': 0,
 	\	'_highlight': {},
 	\	}
-function! s:Item(head, tail, ...) abort "{{{
-	let args = [a:head, a:tail] + a:000
-	let item = s:inherit('Item', 'Region', args)
+function! s:Item(expr, ...) abort "{{{
+	try
+		let item = s:inherit('Item', 'Region', [a:expr] + a:000)
+	catch /^Vim(echoerr):multiselect: Invalid argument for/
+		echoerr s:err_InvalidArgument('Item')
+	endtry
 	if empty(item)
 		return item
 	endif
@@ -427,23 +467,21 @@ function! s:Multiselector(...) abort "{{{
 endfunction "}}}
 
 " main interfaces
-function! s:Multiselector.check(head, tail, ...) abort  "{{{
-	let newitem = call('s:Item', [a:head, a:tail] + a:000)
+function! s:Multiselector.check(expr, ...) abort  "{{{
+	try
+		let newitem = call('s:Item', [a:expr] + a:000)
+	catch /^Vim(echoerr):multiselect: Invalid argument for/
+		echoerr s:err_InvalidArgument('Multiselector.check')
+	endtry
 	call self.add(newitem)
 	return newitem
 endfunction "}}}
-function! s:Multiselector.uncheck(...) abort  "{{{
-	if a:0 < 2
-		" match by position
-		let pos = get(a:000, 0, getpos('.'))
-		let unchecked = self.emit_touching(pos)
-	else
-		" match by range
-		let head = a:1
-		let tail = a:2
-		let region = s:Region(head, tail)
-		let unchecked = self.emit_inside(region)
-	endif
+function! s:Multiselector.uncheck(expr, ...) abort  "{{{
+	try
+		let unchecked = call(self.emit_touching, [a:expr] + a:000, self)
+	catch /^Vim(echoerr):multiselect: Invalid argument for/
+		echoerr s:err_InvalidArgument('Multiselector.uncheck')
+	endtry
 	return unchecked
 endfunction "}}}
 function! s:Multiselector.uncheckall() abort  "{{{
@@ -460,11 +498,23 @@ function! s:Multiselector.emit(...) abort "{{{
 	endif
 	return filtered
 endfunction "}}}
-function! s:Multiselector.emit_inside(region) abort "{{{
-	return self.emit({_, item -> item.isinside(a:region)})
+function! s:Multiselector.emit_inside(expr, ...) abort "{{{
+	let args = [a:expr] + a:000
+	try
+		let itemlist = self.emit({_, item -> call(item.isinside, args, item)})
+	catch /^Vim(echoerr):multiselect: Invalid argument for/
+		echoerr s:err_InvalidArgument('Multiselector.emit_inside')
+	endtry
+	return itemlist
 endfunction "}}}
-function! s:Multiselector.emit_touching(expr) abort "{{{
-	return self.emit({_, item -> item.touches(a:expr)})
+function! s:Multiselector.emit_touching(expr, ...) abort "{{{
+	let args = [a:expr] + a:000
+	try
+		let itemlist = self.emit({_, item -> call(item.touches, args, item)})
+	catch /^Vim(echoerr):multiselect: Invalid argument for/
+		echoerr s:err_InvalidArgument('Multiselector.emit_touching')
+	endtry
+	return itemlist
 endfunction "}}}
 function! s:Multiselector.filter(Filterexpr) abort "{{{
 	call self.emit({i1, i2 -> !a:Filterexpr(i1, i2)})
@@ -547,7 +597,6 @@ function! s:Multiselector.keymap_checkpattern(mode, pat, ...) abort "{{{
 
 	" It is sure that the items in 'itemlist' has no overlap
 	if !empty(itemlist)
-		call filter(itemlist, '!empty(v:val)')
 		for newitem in itemlist
 			call self.filter({_, olditem -> !newitem.touches(olditem)})
 		endfor
@@ -560,7 +609,7 @@ function! s:Multiselector.keymap_uncheck(mode) abort "{{{
 	if a:mode ==# 'x'
 		call s:multiselector.uncheck(getpos("'<"), getpos("'>"))
 	else
-		call s:multiselector.uncheck()
+		call s:multiselector.uncheck(getpos('.'))
 	endif
 endfunction "}}}
 function! s:Multiselector.keymap_uncheckall() abort "{{{

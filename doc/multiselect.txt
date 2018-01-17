@@ -323,8 +323,8 @@ This file is in `macros/multiselect/demo/fooize.vim`.
 ==============================================================================
 API					*multiselect-api*
 
-					*multiselect-module-Multiselect*
 Multiselect module~
+					*multiselect-module-Multiselect*
 
 multiselect#import()			*multiselect#import()*
 	This function returns a `Multiselect` module. >
@@ -394,9 +394,11 @@ Multiselect.Multiselector([{options}])    [function]
 	|multiselect-class-Multiselector|.
 
 
-Multiselect.Region({head}, {tail}[, {type}[, {extended}]])    [function]
+Multiselect.Region({head}[, {tail}[, {type}[, {extended}]]])    [function]
+Multiselect.Region({lnum})
+Multiselect.Region({startlnum}, {endlnum})
 	This is a constructor of `Region` class, it is a class to represent a
-	region of buffer. See |multiselect-class-Region|.
+	region of a buffer. See |multiselect-class-Region|.
 
 	{head} and {tail} are the edge positions of the region. These
 	positions are a list like a return value of |getpos()|.
@@ -415,8 +417,19 @@ Multiselect.Region({head}, {tail}[, {type}[, {extended}]])    [function]
 		let tail = [0, 3, 1, 0]
 		let region = s:Multiselect.Region(head, tail, 'block', 1)
 <
+	With only {head}, it returns an character-wise `Region` instance of a
+	character, its head and tail is same.
 
-Multiselect.Item({head}, {tail}[, {type}[, {extended}]])   [function]
+	With only {lnum}, it returns an line-wise `Region` instance
+	representing the line {lnum}.
+
+	With {startlnum} and {endlnum}, it returns an line-wise `Region`
+	instance representing the range from {startlnum} to {endlnum}.
+
+
+Multiselect.Item({head}[, {tail}[, {type}[, {extended}]]])   [function]
+Multiselect.Item({lnum})
+Multiselect.Item({startlnum}, {endlnum})
 	This is a constructor of `Item` class, it is a subclass of `Region`
 	class used for handling a selection region on a buffer. The arguments
 	are common with `Multiselect.Region()`.  >
@@ -426,9 +439,9 @@ Multiselect.Item({head}, {tail}[, {type}[, {extended}]])   [function]
 <
 
 
-
-					*multiselect-class-Multiselector*
+------------------------------------------------------------------------------
 Multiselector class~
+					*multiselect-class-Multiselector*
 
   - members
 Multiselector.name    [string]
@@ -451,30 +464,32 @@ Multiselector.itemlist    [list]
 
 
   - main interfaces
-Multiselector.check({head}, {tail}[, {type}[, {extended}]])    [method]
+Multiselector.check({head}[, {tail}[, {type}[, {extended}]]])    [method]
+Multiselector.check({lnum})
+Multiselector.check({startlnum}, {endlnum})
+Multiselector.check({region})
 	This method produces an `Item` instance and add it into
-	`Multiselector.itemlist`. The arguments are common with
-	`Multiselect.Region()`. >
+	`Multiselector.itemlist`. This method returns the added item.
+	The arguments are common with `Multiselect.Region()`, and additionally
+	an instance of `Region` class or its subclasses is also acceptable. >
+		let head = [0, 1, 1, 0]
+		let tail = [0, 3, 3, 0]
+		let region = s:Multiselect.Region(head, tail, 'block', 1)
+		call s:multiselector.check(region)
+<
+
+Multiselector.uncheck({head}[, {tail}[, {type}[, {extended}]]])    [method]
+Multiselector.uncheck({lnum})
+Multiselector.uncheck({startlnum}, {endlnum})
+Multiselector.uncheck({region})
+	This method removes items in `Multiselector.itemlist`, it removes the
+	items touching with the assigned region.
+	The arguments are common with `Multiselect.Region()`, and additionally
+	an instance of `Region` class or its subclasses is also acceptable. >
 		let head = [0, 1, 1, 0]
 		let tail = [0, 3, 1, 0]
-		call s:multiselector.check(head, tail, 'block', 1)
-<
-
-Multiselector.uncheck([{pos1}[, {pos2}]])    [method]
-	This function removes items in `Multiselector.itemlist`.
-
-	If it is called without argument, an item under the cursor will be
-	removed. >
-		call s:multiselector.uncheck()
-<
-	If it is called with an position, like the return value of |getpos()|,
-	an item under the position is removed. >
-		call s:multiselector.uncheck([0, 1, 2, 0])
-<
-	If it is called with two positions, items inside the two positions are
-	removed. {pos1} should be closer to the beginning of a buffer than
-	{pos2}. >
-		call s:multiselector.uncheck([0, 1, 1, 0], [0, 3, 3, 0])
+		let region = s:Multiselect.Region(head, tail, 'line')
+		call s:multiselector.uncheck(region)
 <
 
 Multiselector.uncheckall()    [method]
@@ -512,11 +527,15 @@ Multiselector.emit([{Filterexpr}])    [method]
 	        ``Multiselector.emit_touching()` ` instead.
 
 
-Multiselector.emit_inside({region})    [method]
+Multiselector.emit_inside({head}[, {tail}[, {type}[, {extended}]]])   [method]
+Multiselector.emit_inside({lnum})
+Multiselector.emit_inside({startlnum}, {endlnum})
+Multiselector.emit_inside({region})
 	This method removes items from `Multiselector.itemlist` and returns a
-	list of these items. {region} should be an instance of `Region` class
-	or its subclasses. Only the items inside the assigned {region} will
-	be removed to return. >
+	list of these items. This method removes only the items inside the
+	assigned region will be removed to return.
+	The arguments are common with `Multiselect.Region()`, and additionally
+	an instance of `Region` class or its subclasses is also acceptable. >
 		let head = getpos("'<")
 		let tail = getpos("'>")
 		let type = visualmode()
@@ -526,11 +545,15 @@ Multiselector.emit_inside({region})    [method]
 	This actually equals to the above Example1 in `Multiselector.emit()`.
 
 
-Multiselector.emit_touching({expr})    [method]
+Multiselector.emit_touching({head}[, {tail}[, {type}[, {extended}]]]) [method]
+Multiselector.emit_touching({lnum})
+Multiselector.emit_touching({startlnum}, {endlnum})
+Multiselector.emit_touching({region})
 	This method removes items from `Multiselector.itemlist` and returns a
-	list of these items. {expr} should be a position or an instance of
-	`Region` class or its subclasses. Only the items touching with the
-	{expr} will be removed to return. >
+	list of these items. This method removes only the items touching the
+	assigned region will be removed to return.
+	The arguments are common with `Multiselect.Region()`, and additionally
+	an instance of `Region` class or its subclasses is also acceptable. >
 		let curpos = getpos('.')
 		let itemlist = s:multiselector.emit_touching(curpos)
 <
@@ -687,7 +710,7 @@ Multiselector.add({item})    [method]
 <
 
 Multiselector.remove({idx}[, {end}])    [method]
-Multiselector.remove({indexlist})       [method]
+Multiselector.remove({indexlist})
 	This method removes the item in  `Multiselector.itemlist`.
 	Without {end}: Remove the item at {idx} from `Multiselector.itemlist`
 	and return the item. >
@@ -823,7 +846,6 @@ Multiselector.show()    [method]
 		call s:multiselector.show()
 <
 
-
 Multiselector.quench()    [method]
 	This method turns off the highlightings of multiple selection items on
 	the current buffer. It does not unselect, just hide. You can use
@@ -880,8 +902,9 @@ Multiselector.event.UncheckPost    [Event-instance]
 
 
 
-					*multiselect-class-Region*
+------------------------------------------------------------------------------
 Region class~
+					*multiselect-class-Region*
 
 Region.head    [list]
 	This is the head position of the `Region` on a buffer. It is an
@@ -946,10 +969,14 @@ Region.yank()    [method]
 		echo region.yank()  " bar
 <
 
-Region.includes({expr})    [method]
-	This method returns |TRUE| if the `Region` includes {expr},
-	otherwise |FALSE|. {expr} should be a position or an instance of
-	`Region` class or its subclasses. >
+Region.includes({head}[, {tail}[, {type}[, {extended}]]])    [method]
+Region.includes({lnum})
+Region.includes({startlnum}, {endlnum})
+Region.includes({region})
+	This method returns |TRUE| if the `Region` instance includes an
+	assigned region, otherwise |FALSE|.
+	The arguments are common with `Multiselect.Region()`, and additionally
+	an instance of `Region` class or its subclasses is also acceptable. >
 		let head = [0, 1, 2, 0]
 		let tail = [0, 1, 4, 0]
 		let region1 = s:Multiselect.Region(head, tail, 'char')
@@ -976,10 +1003,14 @@ Region.includes({expr})    [method]
 		" bool is TRUE
 <
 
-Region.isinside({region})    [method]
-	This method returns |TRUE| if the `Region` is inside {region},
-	otherwise |FALSE|. {region} should be an instance of `Region` class or
-	its subclasses. >
+Region.isinside({head}[, {tail}[, {type}[, {extended}]]])    [method]
+Region.isinside({lnum})
+Region.isinside({startlnum}, {endlnum})
+Region.isinside({region})
+	This method returns |TRUE| if the `Region` instance is inside an
+	assigned region, otherwise |FALSE|.
+	The arguments are common with `Multiselect.Region()`, and additionally
+	an instance of `Region` class or its subclasses is also acceptable. >
 		let head = [0, 1, 2, 0]
 		let tail = [0, 1, 4, 0]
 		let region1 = s:Multiselect.Region(head, tail, 'char')
@@ -1006,10 +1037,14 @@ Region.isinside({region})    [method]
 		" bool is TRUE
 <
 
-Region.touches({expr})    [method]
-	This method returns |TRUE| if the `Region` touches {expr},
-	otherwise |FALSE|. {expr} should be a position or an instance of
-	`Region` class or its subclasses. >
+Region.touches({head}[, {tail}[, {type}[, {extended}]]])    [method]
+Region.touches({lnum})
+Region.touches({startlnum}, {endlnum})
+Region.touches({region})
+	This method returns |TRUE| if the `Region` instance is touching an
+	assigned region, otherwise |FALSE|.
+	The arguments are common with `Multiselect.Region()`, and additionally
+	an instance of `Region` class or its subclasses is also acceptable. >
 		let head = [0, 1, 2, 0]
 		let tail = [0, 1, 4, 0]
 		let region1 = s:Multiselect.Region(head, tail, 'char')
@@ -1055,6 +1090,7 @@ Region.touches({expr})    [method]
 <
 
 
+------------------------------------------------------------------------------
 					*multiselect-class-Item*
 Item class~
 	`Item` class is a subclass of `Region` class, thus `Item` class
@@ -1077,8 +1113,9 @@ Item.quench()    [method]
 
 
 
-					*multiselect-class-Event*
+------------------------------------------------------------------------------
 Event class~
+					*multiselect-class-Event*
 
 Event.name    [string]
 	The name of autocmd event responsible for.

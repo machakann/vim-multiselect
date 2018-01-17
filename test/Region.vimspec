@@ -12,1042 +12,2518 @@ Describe Region
 		$delete
 	End
 
-	Context (head, tail, type)
-		It constructs a characterwise-instance if a:type is omitted.
-			Assert Equals(Region([0, 1, 1, 0], [0, 1, 7, 0]).type, 'char')
+	Context class constructor
+		It can construct a characterwise-instance
+			let head = [0, 1, 1, 0]
+			let tail = [0, 1, 7, 0]
+			let item = Region(head, tail, 'char')
+			Assert Equals(item.type, 'char')
+			Assert Equals(item.head, head)
+			Assert Equals(item.tail, tail)
+			Assert NotSame(item.head, head)
+			Assert NotSame(item.tail, tail)
+
+			let head = [0, 1, 1, 0]
+			let tail = [0, 1, 7, 0]
+			let item = Region(head, tail, 'v')
+			Assert Equals(item.type, 'char')
+			Assert Equals(item.head, head)
+			Assert Equals(item.tail, tail)
+			Assert NotSame(item.head, head)
+			Assert NotSame(item.tail, tail)
+
+			let pos = [0, 1, 1, 0]
+			let item = Region(pos)
+			Assert Equals(item.type, 'char')
+			Assert Equals(item.head, pos)
+			Assert Equals(item.tail, pos)
+			Assert NotSame(item.head, pos)
+			Assert NotSame(item.tail, pos)
 		End
 
-		It constructs a characterwise-instance if a:type is 'v' or 'char'
-			Assert Equals(Region([0, 1, 1, 0], [0, 1, 7, 0], 'v').type, 'char')
-			Assert Equals(Region([0, 1, 1, 0], [0, 1, 7, 0], 'char').type, 'char')
+		It can construct a linewise-instance
+			let head = [0, 1, 1, 0]
+			let tail = [0, 1, 7, 0]
+			let item = Region(head, tail, 'line')
+			Assert Equals(item.type, 'line')
+			Assert Equals(item.head[1], head[1])
+			Assert Equals(item.tail[1], tail[1])
+			Assert NotSame(item.head, head)
+			Assert NotSame(item.tail, tail)
+
+			let head = [0, 1, 1, 0]
+			let tail = [0, 1, 7, 0]
+			let item = Region(head, tail, 'V')
+			Assert Equals(item.type, 'line')
+			Assert Equals(item.head[1], head[1])
+			Assert Equals(item.tail[1], tail[1])
+			Assert NotSame(item.head, head)
+			Assert NotSame(item.tail, tail)
+
+			let lnum = 1
+			let item = Region(lnum)
+			Assert Equals(item.type, 'line')
+			Assert Equals(item.head[1], lnum)
+			Assert Equals(item.tail[1], lnum)
+
+			let startlnum = 1
+			let endlnum = 2
+			let item = Region(startlnum, endlnum)
+			Assert Equals(item.type, 'line')
+			Assert Equals(item.head[1], startlnum)
+			Assert Equals(item.tail[1], endlnum)
 		End
 
-		It constructs a linewise-instance if a:type is 'V' or 'line'
-			Assert Equals(Region([0, 1, 1, 0], [0, 1, 7, 0], 'V').type, 'line')
-			Assert Equals(Region([0, 1, 1, 0], [0, 1, 7, 0], 'line').type, 'line')
+		It can construct a blockwise-instance
+			let head = [0, 1, 1, 0]
+			let tail = [0, 1, 7, 0]
+			let item = Region(head, tail, 'block')
+			Assert Equals(item.type, 'block')
+			Assert Equals(item.head, head)
+			Assert Equals(item.tail, tail)
+			Assert NotSame(item.head, head)
+			Assert NotSame(item.tail, tail)
+
+			let head = [0, 1, 1, 0]
+			let tail = [0, 1, 7, 0]
+			let item = Region(head, tail, "\<C-v>")
+			Assert Equals(item.type, 'block')
+			Assert Equals(item.head, head)
+			Assert Equals(item.tail, tail)
+			Assert NotSame(item.head, head)
+			Assert NotSame(item.tail, tail)
+
+			let head = [0, 1, 1, 0]
+			let tail = [0, 1, 7, 0]
+			let item = Region(head, tail, "\<C-v>", 1)
+			Assert True(item.extended)
 		End
 
-		It constructs a blockwise-instance if a:type is "\<C-v>" or 'block'
-			Assert Equals(Region([0, 1, 1, 0], [0, 1, 7, 0], "\<C-v>").type, 'block')
-			Assert Equals(Region([0, 1, 1, 0], [0, 1, 7, 0], 'block').type, 'block')
+		It throws an exception with inappropriate arguments
+			Throws /^Vim(echoerr):multiselect: Invalid argument for Region()/ Region({})
+			Throws /^Vim(echoerr):multiselect: Invalid argument for Region()/ Region('')
+			Throws /^Vim(echoerr):multiselect: Invalid argument for Region()/ Region(1, [0, 1, 1, 0])
+			Throws /^Vim(echoerr):multiselect: Invalid argument for Region()/ Region([0, 1, 1, 0], 1)
 		End
 	End
 
-	Context .includes(pos)
-		It returns TRUE if itself is including the position
-			Assert True(Region([0, 2, 5, 0], [0, 3, 4, 0], 'v').
-						\includes([0, 3, 4, 0]))
+	Context .includes(head, tail, ...)
+		It returns TRUE if itself is including a region
+			" a characterwise item includes a characterwise region
+			let region = Region([0, 1, 1, 0], [0, 2, 4, 0], 'v')
+			Assert True(region.includes([0, 1, 1, 0], [0, 1, 3, 0], 'v'))
 
-			Assert True(Region([0, 3, 1, 0], [0, 3, 7, 0], 'v').
-						\includes([0, 3, 4, 0]))
+			let region = Region([0, 4, 4, 0], [0, 5, 7, 0], 'v')
+			Assert True(region.includes([0, 5, 5, 0], [0, 5, 7, 0], 'v'))
 
-			Assert True(Region([0, 3, 4, 0], [0, 4, 3, 0], 'v').
-						\includes([0, 3, 4, 0]))
+			let region = Region([0, 1, 1, 0], [0, 5, 7, 0], 'v')
+			Assert True(region.includes([0, 1, 1, 0], [0, 5, 7, 0], 'v'))
 
-			Assert True(Region([0, 2, 5, 0], [0, 3, 3, 0], 'V').
-						\includes([0, 3, 4, 0]))
+			let region = Region([0, 1, 1, 0], [0, 5, 7, 0], 'v')
+			Assert True(region.includes([0, 3, 3, 0], [0, 3, 3, 0], 'v'))
 
-			Assert True(Region([0, 3, 1, 0], [0, 3, 7, 0], 'V').
-						\includes([0, 3, 4, 0]))
+			let region = Region([0, 3, 3, 0], [0, 3, 3, 0], 'v')
+			Assert True(region.includes([0, 3, 3, 0], [0, 3, 3, 0], 'v'))
 
-			Assert True(Region([0, 3, 5, 0], [0, 4, 3, 0], 'V').
-						\includes([0, 3, 4, 0]))
+			let region = Region([0, 3, 3, 0], [0, 3, 3, 0], 'v')
+			Assert True(region.includes([0, 3, 3, 0], [0, 3, 3, 0], 'v'))
 
-			Assert True(Region([0, 2, 3, 0], [0, 3, 4, 0], "\<C-v>").
-						\includes([0, 3, 4, 0]))
+			" a characterwise item includes a linewise region
+			let region = Region([0, 1, 1, 0], [0, 2, 1, 0], 'v')
+			Assert True(region.includes([0, 1, 4, 0], [0, 1, 4, 0], 'V'))
 
-			Assert True(Region([0, 2, 3, 0], [0, 4, 5, 0], "\<C-v>").
-						\includes([0, 3, 4, 0]))
+			let region = Region([0, 1, 1, 0], [0, 1, 8, 0], 'v')
+			Assert True(region.includes([0, 1, 1, 0], [0, 1, 1, 0], 'V'))
 
-			Assert True(Region([0, 3, 4, 0], [0, 4, 5, 0], "\<C-v>").
-						\includes([0, 3, 4, 0]))
+			let region = Region([0, 1, 1, 0], [0, 3, 1, 0], 'v')
+			Assert True(region.includes([0, 2, 1, 0], [0, 2, 1, 0], 'V'))
+
+			" a characterwise item includes a blockwise region
+			let region = Region([0, 2, 3, 0], [0, 4, 5, 0], 'v')
+			Assert True(region.includes([0, 2, 3, 0], [0, 4, 5, 0], "\<C-v>"))
+
+			let region = Region([0, 2, 3, 0], [0, 4, 5, 0], 'v')
+			Assert True(region.includes([0, 2, 3, 0], [0, 3, 5, 0], "\<C-v>"))
+
+			let region = Region([0, 2, 3, 0], [0, 4, 5, 0], 'v')
+			Assert True(region.includes([0, 3, 1, 0], [0, 4, 2, 0], "\<C-v>"))
+
+			let region = Region([0, 2, 3, 0], [0, 4, 5, 0], 'v')
+			Assert True(region.includes([0, 2, 3, 0], [0, 3, 5, 0], "\<C-v>"))
+
+			let region = Region([0, 2, 3, 0], [0, 4, 5, 0], 'v')
+			Assert True(region.includes([0, 3, 3, 0], [0, 4, 5, 0], "\<C-v>"))
+
+			" a linewise item includes a characterwise region
+			let region = Region([0, 2, 1, 0], [0, 2, 1, 0], 'V')
+			Assert True(region.includes([0, 2, 3, 0], [0, 2, 5, 0], 'v'))
+
+			let region = Region([0, 2, 1, 0], [0, 2, 1, 0], 'V')
+			Assert True(region.includes([0, 2, 1, 0], [0, 2, 8, 0], 'v'))
+
+			let region = Region([0, 2, 1, 0], [0, 4, 1, 0], 'V')
+			Assert True(region.includes([0, 2, 3, 0], [0, 4, 5, 0], 'v'))
+
+			let region = Region([0, 2, 1, 0], [0, 4, 1, 0], 'V')
+			Assert True(region.includes([0, 3, 3, 0], [0, 3, 5, 0], 'v'))
+
+			let region = Region([0, 2, 1, 0], [0, 4, 1, 0], 'V')
+			Assert True(region.includes([0, 4, 3, 0], [0, 4, 5, 0], 'v'))
+
+			let region = Region([0, 2, 1, 0], [0, 4, 1, 0], 'V')
+			Assert True(region.includes([0, 2, 1, 0], [0, 4, 8, 0], 'v'))
+
+			" a linewise item includes a linewise region
+			let region = Region([0, 3, 1, 0], [0, 3, 1, 0], 'V')
+			Assert True(region.includes([0, 3, 1, 0], [0, 3, 1, 0], 'V'))
+
+			let region = Region([0, 2, 1, 0], [0, 4, 1, 0], 'V')
+			Assert True(region.includes([0, 2, 1, 0], [0, 2, 1, 0], 'V'))
+
+			let region = Region([0, 2, 1, 0], [0, 4, 1, 0], 'V')
+			Assert True(region.includes([0, 3, 1, 0], [0, 3, 1, 0], 'V'))
+
+			let region = Region([0, 2, 1, 0], [0, 4, 1, 0], 'V')
+			Assert True(region.includes([0, 2, 1, 0], [0, 4, 1, 0], 'V'))
+
+			" a linewise item includes a blockwise region
+			let region = Region([0, 2, 1, 0], [0, 2, 1, 0], 'V')
+			Assert True(region.includes([0, 2, 3, 0], [0, 2, 5, 0], "\<C-v>"))
+
+			let region = Region([0, 2, 1, 0], [0, 4, 1, 0], 'V')
+			Assert True(region.includes([0, 2, 1, 0], [0, 4, 7, 0], "\<C-v>"))
+
+			let region = Region([0, 2, 1, 0], [0, 4, 1, 0], 'V')
+			Assert True(region.includes([0, 2, 1, 0], [0, 3, 3, 0], "\<C-v>"))
+
+			let region = Region([0, 2, 1, 0], [0, 4, 1, 0], 'V')
+			Assert True(region.includes([0, 2, 5, 0], [0, 3, 7, 0], "\<C-v>"))
+
+			let region = Region([0, 2, 1, 0], [0, 4, 1, 0], 'V')
+			Assert True(region.includes([0, 3, 1, 0], [0, 4, 3, 0], "\<C-v>"))
+
+			let region = Region([0, 2, 1, 0], [0, 4, 1, 0], 'V')
+			Assert True(region.includes([0, 3, 5, 0], [0, 4, 7, 0], "\<C-v>"))
+
+			let region = Region([0, 2, 1, 0], [0, 4, 1, 0], 'V')
+			Assert True(region.includes([0, 2, 3, 0], [0, 4, 5, 0], "\<C-v>"))
+
+			" a blockwise item includes a characterwise region
+			let region = Region([0, 3, 1, 0], [0, 3, 7, 0], "\<C-v>")
+			Assert True(region.includes([0, 3, 3, 0], [0, 3, 5, 0], 'v'))
+
+			let region = Region([0, 3, 3, 0], [0, 3, 5, 0], "\<C-v>")
+			Assert True(region.includes([0, 3, 3, 0], [0, 3, 5, 0], 'v'))
+
+			let region = Region([0, 2, 3, 0], [0, 4, 5, 0], "\<C-v>")
+			Assert True(region.includes([0, 2, 3, 0], [0, 2, 5, 0], 'v'))
+
+			let region = Region([0, 2, 3, 0], [0, 4, 5, 0], "\<C-v>")
+			Assert True(region.includes([0, 3, 3, 0], [0, 3, 5, 0], 'v'))
+
+			let region = Region([0, 2, 3, 0], [0, 4, 5, 0], "\<C-v>")
+			Assert True(region.includes([0, 4, 3, 0], [0, 4, 5, 0], 'v'))
+
+			let region = Region([0, 2, 1, 0], [0, 4, 8, 0], "\<C-v>")
+			Assert True(region.includes([0, 2, 3, 0], [0, 4, 5, 0], 'v'))
+
+			" a blockwise item includes a linewise region
+			let region = Region([0, 3, 1, 0], [0, 3, 8, 0], "\<C-v>")
+			Assert True(region.includes([0, 3, 1, 0], [0, 3, 1, 0], 'V'))
+
+			let region = Region([0, 2, 1, 0], [0, 4, 8, 0], "\<C-v>")
+			Assert True(region.includes([0, 2, 1, 0], [0, 2, 1, 0], 'V'))
+
+			let region = Region([0, 2, 1, 0], [0, 4, 8, 0], "\<C-v>")
+			Assert True(region.includes([0, 3, 1, 0], [0, 3, 1, 0], 'V'))
+
+			let region = Region([0, 2, 1, 0], [0, 4, 8, 0], "\<C-v>")
+			Assert True(region.includes([0, 4, 1, 0], [0, 4, 1, 0], 'V'))
+
+			" a blockwise item includes a blockwise region
+			let region = Region([0, 3, 3, 0], [0, 3, 5, 0], "\<C-v>")
+			Assert True(region.includes([0, 3, 3, 0], [0, 3, 5, 0], "\<C-v>"))
+
+			let region = Region([0, 2, 3, 0], [0, 4, 5, 0], "\<C-v>")
+			Assert True(region.includes([0, 2, 3, 0], [0, 3, 4, 0], "\<C-v>"))
+
+			let region = Region([0, 2, 3, 0], [0, 4, 5, 0], "\<C-v>")
+			Assert True(region.includes([0, 2, 4, 0], [0, 3, 5, 0], "\<C-v>"))
+
+			let region = Region([0, 2, 3, 0], [0, 4, 5, 0], "\<C-v>")
+			Assert True(region.includes([0, 3, 3, 0], [0, 4, 4, 0], "\<C-v>"))
+
+			let region = Region([0, 2, 3, 0], [0, 4, 5, 0], "\<C-v>")
+			Assert True(region.includes([0, 3, 4, 0], [0, 4, 5, 0], "\<C-v>"))
+
+			let region = Region([0, 2, 3, 0], [0, 4, 5, 0], "\<C-v>")
+			Assert True(region.includes([0, 2, 3, 0], [0, 4, 3, 0], "\<C-v>"))
+
+			let region = Region([0, 2, 3, 0], [0, 4, 5, 0], "\<C-v>")
+			Assert True(region.includes([0, 2, 3, 0], [0, 4, 5, 0], "\<C-v>"))
 		End
 
-		It returns FALSE if itself is not including the position
-			Assert False(Region([0, 1, 5, 0], [0, 3, 3, 0], 'v').
-						\includes([0, 3, 4, 0]))
+		It returns FALSE if itself is not including a region
+			" a characterwise item does not include a characterwise region
+			let region = Region([0, 1, 1, 0], [0, 2, 3, 0], 'v')
+			Assert False(region.includes([0, 2, 4, 0], [0, 4, 4, 0], 'v'))
 
-			Assert False(Region([0, 3, 5, 0], [0, 5, 3, 0], 'v').
-						\includes([0, 3, 4, 0]))
+			let region = Region([0, 4, 5, 0], [0, 5, 7, 0], 'v')
+			Assert False(region.includes([0, 2, 4, 0], [0, 4, 4, 0], 'v'))
 
-			Assert False(Region([0, 1, 5, 0], [0, 2, 3, 0], 'V').
-						\includes([0, 3, 4, 0]))
+			let region = Region([0, 1, 1, 0], [0, 2, 3, 0], 'v')
+			Assert False(region.includes([0, 2, 3, 0], [0, 2, 4, 0], 'v'))
 
-			Assert False(Region([0, 4, 5, 0], [0, 5, 3, 0], 'V').
-						\includes([0, 3, 4, 0]))
+			let region = Region([0, 1, 1, 0], [0, 2, 3, 0], 'v')
+			Assert False(region.includes([0, 1, 1, 0], [0, 2, 4, 0], 'v'))
 
-			Assert False(Region([0, 1, 5, 0], [0, 3, 3, 0], "\<C-v>").
-						\includes([0, 3, 4, 0]))
+			let region = Region([0, 4, 5, 0], [0, 4, 7, 0], 'v')
+			Assert False(region.includes([0, 4, 4, 0], [0, 4, 5, 0], 'v'))
 
-			Assert False(Region([0, 3, 5, 0], [0, 5, 7, 0], "\<C-v>").
-						\includes([0, 3, 4, 0]))
+			let region = Region([0, 4, 5, 0], [0, 4, 7, 0], 'v')
+			Assert False(region.includes([0, 4, 4, 0], [0, 4, 7, 0], 'v'))
+
+			" a characterwise item does not include a linewise region
+			let region = Region([0, 1, 1, 0], [0, 1, 7, 0], 'v')
+			Assert False(region.includes([0, 1, 4, 0], [0, 1, 4, 0], 'V'))
+
+			let region = Region([0, 2, 3, 0], [0, 4, 5, 0], 'v')
+			Assert False(region.includes([0, 1, 4, 0], [0, 2, 4, 0], 'V'))
+
+			let region = Region([0, 2, 3, 0], [0, 4, 5, 0], 'v')
+			Assert False(region.includes([0, 2, 4, 0], [0, 4, 4, 0], 'V'))
+
+			let region = Region([0, 2, 3, 0], [0, 4, 5, 0], 'v')
+			Assert False(region.includes([0, 4, 4, 0], [0, 5, 4, 0], 'V'))
+
+			" a characterwise item does not include a blockwise region
+			let region = Region([0, 1, 1, 0], [0, 1, 7, 0], 'v')
+			Assert False(region.includes([0, 2, 3, 0], [0, 4, 5, 0], "\<C-v>"))
+
+			let region = Region([0, 5, 1, 0], [0, 5, 7, 0], 'v')
+			Assert False(region.includes([0, 2, 3, 0], [0, 4, 5, 0], "\<C-v>"))
+
+			let region = Region([0, 2, 1, 0], [0, 2, 3, 0], 'v')
+			Assert False(region.includes([0, 2, 3, 0], [0, 4, 5, 0], "\<C-v>"))
+
+			let region = Region([0, 2, 5, 0], [0, 2, 7, 0], 'v')
+			Assert False(region.includes([0, 2, 3, 0], [0, 4, 5, 0], "\<C-v>"))
+
+			let region = Region([0, 3, 1, 0], [0, 3, 3, 0], 'v')
+			Assert False(region.includes([0, 2, 3, 0], [0, 4, 5, 0], "\<C-v>"))
+
+			let region = Region([0, 3, 5, 0], [0, 3, 7, 0], 'v')
+			Assert False(region.includes([0, 2, 3, 0], [0, 4, 5, 0], "\<C-v>"))
+
+			let region = Region([0, 4, 1, 0], [0, 4, 3, 0], 'v')
+			Assert False(region.includes([0, 2, 3, 0], [0, 4, 5, 0], "\<C-v>"))
+
+			let region = Region([0, 4, 5, 0], [0, 4, 7, 0], 'v')
+			Assert False(region.includes([0, 2, 3, 0], [0, 4, 5, 0], "\<C-v>"))
+
+			let region = Region([0, 1, 1, 0], [0, 2, 3, 0], 'v')
+			Assert False(region.includes([0, 2, 3, 0], [0, 4, 5, 0], "\<C-v>"))
+
+			let region = Region([0, 4, 5, 0], [0, 5, 7, 0], 'v')
+			Assert False(region.includes([0, 2, 3, 0], [0, 4, 5, 0], "\<C-v>"))
+
+			" a linewise item does not include a characterwise region
+			let region = Region([0, 2, 1, 0], [0, 4, 1, 0], 'V')
+			Assert False(region.includes([0, 1, 1, 0], [0, 2, 1, 0], 'v'))
+
+			let region = Region([0, 2, 1, 0], [0, 4, 1, 0], 'V')
+			Assert False(region.includes([0, 4, 1, 0], [0, 5, 1, 0], 'v'))
+
+			let region = Region([0, 2, 1, 0], [0, 4, 1, 0], 'V')
+			Assert False(region.includes([0, 1, 1, 0], [0, 5, 1, 0], 'v'))
+
+			" a linewise item does not include a linewise region
+			let region = Region([0, 1, 1, 0], [0, 1, 1, 0], 'V')
+			Assert False(region.includes([0, 2, 1, 0], [0, 4, 1, 0], 'V'))
+
+			let region = Region([0, 5, 1, 0], [0, 5, 1, 0], 'V')
+			Assert False(region.includes([0, 2, 1, 0], [0, 4, 1, 0], 'V'))
+
+			" a linewise item does not include a blockwise region
+			let region = Region([0, 1, 1, 0], [0, 1, 1, 0], 'V')
+			Assert False(region.includes([0, 2, 3, 0], [0, 4, 5, 0], "\<C-v>"))
+
+			let region = Region([0, 5, 1, 0], [0, 5, 1, 0], 'V')
+			Assert False(region.includes([0, 2, 3, 0], [0, 4, 5, 0], "\<C-v>"))
+
+			" a blockwise item does not include a characterwise region
+			let region = Region([0, 1, 1, 0], [0, 2, 2, 0], "\<C-v>")
+			Assert False(region.includes([0, 2, 3, 0], [0, 4, 5, 0], 'v'))
+
+			let region = Region([0, 4, 6, 0], [0, 5, 7, 0], "\<C-v>")
+			Assert False(region.includes([0, 2, 3, 0], [0, 4, 5, 0], 'v'))
+
+			let region = Region([0, 2, 3, 0], [0, 4, 5, 0], "\<C-v>")
+			Assert False(region.includes([0, 2, 3, 0], [0, 4, 5, 0], 'v'))
+
+			let region = Region([0, 2, 3, 0], [0, 4, 5, 0], "\<C-v>")
+			Assert False(region.includes([0, 2, 1, 0], [0, 2, 3, 0], 'v'))
+
+			let region = Region([0, 2, 3, 0], [0, 4, 5, 0], "\<C-v>")
+			Assert False(region.includes([0, 2, 5, 0], [0, 2, 7, 0], 'v'))
+
+			let region = Region([0, 2, 3, 0], [0, 4, 5, 0], "\<C-v>")
+			Assert False(region.includes([0, 3, 1, 0], [0, 3, 3, 0], 'v'))
+
+			let region = Region([0, 2, 3, 0], [0, 4, 5, 0], "\<C-v>")
+			Assert False(region.includes([0, 3, 5, 0], [0, 3, 7, 0], 'v'))
+
+			let region = Region([0, 2, 3, 0], [0, 4, 5, 0], "\<C-v>")
+			Assert False(region.includes([0, 4, 1, 0], [0, 4, 3, 0], 'v'))
+
+			let region = Region([0, 2, 3, 0], [0, 4, 5, 0], "\<C-v>")
+			Assert False(region.includes([0, 4, 5, 0], [0, 4, 7, 0], 'v'))
+
+			" a blockwise item does not include a linewise region
+			let region = Region([0, 3, 3, 0], [0, 3, 5, 0], "\<C-v>")
+			Assert False(region.includes([0, 3, 1, 0], [0, 3, 1, 0], 'V'))
+
+			let region = Region([0, 2, 3, 0], [0, 4, 5, 0], "\<C-v>")
+			Assert False(region.includes([0, 1, 1, 0], [0, 1, 1, 0], 'V'))
+
+			let region = Region([0, 2, 3, 0], [0, 4, 5, 0], "\<C-v>")
+			Assert False(region.includes([0, 2, 1, 0], [0, 2, 1, 0], 'V'))
+
+			let region = Region([0, 2, 3, 0], [0, 4, 5, 0], "\<C-v>")
+			Assert False(region.includes([0, 3, 1, 0], [0, 3, 1, 0], 'V'))
+
+			let region = Region([0, 2, 3, 0], [0, 4, 5, 0], "\<C-v>")
+			Assert False(region.includes([0, 4, 1, 0], [0, 4, 1, 0], 'V'))
+
+			let region = Region([0, 2, 3, 0], [0, 4, 5, 0], "\<C-v>")
+			Assert False(region.includes([0, 5, 1, 0], [0, 5, 1, 0], 'V'))
+
+			let region = Region([0, 2, 3, 0], [0, 4, 5, 0], "\<C-v>")
+			Assert False(region.includes([0, 1, 1, 0], [0, 5, 1, 0], 'V'))
+
+			let region = Region([0, 2, 3, 0], [0, 4, 5, 0], "\<C-v>")
+			Assert False(region.includes([0, 2, 1, 0], [0, 4, 1, 0], 'V'))
+
+			" a blockwise item does not include a blockwise region
+			let region = Region([0, 3, 3, 0], [0, 3, 5, 0], "\<C-v>")
+			Assert False(region.includes([0, 2, 3, 0], [0, 3, 5, 0], "\<C-v>"))
+
+			let region = Region([0, 3, 3, 0], [0, 3, 5, 0], "\<C-v>")
+			Assert False(region.includes([0, 3, 1, 0], [0, 3, 3, 0], "\<C-v>"))
+
+			let region = Region([0, 3, 3, 0], [0, 3, 5, 0], "\<C-v>")
+			Assert False(region.includes([0, 3, 5, 0], [0, 3, 7, 0], "\<C-v>"))
+
+			let region = Region([0, 3, 3, 0], [0, 3, 5, 0], "\<C-v>")
+			Assert False(region.includes([0, 4, 3, 0], [0, 4, 5, 0], "\<C-v>"))
+
+			let region = Region([0, 2, 3, 0], [0, 4, 5, 0], "\<C-v>")
+			Assert False(region.includes([0, 1, 1, 0], [0, 2, 3, 0], "\<C-v>"))
+
+			let region = Region([0, 2, 3, 0], [0, 4, 5, 0], "\<C-v>")
+			Assert False(region.includes([0, 1, 5, 0], [0, 2, 7, 0], "\<C-v>"))
+
+			let region = Region([0, 2, 3, 0], [0, 4, 5, 0], "\<C-v>")
+			Assert False(region.includes([0, 4, 1, 0], [0, 5, 3, 0], "\<C-v>"))
+
+			let region = Region([0, 2, 3, 0], [0, 4, 5, 0], "\<C-v>")
+			Assert False(region.includes([0, 4, 5, 0], [0, 5, 7, 0], "\<C-v>"))
+
+			let region = Region([0, 2, 3, 0], [0, 4, 5, 0], "\<C-v>")
+			Assert False(region.includes([0, 2, 1, 0], [0, 4, 7, 0], "\<C-v>"))
+
+			let region = Region([0, 2, 3, 0], [0, 4, 5, 0], "\<C-v>")
+			Assert False(region.includes([0, 1, 3, 0], [0, 5, 3, 0], "\<C-v>"))
+
+			let region = Region([0, 2, 3, 0], [0, 4, 5, 0], "\<C-v>")
+			Assert False(region.includes([0, 1, 1, 0], [0, 5, 7, 0], "\<C-v>"))
+		End
+
+		It throws an exception with inappropriate arguments
+			let head = [0, 1, 1, 0]
+			let tail = [0, 1, 1, 0]
+			let region = Region(head, tail, 'v')
+			Throws /^Vim(echoerr):multiselect: Invalid argument for Region.includes()/ region.includes('')
+			Throws /^Vim(echoerr):multiselect: Invalid argument for Region.includes()/ region.includes(1, [0, 1, 1, 0])
+			Throws /^Vim(echoerr):multiselect: Invalid argument for Region.includes()/ region.includes([0, 1, 1, 0], 1)
+		End
+	End
+
+	Context .includes(head)
+		It returns TRUE if itself is including a position
+			let region = Region([0, 2, 1, 0], [0, 4, 8, 0], 'v')
+			Assert True(region.includes([0, 3, 5, 0]))
+
+			let region = Region([0, 2, 1, 0], [0, 4, 8, 0], 'V')
+			Assert True(region.includes([0, 3, 5, 0]))
+
+			let region = Region([0, 2, 1, 0], [0, 4, 8, 0], "\<C-v>")
+			Assert True(region.includes([0, 3, 5, 0]))
+		End
+
+		It returns FALSE if itself is not including a position
+			let region = Region([0, 2, 1, 0], [0, 4, 8, 0], 'v')
+			Assert False(region.includes([0, 1, 1, 0]))
+
+			let region = Region([0, 2, 1, 0], [0, 4, 8, 0], 'V')
+			Assert False(region.includes([0, 1, 1, 0]))
+
+			let region = Region([0, 2, 1, 0], [0, 4, 8, 0], "\<C-v>")
+			Assert False(region.includes([0, 1, 1, 0]))
+		End
+	End
+
+	Context .includes(lnum)
+		It returns TRUE if itself is including a line
+			let region = Region([0, 2, 1, 0], [0, 4, 8, 0], 'v')
+			Assert True(region.includes(3))
+
+			let region = Region([0, 2, 1, 0], [0, 4, 8, 0], 'V')
+			Assert True(region.includes(3))
+
+			let region = Region([0, 2, 1, 0], [0, 4, 8, 0], "\<C-v>")
+			Assert True(region.includes(3))
+		End
+
+		It returns FALSE if itself is not including a position
+			let region = Region([0, 2, 1, 0], [0, 4, 8, 0], 'v')
+			Assert False(region.includes(1))
+
+			let region = Region([0, 2, 1, 0], [0, 4, 8, 0], 'V')
+			Assert False(region.includes(1))
+
+			let region = Region([0, 2, 1, 0], [0, 4, 8, 0], "\<C-v>")
+			Assert False(region.includes(1))
+		End
+	End
+
+	Context .includes(startlnum, endlnum)
+		It returns TRUE if itself is including a range between two lines
+			let region = Region([0, 2, 1, 0], [0, 4, 8, 0], 'v')
+			Assert True(region.includes(2, 4))
+
+			let region = Region([0, 2, 1, 0], [0, 4, 8, 0], 'V')
+			Assert True(region.includes(2, 4))
+
+			let region = Region([0, 2, 1, 0], [0, 4, 8, 0], "\<C-v>")
+			Assert True(region.includes(2, 4))
+		End
+
+		It returns FALSE if itself is not including a range between two lines
+			let region = Region([0, 2, 1, 0], [0, 4, 8, 0], 'v')
+			Assert False(region.includes(1, 5))
+
+			let region = Region([0, 2, 1, 0], [0, 4, 8, 0], 'V')
+			Assert False(region.includes(1, 5))
+
+			let region = Region([0, 2, 1, 0], [0, 4, 8, 0], "\<C-v>")
+			Assert False(region.includes(1, 5))
 		End
 	End
 
 	Context .includes(region)
-		It returns TRUE if itself is including the region
+		It returns TRUE if itself is including a region
 			" a characterwise item includes a characterwise region
-			Assert True(Region([0, 1, 1, 0], [0, 2, 4, 0], 'v').
-						\includes(Region([0, 1, 1, 0], [0, 1, 3, 0], 'v')))
+			let region1 = Region([0, 1, 1, 0], [0, 2, 4, 0], 'v')
+			let region2 = Region([0, 1, 1, 0], [0, 1, 3, 0], 'v')
+			Assert True(region1.includes(region2))
 
-			Assert True(Region([0, 4, 4, 0], [0, 5, 7, 0], 'v').
-						\includes(Region([0, 5, 5, 0], [0, 5, 7, 0], 'v')))
+			let region1 = Region([0, 4, 4, 0], [0, 5, 7, 0], 'v')
+			let region2 = Region([0, 5, 5, 0], [0, 5, 7, 0], 'v')
+			Assert True(region1.includes(region2))
 
-			Assert True(Region([0, 1, 1, 0], [0, 5, 7, 0], 'v').
-						\includes(Region([0, 1, 1, 0], [0, 5, 7, 0], 'v')))
+			let region1 = Region([0, 1, 1, 0], [0, 5, 7, 0], 'v')
+			let region2 = Region([0, 1, 1, 0], [0, 5, 7, 0], 'v')
+			Assert True(region1.includes(region2))
 
-			Assert True(Region([0, 1, 1, 0], [0, 5, 7, 0], 'v').
-						\includes(Region([0, 3, 3, 0], [0, 3, 3, 0], 'v')))
+			let region1 = Region([0, 1, 1, 0], [0, 5, 7, 0], 'v')
+			let region2 = Region([0, 3, 3, 0], [0, 3, 3, 0], 'v')
+			Assert True(region1.includes(region2))
 
-			Assert True(Region([0, 3, 3, 0], [0, 3, 3, 0], 'v').
-						\includes(Region([0, 3, 3, 0], [0, 3, 3, 0], 'v')))
+			let region1 = Region([0, 3, 3, 0], [0, 3, 3, 0], 'v')
+			let region2 = Region([0, 3, 3, 0], [0, 3, 3, 0], 'v')
+			Assert True(region1.includes(region2))
 
+			let region1 = Region([0, 3, 3, 0], [0, 3, 3, 0], 'v')
+			let region2 = Region([0, 3, 3, 0], [0, 3, 3, 0], 'v')
+			Assert True(region1.includes(region2))
+
+			let region = Region([0, 2, 5, 0], [0, 3, 4, 0], 'v')
+			Assert True(region.includes([0, 3, 4, 0]))
+
+			let region = Region([0, 3, 1, 0], [0, 3, 7, 0], 'v')
+			Assert True(region.includes([0, 3, 4, 0]))
+
+			let region = Region([0, 3, 4, 0], [0, 4, 3, 0], 'v')
+			Assert True(region.includes([0, 3, 4, 0]))
 
 			" a characterwise item includes a linewise region
-			Assert True(Region([0, 1, 1, 0], [0, 2, 1, 0], 'v').
-						\includes(Region([0, 1, 4, 0], [0, 1, 4, 0], 'V')))
+			let region1 = Region([0, 1, 1, 0], [0, 2, 1, 0], 'v')
+			let region2 = Region([0, 1, 4, 0], [0, 1, 4, 0], 'V')
+			Assert True(region1.includes(region2))
 
-			Assert True(Region([0, 1, 1, 0], [0, 1, 8, 0], 'v').
-						\includes(Region([0, 1, 1, 0], [0, 1, 1, 0], 'V')))
+			let region1 = Region([0, 1, 1, 0], [0, 1, 8, 0], 'v')
+			let region2 = Region([0, 1, 1, 0], [0, 1, 1, 0], 'V')
+			Assert True(region1.includes(region2))
 
-			Assert True(Region([0, 1, 1, 0], [0, 3, 1, 0], 'v').
-						\includes(Region([0, 2, 1, 0], [0, 2, 1, 0], 'V')))
+			let region1 = Region([0, 1, 1, 0], [0, 3, 1, 0], 'v')
+			let region2 = Region([0, 2, 1, 0], [0, 2, 1, 0], 'V')
+			Assert True(region1.includes(region2))
 
 			" a characterwise item includes a blockwise region
-			Assert True(Region([0, 2, 3, 0], [0, 4, 5, 0], 'v').
-						\includes(Region([0, 2, 3, 0], [0, 4, 5, 0], "\<C-v>")))
+			let region1 = Region([0, 2, 3, 0], [0, 4, 5, 0], 'v')
+			let region2 = Region([0, 2, 3, 0], [0, 4, 5, 0], "\<C-v>")
+			Assert True(region1.includes(region2))
 
-			Assert True(Region([0, 2, 3, 0], [0, 4, 5, 0], 'v').
-						\includes(Region([0, 2, 3, 0], [0, 3, 5, 0], "\<C-v>")))
+			let region1 = Region([0, 2, 3, 0], [0, 4, 5, 0], 'v')
+			let region2 = Region([0, 2, 3, 0], [0, 3, 5, 0], "\<C-v>")
+			Assert True(region1.includes(region2))
 
-			Assert True(Region([0, 2, 3, 0], [0, 4, 5, 0], 'v').
-						\includes(Region([0, 3, 1, 0], [0, 4, 2, 0], "\<C-v>")))
+			let region1 = Region([0, 2, 3, 0], [0, 4, 5, 0], 'v')
+			let region2 = Region([0, 3, 1, 0], [0, 4, 2, 0], "\<C-v>")
+			Assert True(region1.includes(region2))
 
-			Assert True(Region([0, 2, 3, 0], [0, 4, 5, 0], 'v').
-						\includes(Region([0, 2, 3, 0], [0, 3, 5, 0], "\<C-v>")))
+			let region1 = Region([0, 2, 3, 0], [0, 4, 5, 0], 'v')
+			let region2 = Region([0, 2, 3, 0], [0, 3, 5, 0], "\<C-v>")
+			Assert True(region1.includes(region2))
 
-			Assert True(Region([0, 2, 3, 0], [0, 4, 5, 0], 'v').
-						\includes(Region([0, 3, 3, 0], [0, 4, 5, 0], "\<C-v>")))
+			let region1 = Region([0, 2, 3, 0], [0, 4, 5, 0], 'v')
+			let region2 = Region([0, 3, 3, 0], [0, 4, 5, 0], "\<C-v>")
+			Assert True(region1.includes(region2))
 
 			" a linewise item includes a characterwise region
-			Assert True(Region([0, 2, 1, 0], [0, 2, 1, 0], 'V').
-						\includes(Region([0, 2, 3, 0], [0, 2, 5, 0], 'v')))
+			let region1 = Region([0, 2, 1, 0], [0, 2, 1, 0], 'V')
+			let region2 = Region([0, 2, 3, 0], [0, 2, 5, 0], 'v')
+			Assert True(region1.includes(region2))
 
-			Assert True(Region([0, 2, 1, 0], [0, 2, 1, 0], 'V').
-						\includes(Region([0, 2, 1, 0], [0, 2, 8, 0], 'v')))
+			let region1 = Region([0, 2, 1, 0], [0, 2, 1, 0], 'V')
+			let region2 = Region([0, 2, 1, 0], [0, 2, 8, 0], 'v')
+			Assert True(region1.includes(region2))
 
-			Assert True(Region([0, 2, 1, 0], [0, 4, 1, 0], 'V').
-						\includes(Region([0, 2, 3, 0], [0, 4, 5, 0], 'v')))
+			let region1 = Region([0, 2, 1, 0], [0, 4, 1, 0], 'V')
+			let region2 = Region([0, 2, 3, 0], [0, 4, 5, 0], 'v')
+			Assert True(region1.includes(region2))
 
-			Assert True(Region([0, 2, 1, 0], [0, 4, 1, 0], 'V').
-						\includes(Region([0, 3, 3, 0], [0, 3, 5, 0], 'v')))
+			let region1 = Region([0, 2, 1, 0], [0, 4, 1, 0], 'V')
+			let region2 = Region([0, 3, 3, 0], [0, 3, 5, 0], 'v')
+			Assert True(region1.includes(region2))
 
-			Assert True(Region([0, 2, 1, 0], [0, 4, 1, 0], 'V').
-						\includes(Region([0, 4, 3, 0], [0, 4, 5, 0], 'v')))
+			let region1 = Region([0, 2, 1, 0], [0, 4, 1, 0], 'V')
+			let region2 = Region([0, 4, 3, 0], [0, 4, 5, 0], 'v')
+			Assert True(region1.includes(region2))
 
-			Assert True(Region([0, 2, 1, 0], [0, 4, 1, 0], 'V').
-						\includes(Region([0, 2, 1, 0], [0, 4, 8, 0], 'v')))
+			let region1 = Region([0, 2, 1, 0], [0, 4, 1, 0], 'V')
+			let region2 = Region([0, 2, 1, 0], [0, 4, 8, 0], 'v')
+			Assert True(region1.includes(region2))
+
+			let region = Region([0, 2, 5, 0], [0, 3, 3, 0], 'V')
+			Assert True(region.includes([0, 3, 4, 0]))
+
+			let region = Region([0, 3, 1, 0], [0, 3, 7, 0], 'V')
+			Assert True(region.includes([0, 3, 4, 0]))
+
+			let region = Region([0, 3, 5, 0], [0, 4, 3, 0], 'V')
+			Assert True(region.includes([0, 3, 4, 0]))
 
 			" a linewise item includes a linewise region
-			Assert True(Region([0, 3, 1, 0], [0, 3, 1, 0], 'V').
-						\includes(Region([0, 3, 1, 0], [0, 3, 1, 0], 'V')))
+			let region1 = Region([0, 3, 1, 0], [0, 3, 1, 0], 'V')
+			let region2 = Region([0, 3, 1, 0], [0, 3, 1, 0], 'V')
+			Assert True(region1.includes(region2))
 
-			Assert True(Region([0, 2, 1, 0], [0, 4, 1, 0], 'V').
-						\includes(Region([0, 2, 1, 0], [0, 2, 1, 0], 'V')))
+			let region1 = Region([0, 2, 1, 0], [0, 4, 1, 0], 'V')
+			let region2 = Region([0, 2, 1, 0], [0, 2, 1, 0], 'V')
+			Assert True(region1.includes(region2))
 
-			Assert True(Region([0, 2, 1, 0], [0, 4, 1, 0], 'V').
-						\includes(Region([0, 3, 1, 0], [0, 3, 1, 0], 'V')))
+			let region1 = Region([0, 2, 1, 0], [0, 4, 1, 0], 'V')
+			let region2 = Region([0, 3, 1, 0], [0, 3, 1, 0], 'V')
+			Assert True(region1.includes(region2))
 
-			Assert True(Region([0, 2, 1, 0], [0, 4, 1, 0], 'V').
-						\includes(Region([0, 2, 1, 0], [0, 4, 1, 0], 'V')))
+			let region1 = Region([0, 2, 1, 0], [0, 4, 1, 0], 'V')
+			let region2 = Region([0, 2, 1, 0], [0, 4, 1, 0], 'V')
+			Assert True(region1.includes(region2))
 
 			" a linewise item includes a blockwise region
-			Assert True(Region([0, 2, 1, 0], [0, 2, 1, 0], 'V').
-						\includes(Region([0, 2, 3, 0], [0, 2, 5, 0], "\<C-v>")))
+			let region1 = Region([0, 2, 1, 0], [0, 2, 1, 0], 'V')
+			let region2 = Region([0, 2, 3, 0], [0, 2, 5, 0], "\<C-v>")
+			Assert True(region1.includes(region2))
 
-			Assert True(Region([0, 2, 1, 0], [0, 4, 1, 0], 'V').
-						\includes(Region([0, 2, 1, 0], [0, 4, 7, 0], "\<C-v>")))
+			let region1 = Region([0, 2, 1, 0], [0, 4, 1, 0], 'V')
+			let region2 = Region([0, 2, 1, 0], [0, 4, 7, 0], "\<C-v>")
+			Assert True(region1.includes(region2))
 
-			Assert True(Region([0, 2, 1, 0], [0, 4, 1, 0], 'V').
-						\includes(Region([0, 2, 1, 0], [0, 3, 3, 0], "\<C-v>")))
+			let region1 = Region([0, 2, 1, 0], [0, 4, 1, 0], 'V')
+			let region2 = Region([0, 2, 1, 0], [0, 3, 3, 0], "\<C-v>")
+			Assert True(region1.includes(region2))
 
-			Assert True(Region([0, 2, 1, 0], [0, 4, 1, 0], 'V').
-						\includes(Region([0, 2, 5, 0], [0, 3, 7, 0], "\<C-v>")))
+			let region1 = Region([0, 2, 1, 0], [0, 4, 1, 0], 'V')
+			let region2 = Region([0, 2, 5, 0], [0, 3, 7, 0], "\<C-v>")
+			Assert True(region1.includes(region2))
 
-			Assert True(Region([0, 2, 1, 0], [0, 4, 1, 0], 'V').
-						\includes(Region([0, 3, 1, 0], [0, 4, 3, 0], "\<C-v>")))
+			let region1 = Region([0, 2, 1, 0], [0, 4, 1, 0], 'V')
+			let region2 = Region([0, 3, 1, 0], [0, 4, 3, 0], "\<C-v>")
+			Assert True(region1.includes(region2))
 
-			Assert True(Region([0, 2, 1, 0], [0, 4, 1, 0], 'V').
-						\includes(Region([0, 3, 5, 0], [0, 4, 7, 0], "\<C-v>")))
+			let region1 = Region([0, 2, 1, 0], [0, 4, 1, 0], 'V')
+			let region2 = Region([0, 3, 5, 0], [0, 4, 7, 0], "\<C-v>")
+			Assert True(region1.includes(region2))
 
-			Assert True(Region([0, 2, 1, 0], [0, 4, 1, 0], 'V').
-						\includes(Region([0, 2, 3, 0], [0, 4, 5, 0], "\<C-v>")))
+			let region1 = Region([0, 2, 1, 0], [0, 4, 1, 0], 'V')
+			let region2 = Region([0, 2, 3, 0], [0, 4, 5, 0], "\<C-v>")
+			Assert True(region1.includes(region2))
 
 			" a blockwise item includes a characterwise region
-			Assert True(Region([0, 3, 1, 0], [0, 3, 7, 0], "\<C-v>").
-						\includes(Region([0, 3, 3, 0], [0, 3, 5, 0], 'v')))
+			let region1 = Region([0, 3, 1, 0], [0, 3, 7, 0], "\<C-v>")
+			let region2 = Region([0, 3, 3, 0], [0, 3, 5, 0], 'v')
+			Assert True(region1.includes(region2))
 
-			Assert True(Region([0, 3, 3, 0], [0, 3, 5, 0], "\<C-v>").
-						\includes(Region([0, 3, 3, 0], [0, 3, 5, 0], 'v')))
+			let region1 = Region([0, 3, 3, 0], [0, 3, 5, 0], "\<C-v>")
+			let region2 = Region([0, 3, 3, 0], [0, 3, 5, 0], 'v')
+			Assert True(region1.includes(region2))
 
-			Assert True(Region([0, 2, 3, 0], [0, 4, 5, 0], "\<C-v>").
-						\includes(Region([0, 2, 3, 0], [0, 2, 5, 0], 'v')))
+			let region1 = Region([0, 2, 3, 0], [0, 4, 5, 0], "\<C-v>")
+			let region2 = Region([0, 2, 3, 0], [0, 2, 5, 0], 'v')
+			Assert True(region1.includes(region2))
 
-			Assert True(Region([0, 2, 3, 0], [0, 4, 5, 0], "\<C-v>").
-						\includes(Region([0, 3, 3, 0], [0, 3, 5, 0], 'v')))
+			let region1 = Region([0, 2, 3, 0], [0, 4, 5, 0], "\<C-v>")
+			let region2 = Region([0, 3, 3, 0], [0, 3, 5, 0], 'v')
+			Assert True(region1.includes(region2))
 
-			Assert True(Region([0, 2, 3, 0], [0, 4, 5, 0], "\<C-v>").
-						\includes(Region([0, 4, 3, 0], [0, 4, 5, 0], 'v')))
+			let region1 = Region([0, 2, 3, 0], [0, 4, 5, 0], "\<C-v>")
+			let region2 = Region([0, 4, 3, 0], [0, 4, 5, 0], 'v')
+			Assert True(region1.includes(region2))
 
-			Assert True(Region([0, 2, 1, 0], [0, 4, 8, 0], "\<C-v>").
-						\includes(Region([0, 2, 3, 0], [0, 4, 5, 0], 'v')))
+			let region1 = Region([0, 2, 1, 0], [0, 4, 8, 0], "\<C-v>")
+			let region2 = Region([0, 2, 3, 0], [0, 4, 5, 0], 'v')
+			Assert True(region1.includes(region2))
+
+			let region = Region([0, 2, 3, 0], [0, 3, 4, 0], "\<C-v>")
+			Assert True(region.includes([0, 3, 4, 0]))
+
+			let region = Region([0, 2, 3, 0], [0, 4, 5, 0], "\<C-v>")
+			Assert True(region.includes([0, 3, 4, 0]))
+
+			let region = Region([0, 3, 4, 0], [0, 4, 5, 0], "\<C-v>")
+			Assert True(region.includes([0, 3, 4, 0]))
 
 			" a blockwise item includes a linewise region
-			Assert True(Region([0, 3, 1, 0], [0, 3, 8, 0], "\<C-v>").
-						\includes(Region([0, 3, 1, 0], [0, 3, 1, 0], 'V')))
+			let region1 = Region([0, 3, 1, 0], [0, 3, 8, 0], "\<C-v>")
+			let region2 = Region([0, 3, 1, 0], [0, 3, 1, 0], 'V')
+			Assert True(region1.includes(region2))
 
-			Assert True(Region([0, 2, 1, 0], [0, 4, 8, 0], "\<C-v>").
-						\includes(Region([0, 2, 1, 0], [0, 2, 1, 0], 'V')))
+			let region1 = Region([0, 2, 1, 0], [0, 4, 8, 0], "\<C-v>")
+			let region2 = Region([0, 2, 1, 0], [0, 2, 1, 0], 'V')
+			Assert True(region1.includes(region2))
 
-			Assert True(Region([0, 2, 1, 0], [0, 4, 8, 0], "\<C-v>").
-						\includes(Region([0, 3, 1, 0], [0, 3, 1, 0], 'V')))
+			let region1 = Region([0, 2, 1, 0], [0, 4, 8, 0], "\<C-v>")
+			let region2 = Region([0, 3, 1, 0], [0, 3, 1, 0], 'V')
+			Assert True(region1.includes(region2))
 
-			Assert True(Region([0, 2, 1, 0], [0, 4, 8, 0], "\<C-v>").
-						\includes(Region([0, 4, 1, 0], [0, 4, 1, 0], 'V')))
+			let region1 = Region([0, 2, 1, 0], [0, 4, 8, 0], "\<C-v>")
+			let region2 = Region([0, 4, 1, 0], [0, 4, 1, 0], 'V')
+			Assert True(region1.includes(region2))
 
 			" a blockwise item includes a blockwise region
-			Assert True(Region([0, 3, 3, 0], [0, 3, 5, 0], "\<C-v>").
-						\includes(Region([0, 3, 3, 0], [0, 3, 5, 0], "\<C-v>")))
+			let region1 = Region([0, 3, 3, 0], [0, 3, 5, 0], "\<C-v>")
+			let region2 = Region([0, 3, 3, 0], [0, 3, 5, 0], "\<C-v>")
+			Assert True(region1.includes(region2))
 
-			Assert True(Region([0, 2, 3, 0], [0, 4, 5, 0], "\<C-v>").
-						\includes(Region([0, 2, 3, 0], [0, 3, 4, 0], "\<C-v>")))
+			let region1 = Region([0, 2, 3, 0], [0, 4, 5, 0], "\<C-v>")
+			let region2 = Region([0, 2, 3, 0], [0, 3, 4, 0], "\<C-v>")
+			Assert True(region1.includes(region2))
 
-			Assert True(Region([0, 2, 3, 0], [0, 4, 5, 0], "\<C-v>").
-						\includes(Region([0, 2, 4, 0], [0, 3, 5, 0], "\<C-v>")))
+			let region1 = Region([0, 2, 3, 0], [0, 4, 5, 0], "\<C-v>")
+			let region2 = Region([0, 2, 4, 0], [0, 3, 5, 0], "\<C-v>")
+			Assert True(region1.includes(region2))
 
-			Assert True(Region([0, 2, 3, 0], [0, 4, 5, 0], "\<C-v>").
-						\includes(Region([0, 3, 3, 0], [0, 4, 4, 0], "\<C-v>")))
+			let region1 = Region([0, 2, 3, 0], [0, 4, 5, 0], "\<C-v>")
+			let region2 = Region([0, 3, 3, 0], [0, 4, 4, 0], "\<C-v>")
+			Assert True(region1.includes(region2))
 
-			Assert True(Region([0, 2, 3, 0], [0, 4, 5, 0], "\<C-v>").
-						\includes(Region([0, 3, 4, 0], [0, 4, 5, 0], "\<C-v>")))
+			let region1 = Region([0, 2, 3, 0], [0, 4, 5, 0], "\<C-v>")
+			let region2 = Region([0, 3, 4, 0], [0, 4, 5, 0], "\<C-v>")
+			Assert True(region1.includes(region2))
 
-			Assert True(Region([0, 2, 3, 0], [0, 4, 5, 0], "\<C-v>").
-						\includes(Region([0, 2, 3, 0], [0, 4, 3, 0], "\<C-v>")))
+			let region1 = Region([0, 2, 3, 0], [0, 4, 5, 0], "\<C-v>")
+			let region2 = Region([0, 2, 3, 0], [0, 4, 3, 0], "\<C-v>")
+			Assert True(region1.includes(region2))
 
-			Assert True(Region([0, 2, 3, 0], [0, 4, 5, 0], "\<C-v>").
-						\includes(Region([0, 2, 3, 0], [0, 4, 5, 0], "\<C-v>")))
+			let region1 = Region([0, 2, 3, 0], [0, 4, 5, 0], "\<C-v>")
+			let region2 = Region([0, 2, 3, 0], [0, 4, 5, 0], "\<C-v>")
+			Assert True(region1.includes(region2))
 		End
 
-		It returns FALSE if itself is not including the region
+		It returns FALSE if itself is not including a region
 			" a characterwise item does not include a characterwise region
-			Assert False(Region([0, 1, 1, 0], [0, 2, 3, 0], 'v').
-						\includes(Region([0, 2, 4, 0], [0, 4, 4, 0], 'v')))
+			let region1 = Region([0, 1, 1, 0], [0, 2, 3, 0], 'v')
+			let region2 = Region([0, 2, 4, 0], [0, 4, 4, 0], 'v')
+			Assert False(region1.includes(region2))
 
-			Assert False(Region([0, 4, 5, 0], [0, 5, 7, 0], 'v').
-						\includes(Region([0, 2, 4, 0], [0, 4, 4, 0], 'v')))
+			let region1 = Region([0, 4, 5, 0], [0, 5, 7, 0], 'v')
+			let region2 = Region([0, 2, 4, 0], [0, 4, 4, 0], 'v')
+			Assert False(region1.includes(region2))
 
-			Assert False(Region([0, 1, 1, 0], [0, 2, 3, 0], 'v').
-						\includes(Region([0, 2, 3, 0], [0, 2, 4, 0], 'v')))
+			let region1 = Region([0, 1, 1, 0], [0, 2, 3, 0], 'v')
+			let region2 = Region([0, 2, 3, 0], [0, 2, 4, 0], 'v')
+			Assert False(region1.includes(region2))
 
-			Assert False(Region([0, 1, 1, 0], [0, 2, 3, 0], 'v').
-						\includes(Region([0, 1, 1, 0], [0, 2, 4, 0], 'v')))
+			let region1 = Region([0, 1, 1, 0], [0, 2, 3, 0], 'v')
+			let region2 = Region([0, 1, 1, 0], [0, 2, 4, 0], 'v')
+			Assert False(region1.includes(region2))
 
-			Assert False(Region([0, 4, 5, 0], [0, 4, 7, 0], 'v').
-						\includes(Region([0, 4, 4, 0], [0, 4, 5, 0], 'v')))
+			let region1 = Region([0, 4, 5, 0], [0, 4, 7, 0], 'v')
+			let region2 = Region([0, 4, 4, 0], [0, 4, 5, 0], 'v')
+			Assert False(region1.includes(region2))
 
-			Assert False(Region([0, 4, 5, 0], [0, 4, 7, 0], 'v').
-						\includes(Region([0, 4, 4, 0], [0, 4, 7, 0], 'v')))
+			let region1 = Region([0, 4, 5, 0], [0, 4, 7, 0], 'v')
+			let region2 = Region([0, 4, 4, 0], [0, 4, 7, 0], 'v')
+			Assert False(region1.includes(region2))
 
 			" a characterwise item does not include a linewise region
-			Assert False(Region([0, 1, 1, 0], [0, 1, 7, 0], 'v').
-						\includes(Region([0, 1, 4, 0], [0, 1, 4, 0], 'V')))
+			let region1 = Region([0, 1, 1, 0], [0, 1, 7, 0], 'v')
+			let region2 = Region([0, 1, 4, 0], [0, 1, 4, 0], 'V')
+			Assert False(region1.includes(region2))
 
-			Assert False(Region([0, 2, 3, 0], [0, 4, 5, 0], 'v').
-						\includes(Region([0, 1, 4, 0], [0, 2, 4, 0], 'V')))
+			let region1 = Region([0, 2, 3, 0], [0, 4, 5, 0], 'v')
+			let region2 = Region([0, 1, 4, 0], [0, 2, 4, 0], 'V')
+			Assert False(region1.includes(region2))
 
-			Assert False(Region([0, 2, 3, 0], [0, 4, 5, 0], 'v').
-						\includes(Region([0, 2, 4, 0], [0, 4, 4, 0], 'V')))
+			let region1 = Region([0, 2, 3, 0], [0, 4, 5, 0], 'v')
+			let region2 = Region([0, 2, 4, 0], [0, 4, 4, 0], 'V')
+			Assert False(region1.includes(region2))
 
-			Assert False(Region([0, 2, 3, 0], [0, 4, 5, 0], 'v').
-						\includes(Region([0, 4, 4, 0], [0, 5, 4, 0], 'V')))
+			let region1 = Region([0, 2, 3, 0], [0, 4, 5, 0], 'v')
+			let region2 = Region([0, 4, 4, 0], [0, 5, 4, 0], 'V')
+			Assert False(region1.includes(region2))
 
 			" a characterwise item does not include a blockwise region
-			Assert False(Region([0, 1, 1, 0], [0, 1, 7, 0], 'v').
-						\includes(Region([0, 2, 3, 0], [0, 4, 5, 0], "\<C-v>")))
+			let region1 = Region([0, 1, 1, 0], [0, 1, 7, 0], 'v')
+			let region2 = Region([0, 2, 3, 0], [0, 4, 5, 0], "\<C-v>")
+			Assert False(region1.includes(region2))
 
-			Assert False(Region([0, 5, 1, 0], [0, 5, 7, 0], 'v').
-						\includes(Region([0, 2, 3, 0], [0, 4, 5, 0], "\<C-v>")))
+			let region1 = Region([0, 5, 1, 0], [0, 5, 7, 0], 'v')
+			let region2 = Region([0, 2, 3, 0], [0, 4, 5, 0], "\<C-v>")
+			Assert False(region1.includes(region2))
 
-			Assert False(Region([0, 2, 1, 0], [0, 2, 3, 0], 'v').
-						\includes(Region([0, 2, 3, 0], [0, 4, 5, 0], "\<C-v>")))
+			let region1 = Region([0, 2, 1, 0], [0, 2, 3, 0], 'v')
+			let region2 = Region([0, 2, 3, 0], [0, 4, 5, 0], "\<C-v>")
+			Assert False(region1.includes(region2))
 
-			Assert False(Region([0, 2, 5, 0], [0, 2, 7, 0], 'v').
-						\includes(Region([0, 2, 3, 0], [0, 4, 5, 0], "\<C-v>")))
+			let region1 = Region([0, 2, 5, 0], [0, 2, 7, 0], 'v')
+			let region2 = Region([0, 2, 3, 0], [0, 4, 5, 0], "\<C-v>")
+			Assert False(region1.includes(region2))
 
-			Assert False(Region([0, 3, 1, 0], [0, 3, 3, 0], 'v').
-						\includes(Region([0, 2, 3, 0], [0, 4, 5, 0], "\<C-v>")))
+			let region1 = Region([0, 3, 1, 0], [0, 3, 3, 0], 'v')
+			let region2 = Region([0, 2, 3, 0], [0, 4, 5, 0], "\<C-v>")
+			Assert False(region1.includes(region2))
 
-			Assert False(Region([0, 3, 5, 0], [0, 3, 7, 0], 'v').
-						\includes(Region([0, 2, 3, 0], [0, 4, 5, 0], "\<C-v>")))
+			let region1 = Region([0, 3, 5, 0], [0, 3, 7, 0], 'v')
+			let region2 = Region([0, 2, 3, 0], [0, 4, 5, 0], "\<C-v>")
+			Assert False(region1.includes(region2))
 
-			Assert False(Region([0, 4, 1, 0], [0, 4, 3, 0], 'v').
-						\includes(Region([0, 2, 3, 0], [0, 4, 5, 0], "\<C-v>")))
+			let region1 = Region([0, 4, 1, 0], [0, 4, 3, 0], 'v')
+			let region2 = Region([0, 2, 3, 0], [0, 4, 5, 0], "\<C-v>")
+			Assert False(region1.includes(region2))
 
-			Assert False(Region([0, 4, 5, 0], [0, 4, 7, 0], 'v').
-						\includes(Region([0, 2, 3, 0], [0, 4, 5, 0], "\<C-v>")))
+			let region1 = Region([0, 4, 5, 0], [0, 4, 7, 0], 'v')
+			let region2 = Region([0, 2, 3, 0], [0, 4, 5, 0], "\<C-v>")
+			Assert False(region1.includes(region2))
 
-			Assert False(Region([0, 1, 1, 0], [0, 2, 3, 0], 'v').
-						\includes(Region([0, 2, 3, 0], [0, 4, 5, 0], "\<C-v>")))
+			let region1 = Region([0, 1, 1, 0], [0, 2, 3, 0], 'v')
+			let region2 = Region([0, 2, 3, 0], [0, 4, 5, 0], "\<C-v>")
+			Assert False(region1.includes(region2))
 
-			Assert False(Region([0, 4, 5, 0], [0, 5, 7, 0], 'v').
-						\includes(Region([0, 2, 3, 0], [0, 4, 5, 0], "\<C-v>")))
+			let region1 = Region([0, 4, 5, 0], [0, 5, 7, 0], 'v')
+			let region2 = Region([0, 2, 3, 0], [0, 4, 5, 0], "\<C-v>")
+			Assert False(region1.includes(region2))
 
 			" a linewise item does not include a characterwise region
-			Assert False(Region([0, 2, 1, 0], [0, 4, 1, 0], 'V').
-						\includes(Region([0, 1, 1, 0], [0, 2, 1, 0], 'v')))
+			let region1 = Region([0, 2, 1, 0], [0, 4, 1, 0], 'V')
+			let region2 = Region([0, 1, 1, 0], [0, 2, 1, 0], 'v')
+			Assert False(region1.includes(region2))
 
-			Assert False(Region([0, 2, 1, 0], [0, 4, 1, 0], 'V').
-						\includes(Region([0, 4, 1, 0], [0, 5, 1, 0], 'v')))
+			let region1 = Region([0, 2, 1, 0], [0, 4, 1, 0], 'V')
+			let region2 = Region([0, 4, 1, 0], [0, 5, 1, 0], 'v')
+			Assert False(region1.includes(region2))
 
-			Assert False(Region([0, 2, 1, 0], [0, 4, 1, 0], 'V').
-						\includes(Region([0, 1, 1, 0], [0, 5, 1, 0], 'v')))
+			let region1 = Region([0, 2, 1, 0], [0, 4, 1, 0], 'V')
+			let region2 = Region([0, 1, 1, 0], [0, 5, 1, 0], 'v')
+			Assert False(region1.includes(region2))
 
 			" a linewise item does not include a linewise region
-			Assert False(Region([0, 1, 1, 0], [0, 1, 1, 0], 'V').
-						\includes(Region([0, 2, 1, 0], [0, 4, 1, 0], 'V')))
+			let region1 = Region([0, 1, 1, 0], [0, 1, 1, 0], 'V')
+			let region2 = Region([0, 2, 1, 0], [0, 4, 1, 0], 'V')
+			Assert False(region1.includes(region2))
 
-			Assert False(Region([0, 5, 1, 0], [0, 5, 1, 0], 'V').
-						\includes(Region([0, 2, 1, 0], [0, 4, 1, 0], 'V')))
+			let region1 = Region([0, 5, 1, 0], [0, 5, 1, 0], 'V')
+			let region2 = Region([0, 2, 1, 0], [0, 4, 1, 0], 'V')
+			Assert False(region1.includes(region2))
 
 			" a linewise item does not include a blockwise region
-			Assert False(Region([0, 1, 1, 0], [0, 1, 1, 0], 'V').
-						\includes(Region([0, 2, 3, 0], [0, 4, 5, 0], "\<C-v>")))
+			let region1 = Region([0, 1, 1, 0], [0, 1, 1, 0], 'V')
+			let region2 = Region([0, 2, 3, 0], [0, 4, 5, 0], "\<C-v>")
+			Assert False(region1.includes(region2))
 
-			Assert False(Region([0, 5, 1, 0], [0, 5, 1, 0], 'V').
-						\includes(Region([0, 2, 3, 0], [0, 4, 5, 0], "\<C-v>")))
+			let region1 = Region([0, 5, 1, 0], [0, 5, 1, 0], 'V')
+			let region2 = Region([0, 2, 3, 0], [0, 4, 5, 0], "\<C-v>")
+			Assert False(region1.includes(region2))
 
 			" a blockwise item does not include a characterwise region
-			Assert False(Region([0, 1, 1, 0], [0, 2, 2, 0], "\<C-v>").
-						\includes(Region([0, 2, 3, 0], [0, 4, 5, 0], 'v')))
+			let region1 = Region([0, 1, 1, 0], [0, 2, 2, 0], "\<C-v>")
+			let region2 = Region([0, 2, 3, 0], [0, 4, 5, 0], 'v')
+			Assert False(region1.includes(region2))
 
-			Assert False(Region([0, 4, 6, 0], [0, 5, 7, 0], "\<C-v>").
-						\includes(Region([0, 2, 3, 0], [0, 4, 5, 0], 'v')))
+			let region1 = Region([0, 4, 6, 0], [0, 5, 7, 0], "\<C-v>")
+			let region2 = Region([0, 2, 3, 0], [0, 4, 5, 0], 'v')
+			Assert False(region1.includes(region2))
 
-			Assert False(Region([0, 2, 3, 0], [0, 4, 5, 0], "\<C-v>").
-						\includes(Region([0, 2, 3, 0], [0, 4, 5, 0], 'v')))
+			let region1 = Region([0, 2, 3, 0], [0, 4, 5, 0], "\<C-v>")
+			let region2 = Region([0, 2, 3, 0], [0, 4, 5, 0], 'v')
+			Assert False(region1.includes(region2))
 
-			Assert False(Region([0, 2, 3, 0], [0, 4, 5, 0], "\<C-v>").
-						\includes(Region([0, 2, 1, 0], [0, 2, 3, 0], 'v')))
+			let region1 = Region([0, 2, 3, 0], [0, 4, 5, 0], "\<C-v>")
+			let region2 = Region([0, 2, 1, 0], [0, 2, 3, 0], 'v')
+			Assert False(region1.includes(region2))
 
-			Assert False(Region([0, 2, 3, 0], [0, 4, 5, 0], "\<C-v>").
-						\includes(Region([0, 2, 5, 0], [0, 2, 7, 0], 'v')))
+			let region1 = Region([0, 2, 3, 0], [0, 4, 5, 0], "\<C-v>")
+			let region2 = Region([0, 2, 5, 0], [0, 2, 7, 0], 'v')
+			Assert False(region1.includes(region2))
 
-			Assert False(Region([0, 2, 3, 0], [0, 4, 5, 0], "\<C-v>").
-						\includes(Region([0, 3, 1, 0], [0, 3, 3, 0], 'v')))
+			let region1 = Region([0, 2, 3, 0], [0, 4, 5, 0], "\<C-v>")
+			let region2 = Region([0, 3, 1, 0], [0, 3, 3, 0], 'v')
+			Assert False(region1.includes(region2))
 
-			Assert False(Region([0, 2, 3, 0], [0, 4, 5, 0], "\<C-v>").
-						\includes(Region([0, 3, 5, 0], [0, 3, 7, 0], 'v')))
+			let region1 = Region([0, 2, 3, 0], [0, 4, 5, 0], "\<C-v>")
+			let region2 = Region([0, 3, 5, 0], [0, 3, 7, 0], 'v')
+			Assert False(region1.includes(region2))
 
-			Assert False(Region([0, 2, 3, 0], [0, 4, 5, 0], "\<C-v>").
-						\includes(Region([0, 4, 1, 0], [0, 4, 3, 0], 'v')))
+			let region1 = Region([0, 2, 3, 0], [0, 4, 5, 0], "\<C-v>")
+			let region2 = Region([0, 4, 1, 0], [0, 4, 3, 0], 'v')
+			Assert False(region1.includes(region2))
 
-			Assert False(Region([0, 2, 3, 0], [0, 4, 5, 0], "\<C-v>").
-						\includes(Region([0, 4, 5, 0], [0, 4, 7, 0], 'v')))
+			let region1 = Region([0, 2, 3, 0], [0, 4, 5, 0], "\<C-v>")
+			let region2 = Region([0, 4, 5, 0], [0, 4, 7, 0], 'v')
+			Assert False(region1.includes(region2))
 
 			" a blockwise item does not include a linewise region
-			Assert False(Region([0, 3, 3, 0], [0, 3, 5, 0], "\<C-v>").
-						\includes(Region([0, 3, 1, 0], [0, 3, 1, 0], 'V')))
+			let region1 = Region([0, 3, 3, 0], [0, 3, 5, 0], "\<C-v>")
+			let region2 = Region([0, 3, 1, 0], [0, 3, 1, 0], 'V')
+			Assert False(region1.includes(region2))
 
-			Assert False(Region([0, 2, 3, 0], [0, 4, 5, 0], "\<C-v>").
-						\includes(Region([0, 1, 1, 0], [0, 1, 1, 0], 'V')))
+			let region1 = Region([0, 2, 3, 0], [0, 4, 5, 0], "\<C-v>")
+			let region2 = Region([0, 1, 1, 0], [0, 1, 1, 0], 'V')
+			Assert False(region1.includes(region2))
 
-			Assert False(Region([0, 2, 3, 0], [0, 4, 5, 0], "\<C-v>").
-						\includes(Region([0, 2, 1, 0], [0, 2, 1, 0], 'V')))
+			let region1 = Region([0, 2, 3, 0], [0, 4, 5, 0], "\<C-v>")
+			let region2 = Region([0, 2, 1, 0], [0, 2, 1, 0], 'V')
+			Assert False(region1.includes(region2))
 
-			Assert False(Region([0, 2, 3, 0], [0, 4, 5, 0], "\<C-v>").
-						\includes(Region([0, 3, 1, 0], [0, 3, 1, 0], 'V')))
+			let region1 = Region([0, 2, 3, 0], [0, 4, 5, 0], "\<C-v>")
+			let region2 = Region([0, 3, 1, 0], [0, 3, 1, 0], 'V')
+			Assert False(region1.includes(region2))
 
-			Assert False(Region([0, 2, 3, 0], [0, 4, 5, 0], "\<C-v>").
-						\includes(Region([0, 4, 1, 0], [0, 4, 1, 0], 'V')))
+			let region1 = Region([0, 2, 3, 0], [0, 4, 5, 0], "\<C-v>")
+			let region2 = Region([0, 4, 1, 0], [0, 4, 1, 0], 'V')
+			Assert False(region1.includes(region2))
 
-			Assert False(Region([0, 2, 3, 0], [0, 4, 5, 0], "\<C-v>").
-						\includes(Region([0, 5, 1, 0], [0, 5, 1, 0], 'V')))
+			let region1 = Region([0, 2, 3, 0], [0, 4, 5, 0], "\<C-v>")
+			let region2 = Region([0, 5, 1, 0], [0, 5, 1, 0], 'V')
+			Assert False(region1.includes(region2))
 
-			Assert False(Region([0, 2, 3, 0], [0, 4, 5, 0], "\<C-v>").
-						\includes(Region([0, 1, 1, 0], [0, 5, 1, 0], 'V')))
+			let region1 = Region([0, 2, 3, 0], [0, 4, 5, 0], "\<C-v>")
+			let region2 = Region([0, 1, 1, 0], [0, 5, 1, 0], 'V')
+			Assert False(region1.includes(region2))
 
-			Assert False(Region([0, 2, 3, 0], [0, 4, 5, 0], "\<C-v>").
-						\includes(Region([0, 2, 1, 0], [0, 4, 1, 0], 'V')))
+			let region1 = Region([0, 2, 3, 0], [0, 4, 5, 0], "\<C-v>")
+			let region2 = Region([0, 2, 1, 0], [0, 4, 1, 0], 'V')
+			Assert False(region1.includes(region2))
 
 			" a blockwise item does not include a blockwise region
-			Assert False(Region([0, 3, 3, 0], [0, 3, 5, 0], "\<C-v>").
-						\includes(Region([0, 2, 3, 0], [0, 3, 5, 0], "\<C-v>")))
+			let region1 = Region([0, 3, 3, 0], [0, 3, 5, 0], "\<C-v>")
+			let region2 = Region([0, 2, 3, 0], [0, 3, 5, 0], "\<C-v>")
+			Assert False(region1.includes(region2))
 
-			Assert False(Region([0, 3, 3, 0], [0, 3, 5, 0], "\<C-v>").
-						\includes(Region([0, 3, 1, 0], [0, 3, 3, 0], "\<C-v>")))
+			let region1 = Region([0, 3, 3, 0], [0, 3, 5, 0], "\<C-v>")
+			let region2 = Region([0, 3, 1, 0], [0, 3, 3, 0], "\<C-v>")
+			Assert False(region1.includes(region2))
 
-			Assert False(Region([0, 3, 3, 0], [0, 3, 5, 0], "\<C-v>").
-						\includes(Region([0, 3, 5, 0], [0, 3, 7, 0], "\<C-v>")))
+			let region1 = Region([0, 3, 3, 0], [0, 3, 5, 0], "\<C-v>")
+			let region2 = Region([0, 3, 5, 0], [0, 3, 7, 0], "\<C-v>")
+			Assert False(region1.includes(region2))
 
-			Assert False(Region([0, 3, 3, 0], [0, 3, 5, 0], "\<C-v>").
-						\includes(Region([0, 4, 3, 0], [0, 4, 5, 0], "\<C-v>")))
+			let region1 = Region([0, 3, 3, 0], [0, 3, 5, 0], "\<C-v>")
+			let region2 = Region([0, 4, 3, 0], [0, 4, 5, 0], "\<C-v>")
+			Assert False(region1.includes(region2))
 
-			Assert False(Region([0, 2, 3, 0], [0, 4, 5, 0], "\<C-v>").
-						\includes(Region([0, 1, 1, 0], [0, 2, 3, 0], "\<C-v>")))
+			let region1 = Region([0, 2, 3, 0], [0, 4, 5, 0], "\<C-v>")
+			let region2 = Region([0, 1, 1, 0], [0, 2, 3, 0], "\<C-v>")
+			Assert False(region1.includes(region2))
 
-			Assert False(Region([0, 2, 3, 0], [0, 4, 5, 0], "\<C-v>").
-						\includes(Region([0, 1, 5, 0], [0, 2, 7, 0], "\<C-v>")))
+			let region1 = Region([0, 2, 3, 0], [0, 4, 5, 0], "\<C-v>")
+			let region2 = Region([0, 1, 5, 0], [0, 2, 7, 0], "\<C-v>")
+			Assert False(region1.includes(region2))
 
-			Assert False(Region([0, 2, 3, 0], [0, 4, 5, 0], "\<C-v>").
-						\includes(Region([0, 4, 1, 0], [0, 5, 3, 0], "\<C-v>")))
+			let region1 = Region([0, 2, 3, 0], [0, 4, 5, 0], "\<C-v>")
+			let region2 = Region([0, 4, 1, 0], [0, 5, 3, 0], "\<C-v>")
+			Assert False(region1.includes(region2))
 
-			Assert False(Region([0, 2, 3, 0], [0, 4, 5, 0], "\<C-v>").
-						\includes(Region([0, 4, 5, 0], [0, 5, 7, 0], "\<C-v>")))
+			let region1 = Region([0, 2, 3, 0], [0, 4, 5, 0], "\<C-v>")
+			let region2 = Region([0, 4, 5, 0], [0, 5, 7, 0], "\<C-v>")
+			Assert False(region1.includes(region2))
 
-			Assert False(Region([0, 2, 3, 0], [0, 4, 5, 0], "\<C-v>").
-						\includes(Region([0, 2, 1, 0], [0, 4, 7, 0], "\<C-v>")))
+			let region1 = Region([0, 2, 3, 0], [0, 4, 5, 0], "\<C-v>")
+			let region2 = Region([0, 2, 1, 0], [0, 4, 7, 0], "\<C-v>")
+			Assert False(region1.includes(region2))
 
-			Assert False(Region([0, 2, 3, 0], [0, 4, 5, 0], "\<C-v>").
-						\includes(Region([0, 1, 3, 0], [0, 5, 3, 0], "\<C-v>")))
+			let region1 = Region([0, 2, 3, 0], [0, 4, 5, 0], "\<C-v>")
+			let region2 = Region([0, 1, 3, 0], [0, 5, 3, 0], "\<C-v>")
+			Assert False(region1.includes(region2))
 
-			Assert False(Region([0, 2, 3, 0], [0, 4, 5, 0], "\<C-v>").
-						\includes(Region([0, 1, 1, 0], [0, 5, 7, 0], "\<C-v>")))
+			let region1 = Region([0, 2, 3, 0], [0, 4, 5, 0], "\<C-v>")
+			let region2 = Region([0, 1, 1, 0], [0, 5, 7, 0], "\<C-v>")
+			Assert False(region1.includes(region2))
+		End
+	End
+
+	Context .isinside(head, tail...)
+		It returns TRUE if itself is inside a region
+			" a characterwise item in a characterwise region
+			let region = Region([0, 2, 4, 0], [0, 2, 7, 0], 'v')
+			Assert True(region.isinside([0, 2, 4, 0], [0, 4, 4, 0], 'v'))
+
+			let region = Region([0, 2, 6, 0], [0, 3, 1, 0], 'v')
+			Assert True(region.isinside([0, 2, 4, 0], [0, 4, 4, 0], 'v'))
+
+			let region = Region([0, 3, 1, 0], [0, 3, 7, 0], 'v')
+			Assert True(region.isinside([0, 2, 4, 0], [0, 4, 4, 0], 'v'))
+
+			let region = Region([0, 2, 4, 0], [0, 4, 4, 0], 'v')
+			Assert True(region.isinside([0, 2, 4, 0], [0, 4, 4, 0], 'v'))
+
+			let region = Region([0, 4, 3, 0], [0, 4, 4, 0], 'v')
+			Assert True(region.isinside([0, 2, 4, 0], [0, 4, 4, 0], 'v'))
+
+			" a characterwise item in a linewise region
+			let region = Region([0, 2, 1, 0], [0, 2, 7, 0], 'v')
+			Assert True(region.isinside([0, 2, 4, 0], [0, 4, 4, 0], 'V'))
+
+			let region = Region([0, 3, 1, 0], [0, 3, 7, 0], 'v')
+			Assert True(region.isinside([0, 2, 4, 0], [0, 4, 4, 0], 'V'))
+
+			let region = Region([0, 4, 1, 0], [0, 4, 7, 0], 'v')
+			Assert True(region.isinside([0, 2, 4, 0], [0, 4, 4, 0], 'V'))
+
+			let region = Region([0, 2, 1, 0], [0, 4, 7, 0], 'v')
+			Assert True(region.isinside([0, 2, 4, 0], [0, 4, 4, 0], 'V'))
+
+			" a characterwise item in a blockwise region
+			let region = Region([0, 2, 3, 0], [0, 2, 5, 0], 'v')
+			Assert True(region.isinside([0, 2, 3, 0], [0, 4, 5, 0], "\<C-v>"))
+
+			let region = Region([0, 3, 3, 0], [0, 3, 5, 0], 'v')
+			Assert True(region.isinside([0, 2, 3, 0], [0, 4, 5, 0], "\<C-v>"))
+
+			let region = Region([0, 4, 3, 0], [0, 4, 5, 0], 'v')
+			Assert True(region.isinside([0, 2, 3, 0], [0, 4, 5, 0], "\<C-v>"))
+
+			let region = Region([0, 2, 7, 0], [0, 4, 1, 0], 'v')
+			Assert True(region.isinside([0, 2, 1, 0], [0, 4, 8, 0], "\<C-v>"))
+
+			" a linewise item in a characterwise region
+			let region = Region([0, 3, 1, 0], [0, 3, 1, 0], 'V')
+			Assert True(region.isinside([0, 2, 4, 0], [0, 4, 4, 0], 'v'))
+
+			" a linewise item in a linewise region
+			let region = Region([0, 2, 1, 0], [0, 2, 1, 0], 'V')
+			Assert True(region.isinside([0, 2, 4, 0], [0, 4, 4, 0], 'V'))
+
+			let region = Region([0, 3, 1, 0], [0, 3, 1, 0], 'V')
+			Assert True(region.isinside([0, 2, 4, 0], [0, 4, 4, 0], 'V'))
+
+			let region = Region([0, 4, 1, 0], [0, 4, 1, 0], 'V')
+			Assert True(region.isinside([0, 2, 4, 0], [0, 4, 4, 0], 'V'))
+
+			let region = Region([0, 2, 1, 0], [0, 4, 1, 0], 'V')
+			Assert True(region.isinside([0, 2, 4, 0], [0, 4, 4, 0], 'V'))
+
+			" a linewise item in a blockwise region
+			let region = Region([0, 2, 1, 0], [0, 2, 1, 0], 'V')
+			Assert True(region.isinside([0, 2, 1, 0], [0, 4, 8, 0], "\<C-v>"))
+
+			let region = Region([0, 3, 1, 0], [0, 3, 1, 0], 'V')
+			Assert True(region.isinside([0, 2, 1, 0], [0, 4, 8, 0], "\<C-v>"))
+
+			let region = Region([0, 4, 1, 0], [0, 4, 1, 0], 'V')
+			Assert True(region.isinside([0, 2, 1, 0], [0, 4, 8, 0], "\<C-v>"))
+
+			let region = Region([0, 2, 1, 0], [0, 4, 1, 0], 'V')
+			Assert True(region.isinside([0, 2, 1, 0], [0, 4, 8, 0], "\<C-v>"))
+
+			" a blockwise item in a characterwise region
+			let region = Region([0, 2, 3, 0], [0, 4, 5, 0], "\<C-v>")
+			Assert True(region.isinside([0, 2, 3, 0], [0, 4, 5, 0], 'v'))
+
+			let region = Region([0, 2, 3, 0], [0, 3, 4, 0], "\<C-v>")
+			Assert True(region.isinside([0, 2, 3, 0], [0, 4, 5, 0], 'v'))
+
+			let region = Region([0, 3, 4, 0], [0, 4, 5, 0], "\<C-v>")
+			Assert True(region.isinside([0, 2, 3, 0], [0, 4, 5, 0], 'v'))
+
+			let region = Region([0, 2, 6, 0], [0, 3, 7, 0], "\<C-v>")
+			Assert True(region.isinside([0, 2, 3, 0], [0, 4, 5, 0], 'v'))
+
+			let region = Region([0, 3, 1, 0], [0, 4, 2, 0], "\<C-v>")
+			Assert True(region.isinside([0, 2, 3, 0], [0, 4, 5, 0], 'v'))
+
+			" a blockwise item in a linewise region
+			let region = Region([0, 2, 3, 0], [0, 4, 5, 0], "\<C-v>")
+			Assert True(region.isinside([0, 2, 3, 0], [0, 4, 5, 0], 'V'))
+
+			let region = Region([0, 2, 1, 0], [0, 4, 4, 0], "\<C-v>")
+			Assert True(region.isinside([0, 2, 3, 0], [0, 4, 5, 0], 'V'))
+
+			let region = Region([0, 2, 4, 0], [0, 4, 7, 0], "\<C-v>")
+			Assert True(region.isinside([0, 2, 3, 0], [0, 4, 5, 0], 'V'))
+
+			let region = Region([0, 2, 1, 0], [0, 3, 4, 0], "\<C-v>")
+			Assert True(region.isinside([0, 2, 3, 0], [0, 4, 5, 0], 'V'))
+
+			let region = Region([0, 2, 4, 0], [0, 3, 7, 0], "\<C-v>")
+			Assert True(region.isinside([0, 2, 3, 0], [0, 4, 5, 0], 'V'))
+
+			let region = Region([0, 3, 1, 0], [0, 4, 4, 0], "\<C-v>")
+			Assert True(region.isinside([0, 2, 3, 0], [0, 4, 5, 0], 'V'))
+
+			let region = Region([0, 3, 4, 0], [0, 4, 7, 0], "\<C-v>")
+			Assert True(region.isinside([0, 2, 3, 0], [0, 4, 5, 0], 'V'))
+
+			" a blockwise item in a blockwise region
+			let region = Region([0, 2, 3, 0], [0, 4, 5, 0], "\<C-v>")
+			Assert True(region.isinside([0, 2, 3, 0], [0, 4, 5, 0], "\<C-v>"))
+
+			let region = Region([0, 2, 3, 0], [0, 3, 4, 0], "\<C-v>")
+			Assert True(region.isinside([0, 2, 3, 0], [0, 4, 5, 0], "\<C-v>"))
+
+			let region = Region([0, 3, 3, 0], [0, 4, 4, 0], "\<C-v>")
+			Assert True(region.isinside([0, 2, 3, 0], [0, 4, 5, 0], "\<C-v>"))
+
+			let region = Region([0, 2, 4, 0], [0, 3, 5, 0], "\<C-v>")
+			Assert True(region.isinside([0, 2, 3, 0], [0, 4, 5, 0], "\<C-v>"))
+
+			let region = Region([0, 3, 4, 0], [0, 4, 5, 0], "\<C-v>")
+			Assert True(region.isinside([0, 2, 3, 0], [0, 4, 5, 0], "\<C-v>"))
+		End
+
+		It returns FALSE if itself is not inside a region
+			" a characterwise item not in a characterwise region
+			let region = Region([0, 2, 2, 0], [0, 2, 5, 0], 'v')
+			Assert False(region.isinside([0, 2, 4, 0], [0, 4, 4, 0], 'v'))
+
+			let region = Region([0, 1, 6, 0], [0, 2, 3, 0], 'v')
+			Assert False(region.isinside([0, 2, 4, 0], [0, 4, 4, 0], 'v'))
+
+			let region = Region([0, 2, 3, 0], [0, 2, 4, 0], 'v')
+			Assert False(region.isinside([0, 2, 4, 0], [0, 4, 4, 0], 'v'))
+
+			let region = Region([0, 4, 4, 0], [0, 4, 5, 0], 'v')
+			Assert False(region.isinside([0, 2, 4, 0], [0, 4, 4, 0], 'v'))
+
+			let region = Region([0, 4, 5, 0], [0, 5, 1, 0], 'v')
+			Assert False(region.isinside([0, 2, 4, 0], [0, 4, 4, 0], 'v'))
+
+			let region = Region([0, 5, 2, 0], [0, 5, 5, 0], 'v')
+			Assert False(region.isinside([0, 2, 4, 0], [0, 4, 4, 0], 'v'))
+
+			" a characterwise item not in a linewise region
+			let region = Region([0, 1, 1, 0], [0, 1, 7, 0], 'v')
+			Assert False(region.isinside([0, 2, 4, 0], [0, 4, 4, 0], 'V'))
+
+			let region = Region([0, 5, 1, 0], [0, 5, 7, 0], 'v')
+			Assert False(region.isinside([0, 2, 4, 0], [0, 4, 4, 0], 'V'))
+
+			" a characterwise item not in a blockwise region
+			let region = Region([0, 1, 3, 0], [0, 1, 5, 0], 'v')
+			Assert False(region.isinside([0, 2, 3, 0], [0, 4, 5, 0], "\<C-v>"))
+
+			let region = Region([0, 1, 3, 0], [0, 2, 2, 0], 'v')
+			Assert False(region.isinside([0, 2, 3, 0], [0, 4, 5, 0], "\<C-v>"))
+
+			let region = Region([0, 2, 1, 0], [0, 2, 2, 0], 'v')
+			Assert False(region.isinside([0, 2, 3, 0], [0, 4, 5, 0], "\<C-v>"))
+
+			let region = Region([0, 4, 6, 0], [0, 4, 7, 0], 'v')
+			Assert False(region.isinside([0, 2, 3, 0], [0, 4, 5, 0], "\<C-v>"))
+
+			let region = Region([0, 4, 6, 0], [0, 5, 2, 0], 'v')
+			Assert False(region.isinside([0, 2, 3, 0], [0, 4, 5, 0], "\<C-v>"))
+
+			let region = Region([0, 5, 3, 0], [0, 5, 5, 0], 'v')
+			Assert False(region.isinside([0, 2, 3, 0], [0, 4, 5, 0], "\<C-v>"))
+
+			" a linewise item not in a characterwise region
+			let region = Region([0, 1, 1, 0], [0, 1, 1, 0], 'V')
+			Assert False(region.isinside([0, 2, 4, 0], [0, 4, 4, 0], 'v'))
+
+			let region = Region([0, 2, 1, 0], [0, 2, 1, 0], 'V')
+			Assert False(region.isinside([0, 2, 4, 0], [0, 4, 4, 0], 'v'))
+
+			let region = Region([0, 4, 1, 0], [0, 4, 1, 0], 'V')
+			Assert False(region.isinside([0, 2, 4, 0], [0, 4, 4, 0], 'v'))
+
+			let region = Region([0, 5, 1, 0], [0, 5, 1, 0], 'V')
+			Assert False(region.isinside([0, 2, 4, 0], [0, 4, 4, 0], 'v'))
+
+			" a linewise item not in a linewise region
+			let region = Region([0, 1, 1, 0], [0, 1, 1, 0], 'V')
+			Assert False(region.isinside([0, 2, 4, 0], [0, 4, 4, 0], 'V'))
+
+			let region = Region([0, 5, 1, 0], [0, 5, 1, 0], 'V')
+			Assert False(region.isinside([0, 2, 4, 0], [0, 4, 4, 0], 'V'))
+
+			" a linewise item not in a blockwise region
+			let region = Region([0, 1, 1, 0], [0, 1, 1, 0], 'V')
+			Assert False(region.isinside([0, 2, 1, 0], [0, 4, 8, 0], "\<C-v>"))
+
+			let region = Region([0, 5, 1, 0], [0, 5, 1, 0], 'V')
+			Assert False(region.isinside([0, 2, 1, 0], [0, 4, 8, 0], "\<C-v>"))
+
+			let region = Region([0, 2, 1, 0], [0, 2, 1, 0], 'V')
+			Assert False(region.isinside([0, 2, 3, 0], [0, 4, 5, 0], "\<C-v>"))
+
+			let region = Region([0, 3, 1, 0], [0, 3, 1, 0], 'V')
+			Assert False(region.isinside([0, 2, 3, 0], [0, 4, 5, 0], "\<C-v>"))
+
+			let region = Region([0, 4, 1, 0], [0, 4, 1, 0], 'V')
+			Assert False(region.isinside([0, 2, 3, 0], [0, 4, 5, 0], "\<C-v>"))
+
+			let region = Region([0, 2, 1, 0], [0, 4, 1, 0], 'V')
+			Assert False(region.isinside([0, 2, 3, 0], [0, 4, 5, 0], "\<C-v>"))
+
+			" a blockwise item not in a characterwise region
+			let region = Region([0, 1, 1, 0], [0, 2, 2, 0], "\<C-v>")
+			Assert False(region.isinside([0, 2, 3, 0], [0, 4, 5, 0], 'v'))
+
+			let region = Region([0, 1, 1, 0], [0, 3, 4, 0], "\<C-v>")
+			Assert False(region.isinside([0, 2, 3, 0], [0, 4, 5, 0], 'v'))
+
+			let region = Region([0, 4, 6, 0], [0, 5, 7, 0], "\<C-v>")
+			Assert False(region.isinside([0, 2, 3, 0], [0, 4, 5, 0], 'v'))
+
+			let region = Region([0, 3, 4, 0], [0, 5, 7, 0], "\<C-v>")
+			Assert False(region.isinside([0, 2, 3, 0], [0, 4, 5, 0], 'v'))
+
+			" a blockwise item not in a linewise region
+			let region = Region([0, 1, 1, 0], [0, 1, 7, 0], "\<C-v>")
+			Assert False(region.isinside([0, 2, 3, 0], [0, 4, 5, 0], 'V'))
+
+			let region = Region([0, 5, 1, 0], [0, 5, 7, 0], "\<C-v>")
+			Assert False(region.isinside([0, 2, 3, 0], [0, 4, 5, 0], 'V'))
+
+			" blockwise item not in a blockwise region
+			let region = Region([0, 1, 1, 0], [0, 2, 2, 0], "\<C-v>")
+			Assert False(region.isinside([0, 2, 3, 0], [0, 4, 5, 0], "\<C-v>"))
+
+			let region = Region([0, 1, 6, 0], [0, 2, 7, 0], "\<C-v>")
+			Assert False(region.isinside([0, 2, 3, 0], [0, 4, 5, 0], "\<C-v>"))
+
+			let region = Region([0, 6, 1, 0], [0, 7, 2, 0], "\<C-v>")
+			Assert False(region.isinside([0, 2, 3, 0], [0, 4, 5, 0], "\<C-v>"))
+
+			let region = Region([0, 6, 6, 0], [0, 7, 7, 0], "\<C-v>")
+			Assert False(region.isinside([0, 2, 3, 0], [0, 4, 5, 0], "\<C-v>"))
+
+			let region = Region([0, 2, 1, 0], [0, 4, 2, 0], "\<C-v>")
+			Assert False(region.isinside([0, 2, 3, 0], [0, 4, 5, 0], "\<C-v>"))
+
+			let region = Region([0, 2, 6, 0], [0, 4, 7, 0], "\<C-v>")
+			Assert False(region.isinside([0, 2, 3, 0], [0, 4, 5, 0], "\<C-v>"))
+
+			let region = Region([0, 1, 3, 0], [0, 1, 5, 0], "\<C-v>")
+			Assert False(region.isinside([0, 2, 3, 0], [0, 4, 5, 0], "\<C-v>"))
+
+			let region = Region([0, 5, 3, 0], [0, 5, 5, 0], "\<C-v>")
+			Assert False(region.isinside([0, 2, 3, 0], [0, 4, 5, 0], "\<C-v>"))
+		End
+
+		It throws an exception with inappropriate arguments
+			let head = [0, 1, 1, 0]
+			let tail = [0, 1, 1, 0]
+			let region = Region(head, tail, 'v')
+			Throws /^Vim(echoerr):multiselect: Invalid argument for Region.isinside()/ region.isinside('')
+			Throws /^Vim(echoerr):multiselect: Invalid argument for Region.isinside()/ region.isinside(1, [0, 1, 1, 0])
+			Throws /^Vim(echoerr):multiselect: Invalid argument for Region.isinside()/ region.isinside([0, 1, 1, 0], 1)
+		End
+	End
+
+	Context .isinside(head)
+		It returns TRUE if itself is inside a position
+			let region = Region([0, 3, 5, 0], [0, 3, 5, 0], 'v')
+			Assert True(region.isinside([0, 3, 5, 0]))
+
+			let region = Region([0, 3, 5, 0], [0, 3, 5, 0], "\<C-v>")
+			Assert True(region.isinside([0, 3, 5, 0]))
+		End
+
+		It returns FALSE if itself is not inside a position
+			let region = Region([0, 2, 1, 0], [0, 4, 8, 0], 'v')
+			Assert False(region.isinside([0, 1, 1, 0]))
+
+			let region = Region([0, 2, 1, 0], [0, 4, 8, 0], 'V')
+			Assert False(region.isinside([0, 1, 1, 0]))
+
+			let region = Region([0, 2, 1, 0], [0, 4, 8, 0], "\<C-v>")
+			Assert False(region.isinside([0, 1, 1, 0]))
+		End
+	End
+
+	Context .isinside(lnum)
+		It returns TRUE if itself is inside a line
+			let region = Region([0, 3, 5, 0], [0, 3, 5, 0], 'v')
+			Assert True(region.isinside(3))
+
+			let region = Region([0, 3, 5, 0], [0, 3, 5, 0], 'V')
+			Assert True(region.isinside(3))
+
+			let region = Region([0, 3, 5, 0], [0, 3, 5, 0], "\<C-v>")
+			Assert True(region.isinside(3))
+		End
+
+		It returns FALSE if itself is not inside a line
+			let region = Region([0, 2, 1, 0], [0, 4, 8, 0], 'v')
+			Assert False(region.isinside(1))
+
+			let region = Region([0, 2, 1, 0], [0, 4, 8, 0], 'V')
+			Assert False(region.isinside(1))
+
+			let region = Region([0, 2, 1, 0], [0, 4, 8, 0], "\<C-v>")
+			Assert False(region.isinside(1))
+		End
+	End
+
+	Context .isinside(startlnum, endlnum)
+		It returns TRUE if itself is inside a range between two lines
+			let region = Region([0, 3, 5, 0], [0, 3, 5, 0], 'v')
+			Assert True(region.isinside(2, 4))
+
+			let region = Region([0, 3, 5, 0], [0, 3, 5, 0], 'V')
+			Assert True(region.isinside(2, 4))
+
+			let region = Region([0, 3, 5, 0], [0, 3, 5, 0], "\<C-v>")
+			Assert True(region.isinside(2, 4))
+		End
+
+		It returns FALSE if itself is not inside a range between two lines
+			let region = Region([0, 2, 1, 0], [0, 4, 8, 0], 'v')
+			Assert False(region.isinside(1, 2))
+
+			let region = Region([0, 2, 1, 0], [0, 4, 8, 0], 'V')
+			Assert False(region.isinside(1, 2))
+
+			let region = Region([0, 2, 1, 0], [0, 4, 8, 0], "\<C-v>")
+			Assert False(region.isinside(1, 2))
 		End
 	End
 
 	Context .isinside(region)
-		It returns TRUE if itself is inside the region
+		It returns TRUE if itself is inside a region
 			" a characterwise item in a characterwise region
-			Assert True(Region([0, 2, 4, 0], [0, 2, 7, 0], 'v').
-						\isinside(Region([0, 2, 4, 0], [0, 4, 4, 0], 'v')))
+			let region1 = Region([0, 2, 4, 0], [0, 2, 7, 0], 'v')
+			let region2 = Region([0, 2, 4, 0], [0, 4, 4, 0], 'v')
+			Assert True(region1.isinside(region2))
 
-			Assert True(Region([0, 2, 6, 0], [0, 3, 1, 0], 'v').
-						\isinside(Region([0, 2, 4, 0], [0, 4, 4, 0], 'v')))
+			let region1 = Region([0, 2, 6, 0], [0, 3, 1, 0], 'v')
+			let region2 = Region([0, 2, 4, 0], [0, 4, 4, 0], 'v')
+			Assert True(region1.isinside(region2))
 
-			Assert True(Region([0, 3, 1, 0], [0, 3, 7, 0], 'v').
-						\isinside(Region([0, 2, 4, 0], [0, 4, 4, 0], 'v')))
+			let region1 = Region([0, 3, 1, 0], [0, 3, 7, 0], 'v')
+			let region2 = Region([0, 2, 4, 0], [0, 4, 4, 0], 'v')
+			Assert True(region1.isinside(region2))
 
-			Assert True(Region([0, 2, 4, 0], [0, 4, 4, 0], 'v').
-						\isinside(Region([0, 2, 4, 0], [0, 4, 4, 0], 'v')))
+			let region1 = Region([0, 2, 4, 0], [0, 4, 4, 0], 'v')
+			let region2 = Region([0, 2, 4, 0], [0, 4, 4, 0], 'v')
+			Assert True(region1.isinside(region2))
 
-			Assert True(Region([0, 4, 3, 0], [0, 4, 4, 0], 'v').
-						\isinside(Region([0, 2, 4, 0], [0, 4, 4, 0], 'v')))
+			let region1 = Region([0, 4, 3, 0], [0, 4, 4, 0], 'v')
+			let region2 = Region([0, 2, 4, 0], [0, 4, 4, 0], 'v')
+			Assert True(region1.isinside(region2))
 
 			" a characterwise item in a linewise region
-			Assert True(Region([0, 2, 1, 0], [0, 2, 7, 0], 'v').
-						\isinside(Region([0, 2, 4, 0], [0, 4, 4, 0], 'V')))
+			let region1 = Region([0, 2, 1, 0], [0, 2, 7, 0], 'v')
+			let region2 = Region([0, 2, 4, 0], [0, 4, 4, 0], 'V')
+			Assert True(region1.isinside(region2))
 
-			Assert True(Region([0, 3, 1, 0], [0, 3, 7, 0], 'v').
-						\isinside(Region([0, 2, 4, 0], [0, 4, 4, 0], 'V')))
+			let region1 = Region([0, 3, 1, 0], [0, 3, 7, 0], 'v')
+			let region2 = Region([0, 2, 4, 0], [0, 4, 4, 0], 'V')
+			Assert True(region1.isinside(region2))
 
-			Assert True(Region([0, 4, 1, 0], [0, 4, 7, 0], 'v').
-						\isinside(Region([0, 2, 4, 0], [0, 4, 4, 0], 'V')))
+			let region1 = Region([0, 4, 1, 0], [0, 4, 7, 0], 'v')
+			let region2 = Region([0, 2, 4, 0], [0, 4, 4, 0], 'V')
+			Assert True(region1.isinside(region2))
 
-			Assert True(Region([0, 2, 1, 0], [0, 4, 7, 0], 'v').
-						\isinside(Region([0, 2, 4, 0], [0, 4, 4, 0], 'V')))
+			let region1 = Region([0, 2, 1, 0], [0, 4, 7, 0], 'v')
+			let region2 = Region([0, 2, 4, 0], [0, 4, 4, 0], 'V')
+			Assert True(region1.isinside(region2))
 
 			" a characterwise item in a blockwise region
-			Assert True(Region([0, 2, 3, 0], [0, 2, 5, 0], 'v').
-						\isinside(Region([0, 2, 3, 0], [0, 4, 5, 0], "\<C-v>")))
+			let region1 = Region([0, 2, 3, 0], [0, 2, 5, 0], 'v')
+			let region2 = Region([0, 2, 3, 0], [0, 4, 5, 0], "\<C-v>")
+			Assert True(region1.isinside(region2))
 
-			Assert True(Region([0, 3, 3, 0], [0, 3, 5, 0], 'v').
-						\isinside(Region([0, 2, 3, 0], [0, 4, 5, 0], "\<C-v>")))
+			let region1 = Region([0, 3, 3, 0], [0, 3, 5, 0], 'v')
+			let region2 = Region([0, 2, 3, 0], [0, 4, 5, 0], "\<C-v>")
+			Assert True(region1.isinside(region2))
 
-			Assert True(Region([0, 4, 3, 0], [0, 4, 5, 0], 'v').
-						\isinside(Region([0, 2, 3, 0], [0, 4, 5, 0], "\<C-v>")))
+			let region1 = Region([0, 4, 3, 0], [0, 4, 5, 0], 'v')
+			let region2 = Region([0, 2, 3, 0], [0, 4, 5, 0], "\<C-v>")
+			Assert True(region1.isinside(region2))
 
-			Assert True(Region([0, 2, 7, 0], [0, 4, 1, 0], 'v').
-						\isinside(Region([0, 2, 1, 0], [0, 4, 8, 0], "\<C-v>")))
+			let region1 = Region([0, 2, 7, 0], [0, 4, 1, 0], 'v')
+			let region2 = Region([0, 2, 1, 0], [0, 4, 8, 0], "\<C-v>")
+			Assert True(region1.isinside(region2))
 
 			" a linewise item in a characterwise region
-			Assert True(Region([0, 3, 1, 0], [0, 3, 1, 0], 'V').
-						\isinside(Region([0, 2, 4, 0], [0, 4, 4, 0], 'v')))
+			let region1 = Region([0, 3, 1, 0], [0, 3, 1, 0], 'V')
+			let region2 = Region([0, 2, 4, 0], [0, 4, 4, 0], 'v')
+			Assert True(region1.isinside(region2))
 
 			" a linewise item in a linewise region
-			Assert True(Region([0, 2, 1, 0], [0, 2, 1, 0], 'V').
-						\isinside(Region([0, 2, 4, 0], [0, 4, 4, 0], 'V')))
+			let region1 = Region([0, 2, 1, 0], [0, 2, 1, 0], 'V')
+			let region2 = Region([0, 2, 4, 0], [0, 4, 4, 0], 'V')
+			Assert True(region1.isinside(region2))
 
-			Assert True(Region([0, 3, 1, 0], [0, 3, 1, 0], 'V').
-						\isinside(Region([0, 2, 4, 0], [0, 4, 4, 0], 'V')))
+			let region1 = Region([0, 3, 1, 0], [0, 3, 1, 0], 'V')
+			let region2 = Region([0, 2, 4, 0], [0, 4, 4, 0], 'V')
+			Assert True(region1.isinside(region2))
 
-			Assert True(Region([0, 4, 1, 0], [0, 4, 1, 0], 'V').
-						\isinside(Region([0, 2, 4, 0], [0, 4, 4, 0], 'V')))
+			let region1 = Region([0, 4, 1, 0], [0, 4, 1, 0], 'V')
+			let region2 = Region([0, 2, 4, 0], [0, 4, 4, 0], 'V')
+			Assert True(region1.isinside(region2))
 
-			Assert True(Region([0, 2, 1, 0], [0, 4, 1, 0], 'V').
-						\isinside(Region([0, 2, 4, 0], [0, 4, 4, 0], 'V')))
+			let region1 = Region([0, 2, 1, 0], [0, 4, 1, 0], 'V')
+			let region2 = Region([0, 2, 4, 0], [0, 4, 4, 0], 'V')
+			Assert True(region1.isinside(region2))
 
 			" a linewise item in a blockwise region
-			Assert True(Region([0, 2, 1, 0], [0, 2, 1, 0], 'V').
-						\isinside(Region([0, 2, 1, 0], [0, 4, 8, 0], "\<C-v>")))
+			let region1 = Region([0, 2, 1, 0], [0, 2, 1, 0], 'V')
+			let region2 = Region([0, 2, 1, 0], [0, 4, 8, 0], "\<C-v>")
+			Assert True(region1.isinside(region2))
 
-			Assert True(Region([0, 3, 1, 0], [0, 3, 1, 0], 'V').
-						\isinside(Region([0, 2, 1, 0], [0, 4, 8, 0], "\<C-v>")))
+			let region1 = Region([0, 3, 1, 0], [0, 3, 1, 0], 'V')
+			let region2 = Region([0, 2, 1, 0], [0, 4, 8, 0], "\<C-v>")
+			Assert True(region1.isinside(region2))
 
-			Assert True(Region([0, 4, 1, 0], [0, 4, 1, 0], 'V').
-						\isinside(Region([0, 2, 1, 0], [0, 4, 8, 0], "\<C-v>")))
+			let region1 = Region([0, 4, 1, 0], [0, 4, 1, 0], 'V')
+			let region2 = Region([0, 2, 1, 0], [0, 4, 8, 0], "\<C-v>")
+			Assert True(region1.isinside(region2))
 
-			Assert True(Region([0, 2, 1, 0], [0, 4, 1, 0], 'V').
-						\isinside(Region([0, 2, 1, 0], [0, 4, 8, 0], "\<C-v>")))
+			let region1 = Region([0, 2, 1, 0], [0, 4, 1, 0], 'V')
+			let region2 = Region([0, 2, 1, 0], [0, 4, 8, 0], "\<C-v>")
+			Assert True(region1.isinside(region2))
 
 			" a blockwise item in a characterwise region
-			Assert True(Region([0, 2, 3, 0], [0, 4, 5, 0], "\<C-v>").
-						\isinside(Region([0, 2, 3, 0], [0, 4, 5, 0], 'v')))
+			let region1 = Region([0, 2, 3, 0], [0, 4, 5, 0], "\<C-v>")
+			let region2 = Region([0, 2, 3, 0], [0, 4, 5, 0], 'v')
+			Assert True(region1.isinside(region2))
 
-			Assert True(Region([0, 2, 3, 0], [0, 3, 4, 0], "\<C-v>").
-						\isinside(Region([0, 2, 3, 0], [0, 4, 5, 0], 'v')))
+			let region1 = Region([0, 2, 3, 0], [0, 3, 4, 0], "\<C-v>")
+			let region2 = Region([0, 2, 3, 0], [0, 4, 5, 0], 'v')
+			Assert True(region1.isinside(region2))
 
-			Assert True(Region([0, 3, 4, 0], [0, 4, 5, 0], "\<C-v>").
-						\isinside(Region([0, 2, 3, 0], [0, 4, 5, 0], 'v')))
+			let region1 = Region([0, 3, 4, 0], [0, 4, 5, 0], "\<C-v>")
+			let region2 = Region([0, 2, 3, 0], [0, 4, 5, 0], 'v')
+			Assert True(region1.isinside(region2))
 
-			Assert True(Region([0, 2, 6, 0], [0, 3, 7, 0], "\<C-v>").
-						\isinside(Region([0, 2, 3, 0], [0, 4, 5, 0], 'v')))
+			let region1 = Region([0, 2, 6, 0], [0, 3, 7, 0], "\<C-v>")
+			let region2 = Region([0, 2, 3, 0], [0, 4, 5, 0], 'v')
+			Assert True(region1.isinside(region2))
 
-			Assert True(Region([0, 3, 1, 0], [0, 4, 2, 0], "\<C-v>").
-						\isinside(Region([0, 2, 3, 0], [0, 4, 5, 0], 'v')))
+			let region1 = Region([0, 3, 1, 0], [0, 4, 2, 0], "\<C-v>")
+			let region2 = Region([0, 2, 3, 0], [0, 4, 5, 0], 'v')
+			Assert True(region1.isinside(region2))
 
 			" a blockwise item in a linewise region
-			Assert True(Region([0, 2, 3, 0], [0, 4, 5, 0], "\<C-v>").
-						\isinside(Region([0, 2, 3, 0], [0, 4, 5, 0], 'V')))
+			let region1 = Region([0, 2, 3, 0], [0, 4, 5, 0], "\<C-v>")
+			let region2 = Region([0, 2, 3, 0], [0, 4, 5, 0], 'V')
+			Assert True(region1.isinside(region2))
 
-			Assert True(Region([0, 2, 1, 0], [0, 4, 4, 0], "\<C-v>").
-						\isinside(Region([0, 2, 3, 0], [0, 4, 5, 0], 'V')))
+			let region1 = Region([0, 2, 1, 0], [0, 4, 4, 0], "\<C-v>")
+			let region2 = Region([0, 2, 3, 0], [0, 4, 5, 0], 'V')
+			Assert True(region1.isinside(region2))
 
-			Assert True(Region([0, 2, 4, 0], [0, 4, 7, 0], "\<C-v>").
-						\isinside(Region([0, 2, 3, 0], [0, 4, 5, 0], 'V')))
+			let region1 = Region([0, 2, 4, 0], [0, 4, 7, 0], "\<C-v>")
+			let region2 = Region([0, 2, 3, 0], [0, 4, 5, 0], 'V')
+			Assert True(region1.isinside(region2))
 
-			Assert True(Region([0, 2, 1, 0], [0, 3, 4, 0], "\<C-v>").
-						\isinside(Region([0, 2, 3, 0], [0, 4, 5, 0], 'V')))
+			let region1 = Region([0, 2, 1, 0], [0, 3, 4, 0], "\<C-v>")
+			let region2 = Region([0, 2, 3, 0], [0, 4, 5, 0], 'V')
+			Assert True(region1.isinside(region2))
 
-			Assert True(Region([0, 2, 4, 0], [0, 3, 7, 0], "\<C-v>").
-						\isinside(Region([0, 2, 3, 0], [0, 4, 5, 0], 'V')))
+			let region1 = Region([0, 2, 4, 0], [0, 3, 7, 0], "\<C-v>")
+			let region2 = Region([0, 2, 3, 0], [0, 4, 5, 0], 'V')
+			Assert True(region1.isinside(region2))
 
-			Assert True(Region([0, 3, 1, 0], [0, 4, 4, 0], "\<C-v>").
-						\isinside(Region([0, 2, 3, 0], [0, 4, 5, 0], 'V')))
+			let region1 = Region([0, 3, 1, 0], [0, 4, 4, 0], "\<C-v>")
+			let region2 = Region([0, 2, 3, 0], [0, 4, 5, 0], 'V')
+			Assert True(region1.isinside(region2))
 
-			Assert True(Region([0, 3, 4, 0], [0, 4, 7, 0], "\<C-v>").
-						\isinside(Region([0, 2, 3, 0], [0, 4, 5, 0], 'V')))
+			let region1 = Region([0, 3, 4, 0], [0, 4, 7, 0], "\<C-v>")
+			let region2 = Region([0, 2, 3, 0], [0, 4, 5, 0], 'V')
+			Assert True(region1.isinside(region2))
 
 			" a blockwise item in a blockwise region
-			Assert True(Region([0, 2, 3, 0], [0, 4, 5, 0], "\<C-v>").
-						\isinside(Region([0, 2, 3, 0], [0, 4, 5, 0], "\<C-v>")))
+			let region1 = Region([0, 2, 3, 0], [0, 4, 5, 0], "\<C-v>")
+			let region2 = Region([0, 2, 3, 0], [0, 4, 5, 0], "\<C-v>")
+			Assert True(region1.isinside(region2))
 
-			Assert True(Region([0, 2, 3, 0], [0, 3, 4, 0], "\<C-v>").
-						\isinside(Region([0, 2, 3, 0], [0, 4, 5, 0], "\<C-v>")))
+			let region1 = Region([0, 2, 3, 0], [0, 3, 4, 0], "\<C-v>")
+			let region2 = Region([0, 2, 3, 0], [0, 4, 5, 0], "\<C-v>")
+			Assert True(region1.isinside(region2))
 
-			Assert True(Region([0, 3, 3, 0], [0, 4, 4, 0], "\<C-v>").
-						\isinside(Region([0, 2, 3, 0], [0, 4, 5, 0], "\<C-v>")))
+			let region1 = Region([0, 3, 3, 0], [0, 4, 4, 0], "\<C-v>")
+			let region2 = Region([0, 2, 3, 0], [0, 4, 5, 0], "\<C-v>")
+			Assert True(region1.isinside(region2))
 
-			Assert True(Region([0, 2, 4, 0], [0, 3, 5, 0], "\<C-v>").
-						\isinside(Region([0, 2, 3, 0], [0, 4, 5, 0], "\<C-v>")))
+			let region1 = Region([0, 2, 4, 0], [0, 3, 5, 0], "\<C-v>")
+			let region2 = Region([0, 2, 3, 0], [0, 4, 5, 0], "\<C-v>")
+			Assert True(region1.isinside(region2))
 
-			Assert True(Region([0, 3, 4, 0], [0, 4, 5, 0], "\<C-v>").
-						\isinside(Region([0, 2, 3, 0], [0, 4, 5, 0], "\<C-v>")))
+			let region1 = Region([0, 3, 4, 0], [0, 4, 5, 0], "\<C-v>")
+			let region2 = Region([0, 2, 3, 0], [0, 4, 5, 0], "\<C-v>")
+			Assert True(region1.isinside(region2))
 		End
 
-		It returns FALSE if itself is not inside the region
+		It returns FALSE if itself is not inside a region
 			" a characterwise item not in a characterwise region
-			Assert False(Region([0, 2, 2, 0], [0, 2, 5, 0], 'v').
-						\isinside(Region([0, 2, 4, 0], [0, 4, 4, 0], 'v')))
+			let region1 = Region([0, 2, 2, 0], [0, 2, 5, 0], 'v')
+			let region2 = Region([0, 2, 4, 0], [0, 4, 4, 0], 'v')
+			Assert False(region1.isinside(region2))
 
-			Assert False(Region([0, 1, 6, 0], [0, 2, 3, 0], 'v').
-						\isinside(Region([0, 2, 4, 0], [0, 4, 4, 0], 'v')))
+			let region1 = Region([0, 1, 6, 0], [0, 2, 3, 0], 'v')
+			let region2 = Region([0, 2, 4, 0], [0, 4, 4, 0], 'v')
+			Assert False(region1.isinside(region2))
 
-			Assert False(Region([0, 2, 3, 0], [0, 2, 4, 0], 'v').
-						\isinside(Region([0, 2, 4, 0], [0, 4, 4, 0], 'v')))
+			let region1 = Region([0, 2, 3, 0], [0, 2, 4, 0], 'v')
+			let region2 = Region([0, 2, 4, 0], [0, 4, 4, 0], 'v')
+			Assert False(region1.isinside(region2))
 
-			Assert False(Region([0, 4, 4, 0], [0, 4, 5, 0], 'v').
-						\isinside(Region([0, 2, 4, 0], [0, 4, 4, 0], 'v')))
+			let region1 = Region([0, 4, 4, 0], [0, 4, 5, 0], 'v')
+			let region2 = Region([0, 2, 4, 0], [0, 4, 4, 0], 'v')
+			Assert False(region1.isinside(region2))
 
-			Assert False(Region([0, 4, 5, 0], [0, 5, 1, 0], 'v').
-						\isinside(Region([0, 2, 4, 0], [0, 4, 4, 0], 'v')))
+			let region1 = Region([0, 4, 5, 0], [0, 5, 1, 0], 'v')
+			let region2 = Region([0, 2, 4, 0], [0, 4, 4, 0], 'v')
+			Assert False(region1.isinside(region2))
 
-			Assert False(Region([0, 5, 2, 0], [0, 5, 5, 0], 'v').
-						\isinside(Region([0, 2, 4, 0], [0, 4, 4, 0], 'v')))
+			let region1 = Region([0, 5, 2, 0], [0, 5, 5, 0], 'v')
+			let region2 = Region([0, 2, 4, 0], [0, 4, 4, 0], 'v')
+			Assert False(region1.isinside(region2))
 
 			" a characterwise item not in a linewise region
-			Assert False(Region([0, 1, 1, 0], [0, 1, 7, 0], 'v').
-						\isinside(Region([0, 2, 4, 0], [0, 4, 4, 0], 'V')))
+			let region1 = Region([0, 1, 1, 0], [0, 1, 7, 0], 'v')
+			let region2 = Region([0, 2, 4, 0], [0, 4, 4, 0], 'V')
+			Assert False(region1.isinside(region2))
 
-			Assert False(Region([0, 5, 1, 0], [0, 5, 7, 0], 'v').
-						\isinside(Region([0, 2, 4, 0], [0, 4, 4, 0], 'V')))
+			let region1 = Region([0, 5, 1, 0], [0, 5, 7, 0], 'v')
+			let region2 = Region([0, 2, 4, 0], [0, 4, 4, 0], 'V')
+			Assert False(region1.isinside(region2))
 
 			" a characterwise item not in a blockwise region
-			Assert False(Region([0, 1, 3, 0], [0, 1, 5, 0], 'v').
-						\isinside(Region([0, 2, 3, 0], [0, 4, 5, 0], "\<C-v>")))
+			let region1 = Region([0, 1, 3, 0], [0, 1, 5, 0], 'v')
+			let region2 = Region([0, 2, 3, 0], [0, 4, 5, 0], "\<C-v>")
+			Assert False(region1.isinside(region2))
 
-			Assert False(Region([0, 1, 3, 0], [0, 2, 2, 0], 'v').
-						\isinside(Region([0, 2, 3, 0], [0, 4, 5, 0], "\<C-v>")))
+			let region1 = Region([0, 1, 3, 0], [0, 2, 2, 0], 'v')
+			let region2 = Region([0, 2, 3, 0], [0, 4, 5, 0], "\<C-v>")
+			Assert False(region1.isinside(region2))
 
-			Assert False(Region([0, 2, 1, 0], [0, 2, 2, 0], 'v').
-						\isinside(Region([0, 2, 3, 0], [0, 4, 5, 0], "\<C-v>")))
+			let region1 = Region([0, 2, 1, 0], [0, 2, 2, 0], 'v')
+			let region2 = Region([0, 2, 3, 0], [0, 4, 5, 0], "\<C-v>")
+			Assert False(region1.isinside(region2))
 
-			Assert False(Region([0, 4, 6, 0], [0, 4, 7, 0], 'v').
-						\isinside(Region([0, 2, 3, 0], [0, 4, 5, 0], "\<C-v>")))
+			let region1 = Region([0, 4, 6, 0], [0, 4, 7, 0], 'v')
+			let region2 = Region([0, 2, 3, 0], [0, 4, 5, 0], "\<C-v>")
+			Assert False(region1.isinside(region2))
 
-			Assert False(Region([0, 4, 6, 0], [0, 5, 2, 0], 'v').
-						\isinside(Region([0, 2, 3, 0], [0, 4, 5, 0], "\<C-v>")))
+			let region1 = Region([0, 4, 6, 0], [0, 5, 2, 0], 'v')
+			let region2 = Region([0, 2, 3, 0], [0, 4, 5, 0], "\<C-v>")
+			Assert False(region1.isinside(region2))
 
-			Assert False(Region([0, 5, 3, 0], [0, 5, 5, 0], 'v').
-						\isinside(Region([0, 2, 3, 0], [0, 4, 5, 0], "\<C-v>")))
+			let region1 = Region([0, 5, 3, 0], [0, 5, 5, 0], 'v')
+			let region2 = Region([0, 2, 3, 0], [0, 4, 5, 0], "\<C-v>")
+			Assert False(region1.isinside(region2))
 
 			" a linewise item not in a characterwise region
-			Assert False(Region([0, 1, 1, 0], [0, 1, 1, 0], 'V').
-						\isinside(Region([0, 2, 4, 0], [0, 4, 4, 0], 'v')))
+			let region1 = Region([0, 1, 1, 0], [0, 1, 1, 0], 'V')
+			let region2 = Region([0, 2, 4, 0], [0, 4, 4, 0], 'v')
+			Assert False(region1.isinside(region2))
 
-			Assert False(Region([0, 2, 1, 0], [0, 2, 1, 0], 'V').
-						\isinside(Region([0, 2, 4, 0], [0, 4, 4, 0], 'v')))
+			let region1 = Region([0, 2, 1, 0], [0, 2, 1, 0], 'V')
+			let region2 = Region([0, 2, 4, 0], [0, 4, 4, 0], 'v')
+			Assert False(region1.isinside(region2))
 
-			Assert False(Region([0, 4, 1, 0], [0, 4, 1, 0], 'V').
-						\isinside(Region([0, 2, 4, 0], [0, 4, 4, 0], 'v')))
+			let region1 = Region([0, 4, 1, 0], [0, 4, 1, 0], 'V')
+			let region2 = Region([0, 2, 4, 0], [0, 4, 4, 0], 'v')
+			Assert False(region1.isinside(region2))
 
-			Assert False(Region([0, 5, 1, 0], [0, 5, 1, 0], 'V').
-						\isinside(Region([0, 2, 4, 0], [0, 4, 4, 0], 'v')))
+			let region1 = Region([0, 5, 1, 0], [0, 5, 1, 0], 'V')
+			let region2 = Region([0, 2, 4, 0], [0, 4, 4, 0], 'v')
+			Assert False(region1.isinside(region2))
 
 			" a linewise item not in a linewise region
-			Assert False(Region([0, 1, 1, 0], [0, 1, 1, 0], 'V').
-						\isinside(Region([0, 2, 4, 0], [0, 4, 4, 0], 'V')))
+			let region1 = Region([0, 1, 1, 0], [0, 1, 1, 0], 'V')
+			let region2 = Region([0, 2, 4, 0], [0, 4, 4, 0], 'V')
+			Assert False(region1.isinside(region2))
 
-			Assert False(Region([0, 5, 1, 0], [0, 5, 1, 0], 'V').
-						\isinside(Region([0, 2, 4, 0], [0, 4, 4, 0], 'V')))
+			let region1 = Region([0, 5, 1, 0], [0, 5, 1, 0], 'V')
+			let region2 = Region([0, 2, 4, 0], [0, 4, 4, 0], 'V')
+			Assert False(region1.isinside(region2))
 
 			" a linewise item not in a blockwise region
-			Assert False(Region([0, 1, 1, 0], [0, 1, 1, 0], 'V').
-						\isinside(Region([0, 2, 1, 0], [0, 4, 8, 0], "\<C-v>")))
+			let region1 = Region([0, 1, 1, 0], [0, 1, 1, 0], 'V')
+			let region2 = Region([0, 2, 1, 0], [0, 4, 8, 0], "\<C-v>")
+			Assert False(region1.isinside(region2))
 
-			Assert False(Region([0, 5, 1, 0], [0, 5, 1, 0], 'V').
-						\isinside(Region([0, 2, 1, 0], [0, 4, 8, 0], "\<C-v>")))
+			let region1 = Region([0, 5, 1, 0], [0, 5, 1, 0], 'V')
+			let region2 = Region([0, 2, 1, 0], [0, 4, 8, 0], "\<C-v>")
+			Assert False(region1.isinside(region2))
 
-			Assert False(Region([0, 2, 1, 0], [0, 2, 1, 0], 'V').
-						\isinside(Region([0, 2, 3, 0], [0, 4, 5, 0], "\<C-v>")))
+			let region1 = Region([0, 2, 1, 0], [0, 2, 1, 0], 'V')
+			let region2 = Region([0, 2, 3, 0], [0, 4, 5, 0], "\<C-v>")
+			Assert False(region1.isinside(region2))
 
-			Assert False(Region([0, 3, 1, 0], [0, 3, 1, 0], 'V').
-						\isinside(Region([0, 2, 3, 0], [0, 4, 5, 0], "\<C-v>")))
+			let region1 = Region([0, 3, 1, 0], [0, 3, 1, 0], 'V')
+			let region2 = Region([0, 2, 3, 0], [0, 4, 5, 0], "\<C-v>")
+			Assert False(region1.isinside(region2))
 
-			Assert False(Region([0, 4, 1, 0], [0, 4, 1, 0], 'V').
-						\isinside(Region([0, 2, 3, 0], [0, 4, 5, 0], "\<C-v>")))
+			let region1 = Region([0, 4, 1, 0], [0, 4, 1, 0], 'V')
+			let region2 = Region([0, 2, 3, 0], [0, 4, 5, 0], "\<C-v>")
+			Assert False(region1.isinside(region2))
 
-			Assert False(Region([0, 2, 1, 0], [0, 4, 1, 0], 'V').
-						\isinside(Region([0, 2, 3, 0], [0, 4, 5, 0], "\<C-v>")))
+			let region1 = Region([0, 2, 1, 0], [0, 4, 1, 0], 'V')
+			let region2 = Region([0, 2, 3, 0], [0, 4, 5, 0], "\<C-v>")
+			Assert False(region1.isinside(region2))
 
 			" a blockwise item not in a characterwise region
-			Assert False(Region([0, 1, 1, 0], [0, 2, 2, 0], "\<C-v>").
-						\isinside(Region([0, 2, 3, 0], [0, 4, 5, 0], 'v')))
+			let region1 = Region([0, 1, 1, 0], [0, 2, 2, 0], "\<C-v>")
+			let region2 = Region([0, 2, 3, 0], [0, 4, 5, 0], 'v')
+			Assert False(region1.isinside(region2))
 
-			Assert False(Region([0, 1, 1, 0], [0, 3, 4, 0], "\<C-v>").
-						\isinside(Region([0, 2, 3, 0], [0, 4, 5, 0], 'v')))
+			let region1 = Region([0, 1, 1, 0], [0, 3, 4, 0], "\<C-v>")
+			let region2 = Region([0, 2, 3, 0], [0, 4, 5, 0], 'v')
+			Assert False(region1.isinside(region2))
 
-			Assert False(Region([0, 4, 6, 0], [0, 5, 7, 0], "\<C-v>").
-						\isinside(Region([0, 2, 3, 0], [0, 4, 5, 0], 'v')))
+			let region1 = Region([0, 4, 6, 0], [0, 5, 7, 0], "\<C-v>")
+			let region2 = Region([0, 2, 3, 0], [0, 4, 5, 0], 'v')
+			Assert False(region1.isinside(region2))
 
-			Assert False(Region([0, 3, 4, 0], [0, 5, 7, 0], "\<C-v>").
-						\isinside(Region([0, 2, 3, 0], [0, 4, 5, 0], 'v')))
+			let region1 = Region([0, 3, 4, 0], [0, 5, 7, 0], "\<C-v>")
+			let region2 = Region([0, 2, 3, 0], [0, 4, 5, 0], 'v')
+			Assert False(region1.isinside(region2))
 
 			" a blockwise item not in a linewise region
-			Assert False(Region([0, 1, 1, 0], [0, 1, 7, 0], "\<C-v>").
-						\isinside(Region([0, 2, 3, 0], [0, 4, 5, 0], 'V')))
+			let region1 = Region([0, 1, 1, 0], [0, 1, 7, 0], "\<C-v>")
+			let region2 = Region([0, 2, 3, 0], [0, 4, 5, 0], 'V')
+			Assert False(region1.isinside(region2))
 
-			Assert False(Region([0, 5, 1, 0], [0, 5, 7, 0], "\<C-v>").
-						\isinside(Region([0, 2, 3, 0], [0, 4, 5, 0], 'V')))
+			let region1 = Region([0, 5, 1, 0], [0, 5, 7, 0], "\<C-v>")
+			let region2 = Region([0, 2, 3, 0], [0, 4, 5, 0], 'V')
+			Assert False(region1.isinside(region2))
 
 			" blockwise item not in a blockwise region
-			Assert False(Region([0, 1, 1, 0], [0, 2, 2, 0], "\<C-v>").
-						\isinside(Region([0, 2, 3, 0], [0, 4, 5, 0], "\<C-v>")))
+			let region1 = Region([0, 1, 1, 0], [0, 2, 2, 0], "\<C-v>")
+			let region2 = Region([0, 2, 3, 0], [0, 4, 5, 0], "\<C-v>")
+			Assert False(region1.isinside(region2))
 
-			Assert False(Region([0, 1, 6, 0], [0, 2, 7, 0], "\<C-v>").
-						\isinside(Region([0, 2, 3, 0], [0, 4, 5, 0], "\<C-v>")))
+			let region1 = Region([0, 1, 6, 0], [0, 2, 7, 0], "\<C-v>")
+			let region2 = Region([0, 2, 3, 0], [0, 4, 5, 0], "\<C-v>")
+			Assert False(region1.isinside(region2))
 
-			Assert False(Region([0, 6, 1, 0], [0, 7, 2, 0], "\<C-v>").
-						\isinside(Region([0, 2, 3, 0], [0, 4, 5, 0], "\<C-v>")))
+			let region1 = Region([0, 6, 1, 0], [0, 7, 2, 0], "\<C-v>")
+			let region2 = Region([0, 2, 3, 0], [0, 4, 5, 0], "\<C-v>")
+			Assert False(region1.isinside(region2))
 
-			Assert False(Region([0, 6, 6, 0], [0, 7, 7, 0], "\<C-v>").
-						\isinside(Region([0, 2, 3, 0], [0, 4, 5, 0], "\<C-v>")))
+			let region1 = Region([0, 6, 6, 0], [0, 7, 7, 0], "\<C-v>")
+			let region2 = Region([0, 2, 3, 0], [0, 4, 5, 0], "\<C-v>")
+			Assert False(region1.isinside(region2))
 
-			Assert False(Region([0, 2, 1, 0], [0, 4, 2, 0], "\<C-v>").
-						\isinside(Region([0, 2, 3, 0], [0, 4, 5, 0], "\<C-v>")))
+			let region1 = Region([0, 2, 1, 0], [0, 4, 2, 0], "\<C-v>")
+			let region2 = Region([0, 2, 3, 0], [0, 4, 5, 0], "\<C-v>")
+			Assert False(region1.isinside(region2))
 
-			Assert False(Region([0, 2, 6, 0], [0, 4, 7, 0], "\<C-v>").
-						\isinside(Region([0, 2, 3, 0], [0, 4, 5, 0], "\<C-v>")))
+			let region1 = Region([0, 2, 6, 0], [0, 4, 7, 0], "\<C-v>")
+			let region2 = Region([0, 2, 3, 0], [0, 4, 5, 0], "\<C-v>")
+			Assert False(region1.isinside(region2))
 
-			Assert False(Region([0, 1, 3, 0], [0, 1, 5, 0], "\<C-v>").
-						\isinside(Region([0, 2, 3, 0], [0, 4, 5, 0], "\<C-v>")))
+			let region1 = Region([0, 1, 3, 0], [0, 1, 5, 0], "\<C-v>")
+			let region2 = Region([0, 2, 3, 0], [0, 4, 5, 0], "\<C-v>")
+			Assert False(region1.isinside(region2))
 
-			Assert False(Region([0, 5, 3, 0], [0, 5, 5, 0], "\<C-v>").
-						\isinside(Region([0, 2, 3, 0], [0, 4, 5, 0], "\<C-v>")))
+			let region1 = Region([0, 5, 3, 0], [0, 5, 5, 0], "\<C-v>")
+			let region2 = Region([0, 2, 3, 0], [0, 4, 5, 0], "\<C-v>")
+			Assert False(region1.isinside(region2))
 		End
 	End
 
-	Context .touches(pos)
-		It returns TRUE if itself is touching the position
-			Assert True(Region([0, 2, 5, 0], [0, 3, 4, 0], 'v').
-						\touches([0, 3, 4, 0]))
+	Context .touches(head, tail, ...)
+		It returns TRUE if itself is touching a region
+			" a characterwise item touches a characterwise region
+			let region = Region([0, 1, 1, 0], [0, 2, 4, 0], 'v')
+			Assert True(region.touches([0, 2, 4, 0], [0, 4, 4, 0], 'v'))
 
-			Assert True(Region([0, 3, 1, 0], [0, 3, 7, 0], 'v').
-						\touches([0, 3, 4, 0]))
+			let region = Region([0, 4, 4, 0], [0, 5, 7, 0], 'v')
+			Assert True(region.touches([0, 2, 4, 0], [0, 4, 4, 0], 'v'))
 
-			Assert True(Region([0, 3, 4, 0], [0, 4, 3, 0], 'v').
-						\touches([0, 3, 4, 0]))
+			let region = Region([0, 1, 1, 0], [0, 5, 7, 0], 'v')
+			Assert True(region.touches([0, 2, 4, 0], [0, 4, 4, 0], 'v'))
 
-			Assert True(Region([0, 2, 5, 0], [0, 3, 3, 0], 'V').
-						\touches([0, 3, 4, 0]))
+			let region = Region([0, 2, 4, 0], [0, 4, 4, 0], 'v')
+			Assert True(region.touches([0, 2, 4, 0], [0, 4, 4, 0], 'v'))
 
-			Assert True(Region([0, 3, 1, 0], [0, 3, 7, 0], 'V').
-						\touches([0, 3, 4, 0]))
+			let region = Region([0, 2, 5, 0], [0, 4, 3, 0], 'v')
+			Assert True(region.touches([0, 2, 4, 0], [0, 4, 4, 0], 'v'))
 
-			Assert True(Region([0, 3, 5, 0], [0, 4, 3, 0], 'V').
-						\touches([0, 3, 4, 0]))
+			let region = Region([0, 2, 3, 0], [0, 4, 5, 0], 'v')
+			Assert True(region.touches([0, 2, 4, 0], [0, 4, 4, 0], 'v'))
 
-			Assert True(Region([0, 2, 3, 0], [0, 3, 4, 0], "\<C-v>").
-						\touches([0, 3, 4, 0]))
+			" a characterwise item touches a linewise region
+			let region = Region([0, 1, 1, 0], [0, 2, 1, 0], 'v')
+			Assert True(region.touches([0, 2, 4, 0], [0, 4, 4, 0], 'V'))
 
-			Assert True(Region([0, 2, 3, 0], [0, 4, 5, 0], "\<C-v>").
-						\touches([0, 3, 4, 0]))
+			let region = Region([0, 2, 1, 0], [0, 2, 7, 0], 'v')
+			Assert True(region.touches([0, 2, 4, 0], [0, 4, 4, 0], 'V'))
 
-			Assert True(Region([0, 3, 4, 0], [0, 4, 5, 0], "\<C-v>").
-						\touches([0, 3, 4, 0]))
+			let region = Region([0, 4, 7, 0], [0, 5, 7, 0], 'v')
+			Assert True(region.touches([0, 2, 4, 0], [0, 4, 4, 0], 'V'))
+
+			let region = Region([0, 1, 1, 0], [0, 5, 7, 0], 'v')
+			Assert True(region.touches([0, 2, 4, 0], [0, 4, 4, 0], 'V'))
+
+			" a characterwise item touches a blockwise region
+			let region = Region([0, 1, 1, 0], [0, 2, 3, 0], 'v')
+			Assert True(region.touches([0, 2, 3, 0], [0, 4, 5, 0], "\<C-v>"))
+
+			let region = Region([0, 4, 5, 0], [0, 5, 7, 0], 'v')
+			Assert True(region.touches([0, 2, 3, 0], [0, 4, 5, 0], "\<C-v>"))
+
+			let region = Region([0, 1, 1, 0], [0, 5, 7, 0], 'v')
+			Assert True(region.touches([0, 2, 3, 0], [0, 4, 5, 0], "\<C-v>"))
+
+			let region = Region([0, 2, 3, 0], [0, 4, 5, 0], 'v')
+			Assert True(region.touches([0, 2, 3, 0], [0, 4, 5, 0], "\<C-v>"))
+
+			let region = Region([0, 2, 4, 0], [0, 4, 4, 0], 'v')
+			Assert True(region.touches([0, 2, 3, 0], [0, 4, 5, 0], "\<C-v>"))
+
+			let region = Region([0, 2, 2, 0], [0, 4, 6, 0], 'v')
+			Assert True(region.touches([0, 2, 3, 0], [0, 4, 5, 0], "\<C-v>"))
+
+			let region = Region([0, 3, 1, 0], [0, 3, 3, 0], 'v')
+			Assert True(region.touches([0, 2, 3, 0], [0, 4, 5, 0], "\<C-v>"))
+
+			let region = Region([0, 3, 5, 0], [0, 3, 7, 0], 'v')
+			Assert True(region.touches([0, 2, 3, 0], [0, 4, 5, 0], "\<C-v>"))
+
+			" a linewise item touches a characterwise region
+			let region = Region([0, 2, 1, 0], [0, 2, 1, 0], 'V')
+			Assert True(region.touches([0, 2, 3, 0], [0, 4, 5, 0], 'v'))
+
+			let region = Region([0, 3, 1, 0], [0, 3, 1, 0], 'V')
+			Assert True(region.touches([0, 2, 3, 0], [0, 4, 5, 0], 'v'))
+
+			let region = Region([0, 4, 1, 0], [0, 4, 1, 0], 'V')
+			Assert True(region.touches([0, 2, 3, 0], [0, 4, 5, 0], 'v'))
+
+			let region = Region([0, 1, 1, 0], [0, 2, 1, 0], 'V')
+			Assert True(region.touches([0, 2, 3, 0], [0, 4, 5, 0], 'v'))
+
+			let region = Region([0, 4, 1, 0], [0, 5, 1, 0], 'V')
+			Assert True(region.touches([0, 2, 3, 0], [0, 4, 5, 0], 'v'))
+
+			let region = Region([0, 2, 1, 0], [0, 4, 1, 0], 'V')
+			Assert True(region.touches([0, 2, 3, 0], [0, 4, 5, 0], 'v'))
+
+			let region = Region([0, 1, 1, 0], [0, 5, 1, 0], 'V')
+			Assert True(region.touches([0, 2, 3, 0], [0, 4, 5, 0], 'v'))
+
+			" a linewise item touches a linewise region
+			let region = Region([0, 2, 1, 0], [0, 2, 1, 0], 'V')
+			Assert True(region.touches([0, 2, 3, 0], [0, 4, 5, 0], 'V'))
+
+			let region = Region([0, 3, 1, 0], [0, 3, 1, 0], 'V')
+			Assert True(region.touches([0, 2, 3, 0], [0, 4, 5, 0], 'V'))
+
+			let region = Region([0, 4, 1, 0], [0, 4, 1, 0], 'V')
+			Assert True(region.touches([0, 2, 3, 0], [0, 4, 5, 0], 'V'))
+
+			let region = Region([0, 1, 1, 0], [0, 2, 1, 0], 'V')
+			Assert True(region.touches([0, 2, 3, 0], [0, 4, 5, 0], 'V'))
+
+			let region = Region([0, 4, 1, 0], [0, 5, 1, 0], 'V')
+			Assert True(region.touches([0, 2, 3, 0], [0, 4, 5, 0], 'V'))
+
+			let region = Region([0, 2, 1, 0], [0, 4, 1, 0], 'V')
+			Assert True(region.touches([0, 2, 3, 0], [0, 4, 5, 0], 'V'))
+
+			let region = Region([0, 1, 1, 0], [0, 5, 1, 0], 'V')
+			Assert True(region.touches([0, 2, 3, 0], [0, 4, 5, 0], 'V'))
+
+			" a linewise item touches a blockwise region
+			let region = Region([0, 2, 1, 0], [0, 2, 1, 0], 'V')
+			Assert True(region.touches([0, 2, 3, 0], [0, 4, 5, 0], "\<C-v>"))
+
+			let region = Region([0, 3, 1, 0], [0, 3, 1, 0], 'V')
+			Assert True(region.touches([0, 2, 3, 0], [0, 4, 5, 0], "\<C-v>"))
+
+			let region = Region([0, 4, 1, 0], [0, 4, 1, 0], 'V')
+			Assert True(region.touches([0, 2, 3, 0], [0, 4, 5, 0], "\<C-v>"))
+
+			let region = Region([0, 1, 1, 0], [0, 2, 1, 0], 'V')
+			Assert True(region.touches([0, 2, 3, 0], [0, 4, 5, 0], "\<C-v>"))
+
+			let region = Region([0, 4, 1, 0], [0, 5, 1, 0], 'V')
+			Assert True(region.touches([0, 2, 3, 0], [0, 4, 5, 0], "\<C-v>"))
+
+			let region = Region([0, 2, 1, 0], [0, 4, 1, 0], 'V')
+			Assert True(region.touches([0, 2, 3, 0], [0, 4, 5, 0], "\<C-v>"))
+
+			let region = Region([0, 1, 1, 0], [0, 5, 1, 0], 'V')
+			Assert True(region.touches([0, 2, 3, 0], [0, 4, 5, 0], "\<C-v>"))
+
+			" a blockwise item touches a characterwise region
+			let region = Region([0, 1, 1, 0], [0, 2, 3, 0], "\<C-v>")
+			Assert True(region.touches([0, 2, 3, 0], [0, 4, 5, 0], 'v'))
+
+			let region = Region([0, 4, 5, 0], [0, 5, 7, 0], "\<C-v>")
+			Assert True(region.touches([0, 2, 3, 0], [0, 4, 5, 0], 'v'))
+
+			let region = Region([0, 2, 3, 0], [0, 4, 5, 0], "\<C-v>")
+			Assert True(region.touches([0, 2, 3, 0], [0, 4, 5, 0], 'v'))
+
+			let region = Region([0, 1, 1, 0], [0, 5, 7, 0], "\<C-v>")
+			Assert True(region.touches([0, 2, 3, 0], [0, 4, 5, 0], 'v'))
+
+			let region = Region([0, 2, 2, 0], [0, 4, 6, 0], "\<C-v>")
+			Assert True(region.touches([0, 2, 3, 0], [0, 4, 5, 0], 'v'))
+
+			let region = Region([0, 2, 4, 0], [0, 4, 4, 0], "\<C-v>")
+			Assert True(region.touches([0, 2, 3, 0], [0, 4, 5, 0], 'v'))
+
+			let region = Region([0, 2, 1, 0], [0, 4, 3, 0], "\<C-v>")
+			Assert True(region.touches([0, 2, 3, 0], [0, 4, 5, 0], 'v'))
+
+			let region = Region([0, 2, 5, 0], [0, 4, 7, 0], "\<C-v>")
+			Assert True(region.touches([0, 2, 3, 0], [0, 4, 5, 0], 'v'))
+
+			" a blockwise item touches a linewise region
+			let region = Region([0, 1, 3, 0], [0, 2, 5, 0], "\<C-v>")
+			Assert True(region.touches([0, 2, 3, 0], [0, 4, 5, 0], 'V'))
+
+			let region = Region([0, 4, 3, 0], [0, 5, 5, 0], "\<C-v>")
+			Assert True(region.touches([0, 2, 3, 0], [0, 4, 5, 0], 'V'))
+
+			let region = Region([0, 2, 3, 0], [0, 4, 5, 0], "\<C-v>")
+			Assert True(region.touches([0, 2, 3, 0], [0, 4, 5, 0], 'V'))
+
+			let region = Region([0, 1, 1, 0], [0, 5, 7, 0], "\<C-v>")
+			Assert True(region.touches([0, 2, 3, 0], [0, 4, 5, 0], 'V'))
+
+			let region = Region([0, 1, 1, 0], [0, 2, 2, 0], "\<C-v>")
+			Assert True(region.touches([0, 2, 3, 0], [0, 4, 5, 0], 'V'))
+
+			let region = Region([0, 1, 1, 0], [0, 5, 2, 0], "\<C-v>")
+			Assert True(region.touches([0, 2, 3, 0], [0, 4, 5, 0], 'V'))
+
+			let region = Region([0, 1, 6, 0], [0, 5, 7, 0], "\<C-v>")
+			Assert True(region.touches([0, 2, 3, 0], [0, 4, 5, 0], 'V'))
+
+			" a blockwise item touches a blockwise region
+			let region = Region([0, 1, 2, 0], [0, 2, 3, 0], "\<C-v>")
+			Assert True(region.touches([0, 2, 3, 0], [0, 4, 5, 0], "\<C-v>"))
+
+			let region = Region([0, 4, 5, 0], [0, 5, 6, 0], "\<C-v>")
+			Assert True(region.touches([0, 2, 3, 0], [0, 4, 5, 0], "\<C-v>"))
+
+			let region = Region([0, 1, 5, 0], [0, 2, 6, 0], "\<C-v>")
+			Assert True(region.touches([0, 2, 3, 0], [0, 4, 5, 0], "\<C-v>"))
+
+			let region = Region([0, 4, 2, 0], [0, 5, 3, 0], "\<C-v>")
+			Assert True(region.touches([0, 2, 3, 0], [0, 4, 5, 0], "\<C-v>"))
+
+			let region = Region([0, 1, 1, 0], [0, 5, 7, 0], "\<C-v>")
+			Assert True(region.touches([0, 2, 3, 0], [0, 4, 5, 0], "\<C-v>"))
+
+			let region = Region([0, 2, 3, 0], [0, 4, 5, 0], "\<C-v>")
+			Assert True(region.touches([0, 2, 3, 0], [0, 4, 5, 0], "\<C-v>"))
+
+			let region = Region([0, 1, 1, 0], [0, 5, 3, 0], "\<C-v>")
+			Assert True(region.touches([0, 2, 3, 0], [0, 4, 5, 0], "\<C-v>"))
+
+			let region = Region([0, 1, 5, 0], [0, 5, 6, 0], "\<C-v>")
+			Assert True(region.touches([0, 2, 3, 0], [0, 4, 5, 0], "\<C-v>"))
 		End
 
-		It returns FALSE if itself is not touching the position
-			Assert False(Region([0, 1, 5, 0], [0, 3, 3, 0], 'v').
-						\touches([0, 3, 4, 0]))
+		It returns FALSE if itself is not touching a region
+			" a characterwise item does not touch a characterwise region
+			let region = Region([0, 1, 1, 0], [0, 2, 3, 0], 'v')
+			Assert False(region.touches([0, 2, 4, 0], [0, 4, 4, 0], 'v'))
 
-			Assert False(Region([0, 3, 5, 0], [0, 5, 3, 0], 'v').
-						\touches([0, 3, 4, 0]))
+			let region = Region([0, 4, 5, 0], [0, 5, 7, 0], 'v')
+			Assert False(region.touches([0, 2, 4, 0], [0, 4, 4, 0], 'v'))
 
-			Assert False(Region([0, 1, 5, 0], [0, 2, 3, 0], 'V').
-						\touches([0, 3, 4, 0]))
+			let region = Region([0, 2, 1, 0], [0, 2, 3, 0], 'v')
+			Assert False(region.touches([0, 2, 4, 0], [0, 4, 4, 0], 'v'))
 
-			Assert False(Region([0, 4, 5, 0], [0, 5, 3, 0], 'V').
-						\touches([0, 3, 4, 0]))
+			" a characterwise item does not touch a linewise region
+			let region = Region([0, 1, 1, 0], [0, 1, 7, 0], 'v')
+			Assert False(region.touches([0, 2, 4, 0], [0, 4, 4, 0], 'V'))
 
-			Assert False(Region([0, 1, 5, 0], [0, 3, 3, 0], "\<C-v>").
-						\touches([0, 3, 4, 0]))
+			let region = Region([0, 5, 1, 0], [0, 5, 7, 0], 'v')
+			Assert False(region.touches([0, 2, 4, 0], [0, 4, 4, 0], 'V'))
 
-			Assert False(Region([0, 3, 5, 0], [0, 5, 7, 0], "\<C-v>").
-						\touches([0, 3, 4, 0]))
+			" a characterwise item does not touch a blockwise region
+			let region = Region([0, 1, 1, 0], [0, 1, 7, 0], 'v')
+			Assert False(region.touches([0, 2, 3, 0], [0, 4, 5, 0], "\<C-v>"))
+
+			let region = Region([0, 5, 1, 0], [0, 5, 7, 0], 'v')
+			Assert False(region.touches([0, 2, 3, 0], [0, 4, 5, 0], "\<C-v>"))
+
+			let region = Region([0, 2, 1, 0], [0, 2, 2, 0], 'v')
+			Assert False(region.touches([0, 2, 3, 0], [0, 4, 5, 0], "\<C-v>"))
+
+			let region = Region([0, 2, 6, 0], [0, 2, 7, 0], 'v')
+			Assert False(region.touches([0, 2, 3, 0], [0, 4, 5, 0], "\<C-v>"))
+
+			let region = Region([0, 3, 1, 0], [0, 3, 2, 0], 'v')
+			Assert False(region.touches([0, 2, 3, 0], [0, 4, 5, 0], "\<C-v>"))
+
+			let region = Region([0, 3, 6, 0], [0, 3, 7, 0], 'v')
+			Assert False(region.touches([0, 2, 3, 0], [0, 4, 5, 0], "\<C-v>"))
+
+			let region = Region([0, 4, 1, 0], [0, 4, 2, 0], 'v')
+			Assert False(region.touches([0, 2, 3, 0], [0, 4, 5, 0], "\<C-v>"))
+
+			let region = Region([0, 4, 6, 0], [0, 4, 7, 0], 'v')
+			Assert False(region.touches([0, 2, 3, 0], [0, 4, 5, 0], "\<C-v>"))
+
+			let region = Region([0, 1, 1, 0], [0, 2, 2, 0], 'v')
+			Assert False(region.touches([0, 2, 3, 0], [0, 4, 5, 0], "\<C-v>"))
+
+			let region = Region([0, 4, 6, 0], [0, 5, 7, 0], 'v')
+			Assert False(region.touches([0, 2, 3, 0], [0, 4, 5, 0], "\<C-v>"))
+
+			" a linewise item does not touch a characterwise region
+			let region = Region([0, 1, 1, 0], [0, 1, 1, 0], 'V')
+			Assert False(region.touches([0, 2, 3, 0], [0, 4, 5, 0], 'v'))
+
+			let region = Region([0, 5, 1, 0], [0, 5, 1, 0], 'V')
+			Assert False(region.touches([0, 2, 3, 0], [0, 4, 5, 0], 'v'))
+
+			" a linewise item does not touch a linewise region
+			let region = Region([0, 1, 1, 0], [0, 1, 1, 0], 'V')
+			Assert False(region.touches([0, 2, 3, 0], [0, 4, 5, 0], 'V'))
+
+			let region = Region([0, 5, 1, 0], [0, 5, 1, 0], 'V')
+			Assert False(region.touches([0, 2, 3, 0], [0, 4, 5, 0], 'V'))
+
+			" a linewise item does not touch a blockwise region
+			let region = Region([0, 1, 1, 0], [0, 1, 1, 0], 'V')
+			Assert False(region.touches([0, 2, 3, 0], [0, 4, 5, 0], "\<C-v>"))
+
+			let region = Region([0, 5, 1, 0], [0, 5, 1, 0], 'V')
+			Assert False(region.touches([0, 2, 3, 0], [0, 4, 5, 0], "\<C-v>"))
+
+			" a blockwise item does not touch a characterwise region
+			let region = Region([0, 1, 1, 0], [0, 2, 2, 0], "\<C-v>")
+			Assert False(region.touches([0, 2, 3, 0], [0, 4, 5, 0], 'v'))
+
+			let region = Region([0, 4, 6, 0], [0, 5, 7, 0], "\<C-v>")
+			Assert False(region.touches([0, 2, 3, 0], [0, 4, 5, 0], 'v'))
+
+			" a blockwise item does not touch a linewise region
+			let region = Region([0, 1, 1, 0], [0, 1, 7, 0], "\<C-v>")
+			Assert False(region.touches([0, 2, 3, 0], [0, 4, 5, 0], 'V'))
+
+			let region = Region([0, 5, 1, 0], [0, 5, 7, 0], "\<C-v>")
+			Assert False(region.touches([0, 2, 3, 0], [0, 4, 5, 0], 'V'))
+
+			" a blockwise item does not touch a blockwise region
+			let region = Region([0, 1, 1, 0], [0, 1, 7, 0], "\<C-v>")
+			Assert False(region.touches([0, 2, 3, 0], [0, 4, 5, 0], "\<C-v>"))
+
+			let region = Region([0, 5, 1, 0], [0, 5, 7, 0], "\<C-v>")
+			Assert False(region.touches([0, 2, 3, 0], [0, 4, 5, 0], "\<C-v>"))
+
+			let region = Region([0, 1, 1, 0], [0, 5, 2, 0], "\<C-v>")
+			Assert False(region.touches([0, 2, 3, 0], [0, 4, 5, 0], "\<C-v>"))
+
+			let region = Region([0, 1, 6, 0], [0, 5, 7, 0], "\<C-v>")
+			Assert False(region.touches([0, 2, 3, 0], [0, 4, 5, 0], "\<C-v>"))
+
+			let region = Region([0, 1, 1, 0], [0, 1, 2, 0], "\<C-v>")
+			Assert False(region.touches([0, 2, 3, 0], [0, 4, 5, 0], "\<C-v>"))
+
+			let region = Region([0, 1, 6, 0], [0, 1, 7, 0], "\<C-v>")
+			Assert False(region.touches([0, 2, 3, 0], [0, 4, 5, 0], "\<C-v>"))
+
+			let region = Region([0, 5, 1, 0], [0, 5, 2, 0], "\<C-v>")
+			Assert False(region.touches([0, 2, 3, 0], [0, 4, 5, 0], "\<C-v>"))
+
+			let region = Region([0, 5, 6, 0], [0, 5, 7, 0], "\<C-v>")
+			Assert False(region.touches([0, 2, 3, 0], [0, 4, 5, 0], "\<C-v>"))
+
+			let region = Region([0, 1, 3, 0], [0, 1, 5, 0], "\<C-v>")
+			Assert False(region.touches([0, 2, 3, 0], [0, 4, 5, 0], "\<C-v>"))
+
+			let region = Region([0, 5, 3, 0], [0, 5, 5, 0], "\<C-v>")
+			Assert False(region.touches([0, 2, 3, 0], [0, 4, 5, 0], "\<C-v>"))
+
+			let region = Region([0, 2, 1, 0], [0, 4, 2, 0], "\<C-v>")
+			Assert False(region.touches([0, 2, 3, 0], [0, 4, 5, 0], "\<C-v>"))
+
+			let region = Region([0, 2, 6, 0], [0, 4, 7, 0], "\<C-v>")
+			Assert False(region.touches([0, 2, 3, 0], [0, 4, 5, 0], "\<C-v>"))
+		End
+
+		It throws an exception with inappropriate arguments
+			let head = [0, 1, 1, 0]
+			let tail = [0, 1, 1, 0]
+			let region = Region(head, tail, 'v')
+			Throws /^Vim(echoerr):multiselect: Invalid argument for Region.touches()/ region.touches('')
+			Throws /^Vim(echoerr):multiselect: Invalid argument for Region.touches()/ region.touches(1, [0, 1, 1, 0])
+			Throws /^Vim(echoerr):multiselect: Invalid argument for Region.touches()/ region.touches([0, 1, 1, 0], 1)
+		End
+	End
+
+	Context .touches(head)
+		It returns TRUE if itself is touching a position
+			let region = Region([0, 2, 5, 0], [0, 3, 4, 0], 'v')
+			let pos = [0, 3, 4, 0]
+			Assert True(region.touches(pos))
+
+			let region = Region([0, 3, 1, 0], [0, 3, 7, 0], 'v')
+			let pos = [0, 3, 4, 0]
+			Assert True(region.touches(pos))
+
+			let region = Region([0, 3, 4, 0], [0, 4, 3, 0], 'v')
+			let pos = [0, 3, 4, 0]
+			Assert True(region.touches(pos))
+
+			let region = Region([0, 2, 5, 0], [0, 3, 3, 0], 'V')
+			let pos = [0, 3, 4, 0]
+			Assert True(region.touches(pos))
+
+			let region = Region([0, 3, 1, 0], [0, 3, 7, 0], 'V')
+			let pos = [0, 3, 4, 0]
+			Assert True(region.touches(pos))
+
+			let region = Region([0, 3, 5, 0], [0, 4, 3, 0], 'V')
+			let pos = [0, 3, 4, 0]
+			Assert True(region.touches(pos))
+
+			let region = Region([0, 2, 3, 0], [0, 3, 4, 0], "\<C-v>")
+			let pos = [0, 3, 4, 0]
+			Assert True(region.touches(pos))
+
+			let region = Region([0, 2, 3, 0], [0, 4, 5, 0], "\<C-v>")
+			let pos = [0, 3, 4, 0]
+			Assert True(region.touches(pos))
+
+			let region = Region([0, 3, 4, 0], [0, 4, 5, 0], "\<C-v>")
+			let pos = [0, 3, 4, 0]
+			Assert True(region.touches(pos))
+		End
+
+		It returns FALSE if itself is not touching a position
+			let region = Region([0, 1, 5, 0], [0, 3, 3, 0], 'v')
+			let pos = [0, 3, 4, 0]
+			Assert False(region.touches(pos))
+
+			let region = Region([0, 3, 5, 0], [0, 5, 3, 0], 'v')
+			let pos = [0, 3, 4, 0]
+			Assert False(region.touches(pos))
+
+			let region = Region([0, 1, 5, 0], [0, 2, 3, 0], 'V')
+			let pos = [0, 3, 4, 0]
+			Assert False(region.touches(pos))
+
+			let region = Region([0, 4, 5, 0], [0, 5, 3, 0], 'V')
+			let pos = [0, 3, 4, 0]
+			Assert False(region.touches(pos))
+
+			let region = Region([0, 1, 5, 0], [0, 3, 3, 0], "\<C-v>")
+			let pos = [0, 3, 4, 0]
+			Assert False(region.touches(pos))
+
+			let region = Region([0, 3, 5, 0], [0, 5, 7, 0], "\<C-v>")
+			let pos = [0, 3, 4, 0]
+			Assert False(region.touches(pos))
+		End
+	End
+
+	Context .touches(lnum)
+		It returns TRUE if itself is touching a line
+			let region = Region([0, 2, 1, 0], [0, 4, 8, 0], 'v')
+			Assert True(region.touches(3))
+
+			let region = Region([0, 2, 1, 0], [0, 4, 8, 0], 'V')
+			Assert True(region.touches(3))
+
+			let region = Region([0, 2, 1, 0], [0, 4, 8, 0], "\<C-v>")
+			Assert True(region.touches(3))
+		End
+
+		It returns FALSE if itself is not touching a line
+			let region = Region([0, 2, 1, 0], [0, 4, 8, 0], 'v')
+			Assert False(region.touches(1))
+
+			let region = Region([0, 2, 1, 0], [0, 4, 8, 0], 'V')
+			Assert False(region.touches(1))
+
+			let region = Region([0, 2, 1, 0], [0, 4, 8, 0], "\<C-v>")
+			Assert False(region.touches(1))
+		End
+	End
+
+	Context .touches(startlnum, endlnum)
+		It returns TRUE if itself is touching a range between two lines
+			let region = Region([0, 2, 1, 0], [0, 4, 8, 0], 'v')
+			Assert True(region.touches(1, 4))
+
+			let region = Region([0, 2, 1, 0], [0, 4, 8, 0], 'V')
+			Assert True(region.touches(1, 4))
+
+			let region = Region([0, 2, 1, 0], [0, 4, 8, 0], "\<C-v>")
+			Assert True(region.touches(1, 4))
+		End
+
+		It returns FALSE if itself is not touching a line
+			let region = Region([0, 3, 1, 0], [0, 4, 8, 0], 'v')
+			Assert False(region.touches(1, 2))
+
+			let region = Region([0, 3, 1, 0], [0, 4, 8, 0], 'V')
+			Assert False(region.touches(1, 2))
+
+			let region = Region([0, 3, 1, 0], [0, 4, 8, 0], "\<C-v>")
+			Assert False(region.touches(1, 2))
 		End
 	End
 
 	Context .touches(region)
-		It returns TRUE if itself is touching the region
+		It returns TRUE if itself is touching a region
 			" a characterwise item touches a characterwise region
-			Assert True(Region([0, 1, 1, 0], [0, 2, 4, 0], 'v').
-						\touches(Region([0, 2, 4, 0], [0, 4, 4, 0], 'v')))
+			let region1 = Region([0, 1, 1, 0], [0, 2, 4, 0], 'v')
+			let region2 = Region([0, 2, 4, 0], [0, 4, 4, 0], 'v')
+			Assert True(region1.touches(region2))
 
-			Assert True(Region([0, 4, 4, 0], [0, 5, 7, 0], 'v').
-						\touches(Region([0, 2, 4, 0], [0, 4, 4, 0], 'v')))
+			let region1 = Region([0, 4, 4, 0], [0, 5, 7, 0], 'v')
+			let region2 = Region([0, 2, 4, 0], [0, 4, 4, 0], 'v')
+			Assert True(region1.touches(region2))
 
-			Assert True(Region([0, 1, 1, 0], [0, 5, 7, 0], 'v').
-						\touches(Region([0, 2, 4, 0], [0, 4, 4, 0], 'v')))
+			let region1 = Region([0, 1, 1, 0], [0, 5, 7, 0], 'v')
+			let region2 = Region([0, 2, 4, 0], [0, 4, 4, 0], 'v')
+			Assert True(region1.touches(region2))
 
-			Assert True(Region([0, 2, 4, 0], [0, 4, 4, 0], 'v').
-						\touches(Region([0, 2, 4, 0], [0, 4, 4, 0], 'v')))
+			let region1 = Region([0, 2, 4, 0], [0, 4, 4, 0], 'v')
+			let region2 = Region([0, 2, 4, 0], [0, 4, 4, 0], 'v')
+			Assert True(region1.touches(region2))
 
-			Assert True(Region([0, 2, 5, 0], [0, 4, 3, 0], 'v').
-						\touches(Region([0, 2, 4, 0], [0, 4, 4, 0], 'v')))
+			let region1 = Region([0, 2, 5, 0], [0, 4, 3, 0], 'v')
+			let region2 = Region([0, 2, 4, 0], [0, 4, 4, 0], 'v')
+			Assert True(region1.touches(region2))
 
-			Assert True(Region([0, 2, 3, 0], [0, 4, 5, 0], 'v').
-						\touches(Region([0, 2, 4, 0], [0, 4, 4, 0], 'v')))
+			let region1 = Region([0, 2, 3, 0], [0, 4, 5, 0], 'v')
+			let region2 = Region([0, 2, 4, 0], [0, 4, 4, 0], 'v')
+			Assert True(region1.touches(region2))
 
 			" a characterwise item touches a linewise region
-			Assert True(Region([0, 1, 1, 0], [0, 2, 1, 0], 'v').
-						\touches(Region([0, 2, 4, 0], [0, 4, 4, 0], 'V')))
+			let region1 = Region([0, 1, 1, 0], [0, 2, 1, 0], 'v')
+			let region2 = Region([0, 2, 4, 0], [0, 4, 4, 0], 'V')
+			Assert True(region1.touches(region2))
 
-			Assert True(Region([0, 2, 1, 0], [0, 2, 7, 0], 'v').
-						\touches(Region([0, 2, 4, 0], [0, 4, 4, 0], 'V')))
+			let region1 = Region([0, 2, 1, 0], [0, 2, 7, 0], 'v')
+			let region2 = Region([0, 2, 4, 0], [0, 4, 4, 0], 'V')
+			Assert True(region1.touches(region2))
 
-			Assert True(Region([0, 4, 7, 0], [0, 5, 7, 0], 'v').
-						\touches(Region([0, 2, 4, 0], [0, 4, 4, 0], 'V')))
+			let region1 = Region([0, 4, 7, 0], [0, 5, 7, 0], 'v')
+			let region2 = Region([0, 2, 4, 0], [0, 4, 4, 0], 'V')
+			Assert True(region1.touches(region2))
 
-			Assert True(Region([0, 1, 1, 0], [0, 5, 7, 0], 'v').
-						\touches(Region([0, 2, 4, 0], [0, 4, 4, 0], 'V')))
+			let region1 = Region([0, 1, 1, 0], [0, 5, 7, 0], 'v')
+			let region2 = Region([0, 2, 4, 0], [0, 4, 4, 0], 'V')
+			Assert True(region1.touches(region2))
 
 			" a characterwise item touches a blockwise region
-			Assert True(Region([0, 1, 1, 0], [0, 2, 3, 0], 'v').
-						\touches(Region([0, 2, 3, 0], [0, 4, 5, 0], "\<C-v>")))
+			let region1 = Region([0, 1, 1, 0], [0, 2, 3, 0], 'v')
+			let region2 = Region([0, 2, 3, 0], [0, 4, 5, 0], "\<C-v>")
+			Assert True(region1.touches(region2))
 
-			Assert True(Region([0, 4, 5, 0], [0, 5, 7, 0], 'v').
-						\touches(Region([0, 2, 3, 0], [0, 4, 5, 0], "\<C-v>")))
+			let region1 = Region([0, 4, 5, 0], [0, 5, 7, 0], 'v')
+			let region2 = Region([0, 2, 3, 0], [0, 4, 5, 0], "\<C-v>")
+			Assert True(region1.touches(region2))
 
-			Assert True(Region([0, 1, 1, 0], [0, 5, 7, 0], 'v').
-						\touches(Region([0, 2, 3, 0], [0, 4, 5, 0], "\<C-v>")))
+			let region1 = Region([0, 1, 1, 0], [0, 5, 7, 0], 'v')
+			let region2 = Region([0, 2, 3, 0], [0, 4, 5, 0], "\<C-v>")
+			Assert True(region1.touches(region2))
 
-			Assert True(Region([0, 2, 3, 0], [0, 4, 5, 0], 'v').
-						\touches(Region([0, 2, 3, 0], [0, 4, 5, 0], "\<C-v>")))
+			let region1 = Region([0, 2, 3, 0], [0, 4, 5, 0], 'v')
+			let region2 = Region([0, 2, 3, 0], [0, 4, 5, 0], "\<C-v>")
+			Assert True(region1.touches(region2))
 
-			Assert True(Region([0, 2, 4, 0], [0, 4, 4, 0], 'v').
-						\touches(Region([0, 2, 3, 0], [0, 4, 5, 0], "\<C-v>")))
+			let region1 = Region([0, 2, 4, 0], [0, 4, 4, 0], 'v')
+			let region2 = Region([0, 2, 3, 0], [0, 4, 5, 0], "\<C-v>")
+			Assert True(region1.touches(region2))
 
-			Assert True(Region([0, 2, 2, 0], [0, 4, 6, 0], 'v').
-						\touches(Region([0, 2, 3, 0], [0, 4, 5, 0], "\<C-v>")))
+			let region1 = Region([0, 2, 2, 0], [0, 4, 6, 0], 'v')
+			let region2 = Region([0, 2, 3, 0], [0, 4, 5, 0], "\<C-v>")
+			Assert True(region1.touches(region2))
 
-			Assert True(Region([0, 3, 1, 0], [0, 3, 3, 0], 'v').
-						\touches(Region([0, 2, 3, 0], [0, 4, 5, 0], "\<C-v>")))
+			let region1 = Region([0, 3, 1, 0], [0, 3, 3, 0], 'v')
+			let region2 = Region([0, 2, 3, 0], [0, 4, 5, 0], "\<C-v>")
+			Assert True(region1.touches(region2))
 
-			Assert True(Region([0, 3, 5, 0], [0, 3, 7, 0], 'v').
-						\touches(Region([0, 2, 3, 0], [0, 4, 5, 0], "\<C-v>")))
+			let region1 = Region([0, 3, 5, 0], [0, 3, 7, 0], 'v')
+			let region2 = Region([0, 2, 3, 0], [0, 4, 5, 0], "\<C-v>")
+			Assert True(region1.touches(region2))
 
 			" a linewise item touches a characterwise region
-			Assert True(Region([0, 2, 1, 0], [0, 2, 1, 0], 'V').
-						\touches(Region([0, 2, 3, 0], [0, 4, 5, 0], 'v')))
+			let region1 = Region([0, 2, 1, 0], [0, 2, 1, 0], 'V')
+			let region2 = Region([0, 2, 3, 0], [0, 4, 5, 0], 'v')
+			Assert True(region1.touches(region2))
 
-			Assert True(Region([0, 3, 1, 0], [0, 3, 1, 0], 'V').
-						\touches(Region([0, 2, 3, 0], [0, 4, 5, 0], 'v')))
+			let region1 = Region([0, 3, 1, 0], [0, 3, 1, 0], 'V')
+			let region2 = Region([0, 2, 3, 0], [0, 4, 5, 0], 'v')
+			Assert True(region1.touches(region2))
 
-			Assert True(Region([0, 4, 1, 0], [0, 4, 1, 0], 'V').
-						\touches(Region([0, 2, 3, 0], [0, 4, 5, 0], 'v')))
+			let region1 = Region([0, 4, 1, 0], [0, 4, 1, 0], 'V')
+			let region2 = Region([0, 2, 3, 0], [0, 4, 5, 0], 'v')
+			Assert True(region1.touches(region2))
 
-			Assert True(Region([0, 1, 1, 0], [0, 2, 1, 0], 'V').
-						\touches(Region([0, 2, 3, 0], [0, 4, 5, 0], 'v')))
+			let region1 = Region([0, 1, 1, 0], [0, 2, 1, 0], 'V')
+			let region2 = Region([0, 2, 3, 0], [0, 4, 5, 0], 'v')
+			Assert True(region1.touches(region2))
 
-			Assert True(Region([0, 4, 1, 0], [0, 5, 1, 0], 'V').
-						\touches(Region([0, 2, 3, 0], [0, 4, 5, 0], 'v')))
+			let region1 = Region([0, 4, 1, 0], [0, 5, 1, 0], 'V')
+			let region2 = Region([0, 2, 3, 0], [0, 4, 5, 0], 'v')
+			Assert True(region1.touches(region2))
 
-			Assert True(Region([0, 2, 1, 0], [0, 4, 1, 0], 'V').
-						\touches(Region([0, 2, 3, 0], [0, 4, 5, 0], 'v')))
+			let region1 = Region([0, 2, 1, 0], [0, 4, 1, 0], 'V')
+			let region2 = Region([0, 2, 3, 0], [0, 4, 5, 0], 'v')
+			Assert True(region1.touches(region2))
 
-			Assert True(Region([0, 1, 1, 0], [0, 5, 1, 0], 'V').
-						\touches(Region([0, 2, 3, 0], [0, 4, 5, 0], 'v')))
+			let region1 = Region([0, 1, 1, 0], [0, 5, 1, 0], 'V')
+			let region2 = Region([0, 2, 3, 0], [0, 4, 5, 0], 'v')
+			Assert True(region1.touches(region2))
 
 			" a linewise item touches a linewise region
-			Assert True(Region([0, 2, 1, 0], [0, 2, 1, 0], 'V').
-						\touches(Region([0, 2, 3, 0], [0, 4, 5, 0], 'V')))
+			let region1 = Region([0, 2, 1, 0], [0, 2, 1, 0], 'V')
+			let region2 = Region([0, 2, 3, 0], [0, 4, 5, 0], 'V')
+			Assert True(region1.touches(region2))
 
-			Assert True(Region([0, 3, 1, 0], [0, 3, 1, 0], 'V').
-						\touches(Region([0, 2, 3, 0], [0, 4, 5, 0], 'V')))
+			let region1 = Region([0, 3, 1, 0], [0, 3, 1, 0], 'V')
+			let region2 = Region([0, 2, 3, 0], [0, 4, 5, 0], 'V')
+			Assert True(region1.touches(region2))
 
-			Assert True(Region([0, 4, 1, 0], [0, 4, 1, 0], 'V').
-						\touches(Region([0, 2, 3, 0], [0, 4, 5, 0], 'V')))
+			let region1 = Region([0, 4, 1, 0], [0, 4, 1, 0], 'V')
+			let region2 = Region([0, 2, 3, 0], [0, 4, 5, 0], 'V')
+			Assert True(region1.touches(region2))
 
-			Assert True(Region([0, 1, 1, 0], [0, 2, 1, 0], 'V').
-						\touches(Region([0, 2, 3, 0], [0, 4, 5, 0], 'V')))
+			let region1 = Region([0, 1, 1, 0], [0, 2, 1, 0], 'V')
+			let region2 = Region([0, 2, 3, 0], [0, 4, 5, 0], 'V')
+			Assert True(region1.touches(region2))
 
-			Assert True(Region([0, 4, 1, 0], [0, 5, 1, 0], 'V').
-						\touches(Region([0, 2, 3, 0], [0, 4, 5, 0], 'V')))
+			let region1 = Region([0, 4, 1, 0], [0, 5, 1, 0], 'V')
+			let region2 = Region([0, 2, 3, 0], [0, 4, 5, 0], 'V')
+			Assert True(region1.touches(region2))
 
-			Assert True(Region([0, 2, 1, 0], [0, 4, 1, 0], 'V').
-						\touches(Region([0, 2, 3, 0], [0, 4, 5, 0], 'V')))
+			let region1 = Region([0, 2, 1, 0], [0, 4, 1, 0], 'V')
+			let region2 = Region([0, 2, 3, 0], [0, 4, 5, 0], 'V')
+			Assert True(region1.touches(region2))
 
-			Assert True(Region([0, 1, 1, 0], [0, 5, 1, 0], 'V').
-						\touches(Region([0, 2, 3, 0], [0, 4, 5, 0], 'V')))
+			let region1 = Region([0, 1, 1, 0], [0, 5, 1, 0], 'V')
+			let region2 = Region([0, 2, 3, 0], [0, 4, 5, 0], 'V')
+			Assert True(region1.touches(region2))
 
 			" a linewise item touches a blockwise region
-			Assert True(Region([0, 2, 1, 0], [0, 2, 1, 0], 'V').
-						\touches(Region([0, 2, 3, 0], [0, 4, 5, 0], "\<C-v>")))
+			let region1 = Region([0, 2, 1, 0], [0, 2, 1, 0], 'V')
+			let region2 = Region([0, 2, 3, 0], [0, 4, 5, 0], "\<C-v>")
+			Assert True(region1.touches(region2))
 
-			Assert True(Region([0, 3, 1, 0], [0, 3, 1, 0], 'V').
-						\touches(Region([0, 2, 3, 0], [0, 4, 5, 0], "\<C-v>")))
+			let region1 = Region([0, 3, 1, 0], [0, 3, 1, 0], 'V')
+			let region2 = Region([0, 2, 3, 0], [0, 4, 5, 0], "\<C-v>")
+			Assert True(region1.touches(region2))
 
-			Assert True(Region([0, 4, 1, 0], [0, 4, 1, 0], 'V').
-						\touches(Region([0, 2, 3, 0], [0, 4, 5, 0], "\<C-v>")))
+			let region1 = Region([0, 4, 1, 0], [0, 4, 1, 0], 'V')
+			let region2 = Region([0, 2, 3, 0], [0, 4, 5, 0], "\<C-v>")
+			Assert True(region1.touches(region2))
 
-			Assert True(Region([0, 1, 1, 0], [0, 2, 1, 0], 'V').
-						\touches(Region([0, 2, 3, 0], [0, 4, 5, 0], "\<C-v>")))
+			let region1 = Region([0, 1, 1, 0], [0, 2, 1, 0], 'V')
+			let region2 = Region([0, 2, 3, 0], [0, 4, 5, 0], "\<C-v>")
+			Assert True(region1.touches(region2))
 
-			Assert True(Region([0, 4, 1, 0], [0, 5, 1, 0], 'V').
-						\touches(Region([0, 2, 3, 0], [0, 4, 5, 0], "\<C-v>")))
+			let region1 = Region([0, 4, 1, 0], [0, 5, 1, 0], 'V')
+			let region2 = Region([0, 2, 3, 0], [0, 4, 5, 0], "\<C-v>")
+			Assert True(region1.touches(region2))
 
-			Assert True(Region([0, 2, 1, 0], [0, 4, 1, 0], 'V').
-						\touches(Region([0, 2, 3, 0], [0, 4, 5, 0], "\<C-v>")))
+			let region1 = Region([0, 2, 1, 0], [0, 4, 1, 0], 'V')
+			let region2 = Region([0, 2, 3, 0], [0, 4, 5, 0], "\<C-v>")
+			Assert True(region1.touches(region2))
 
-			Assert True(Region([0, 1, 1, 0], [0, 5, 1, 0], 'V').
-						\touches(Region([0, 2, 3, 0], [0, 4, 5, 0], "\<C-v>")))
+			let region1 = Region([0, 1, 1, 0], [0, 5, 1, 0], 'V')
+			let region2 = Region([0, 2, 3, 0], [0, 4, 5, 0], "\<C-v>")
+			Assert True(region1.touches(region2))
 
 			" a blockwise item touches a characterwise region
-			Assert True(Region([0, 1, 1, 0], [0, 2, 3, 0], "\<C-v>").
-						\touches(Region([0, 2, 3, 0], [0, 4, 5, 0], 'v')))
+			let region1 = Region([0, 1, 1, 0], [0, 2, 3, 0], "\<C-v>")
+			let region2 = Region([0, 2, 3, 0], [0, 4, 5, 0], 'v')
+			Assert True(region1.touches(region2))
 
-			Assert True(Region([0, 4, 5, 0], [0, 5, 7, 0], "\<C-v>").
-						\touches(Region([0, 2, 3, 0], [0, 4, 5, 0], 'v')))
+			let region1 = Region([0, 4, 5, 0], [0, 5, 7, 0], "\<C-v>")
+			let region2 = Region([0, 2, 3, 0], [0, 4, 5, 0], 'v')
+			Assert True(region1.touches(region2))
 
-			Assert True(Region([0, 2, 3, 0], [0, 4, 5, 0], "\<C-v>").
-						\touches(Region([0, 2, 3, 0], [0, 4, 5, 0], 'v')))
+			let region1 = Region([0, 2, 3, 0], [0, 4, 5, 0], "\<C-v>")
+			let region2 = Region([0, 2, 3, 0], [0, 4, 5, 0], 'v')
+			Assert True(region1.touches(region2))
 
-			Assert True(Region([0, 1, 1, 0], [0, 5, 7, 0], "\<C-v>").
-						\touches(Region([0, 2, 3, 0], [0, 4, 5, 0], 'v')))
+			let region1 = Region([0, 1, 1, 0], [0, 5, 7, 0], "\<C-v>")
+			let region2 = Region([0, 2, 3, 0], [0, 4, 5, 0], 'v')
+			Assert True(region1.touches(region2))
 
-			Assert True(Region([0, 2, 2, 0], [0, 4, 6, 0], "\<C-v>").
-						\touches(Region([0, 2, 3, 0], [0, 4, 5, 0], 'v')))
+			let region1 = Region([0, 2, 2, 0], [0, 4, 6, 0], "\<C-v>")
+			let region2 = Region([0, 2, 3, 0], [0, 4, 5, 0], 'v')
+			Assert True(region1.touches(region2))
 
-			Assert True(Region([0, 2, 4, 0], [0, 4, 4, 0], "\<C-v>").
-						\touches(Region([0, 2, 3, 0], [0, 4, 5, 0], 'v')))
+			let region1 = Region([0, 2, 4, 0], [0, 4, 4, 0], "\<C-v>")
+			let region2 = Region([0, 2, 3, 0], [0, 4, 5, 0], 'v')
+			Assert True(region1.touches(region2))
 
-			Assert True(Region([0, 2, 1, 0], [0, 4, 3, 0], "\<C-v>").
-						\touches(Region([0, 2, 3, 0], [0, 4, 5, 0], 'v')))
+			let region1 = Region([0, 2, 1, 0], [0, 4, 3, 0], "\<C-v>")
+			let region2 = Region([0, 2, 3, 0], [0, 4, 5, 0], 'v')
+			Assert True(region1.touches(region2))
 
-			Assert True(Region([0, 2, 5, 0], [0, 4, 7, 0], "\<C-v>").
-						\touches(Region([0, 2, 3, 0], [0, 4, 5, 0], 'v')))
+			let region1 = Region([0, 2, 5, 0], [0, 4, 7, 0], "\<C-v>")
+			let region2 = Region([0, 2, 3, 0], [0, 4, 5, 0], 'v')
+			Assert True(region1.touches(region2))
 
 			" a blockwise item touches a linewise region
-			Assert True(Region([0, 1, 3, 0], [0, 2, 5, 0], "\<C-v>").
-						\touches(Region([0, 2, 3, 0], [0, 4, 5, 0], 'V')))
+			let region1 = Region([0, 1, 3, 0], [0, 2, 5, 0], "\<C-v>")
+			let region2 = Region([0, 2, 3, 0], [0, 4, 5, 0], 'V')
+			Assert True(region1.touches(region2))
 
-			Assert True(Region([0, 4, 3, 0], [0, 5, 5, 0], "\<C-v>").
-						\touches(Region([0, 2, 3, 0], [0, 4, 5, 0], 'V')))
+			let region1 = Region([0, 4, 3, 0], [0, 5, 5, 0], "\<C-v>")
+			let region2 = Region([0, 2, 3, 0], [0, 4, 5, 0], 'V')
+			Assert True(region1.touches(region2))
 
-			Assert True(Region([0, 2, 3, 0], [0, 4, 5, 0], "\<C-v>").
-						\touches(Region([0, 2, 3, 0], [0, 4, 5, 0], 'V')))
+			let region1 = Region([0, 2, 3, 0], [0, 4, 5, 0], "\<C-v>")
+			let region2 = Region([0, 2, 3, 0], [0, 4, 5, 0], 'V')
+			Assert True(region1.touches(region2))
 
-			Assert True(Region([0, 1, 1, 0], [0, 5, 7, 0], "\<C-v>").
-						\touches(Region([0, 2, 3, 0], [0, 4, 5, 0], 'V')))
+			let region1 = Region([0, 1, 1, 0], [0, 5, 7, 0], "\<C-v>")
+			let region2 = Region([0, 2, 3, 0], [0, 4, 5, 0], 'V')
+			Assert True(region1.touches(region2))
 
-			Assert True(Region([0, 1, 1, 0], [0, 2, 2, 0], "\<C-v>").
-						\touches(Region([0, 2, 3, 0], [0, 4, 5, 0], 'V')))
+			let region1 = Region([0, 1, 1, 0], [0, 2, 2, 0], "\<C-v>")
+			let region2 = Region([0, 2, 3, 0], [0, 4, 5, 0], 'V')
+			Assert True(region1.touches(region2))
 
-			Assert True(Region([0, 1, 1, 0], [0, 5, 2, 0], "\<C-v>").
-						\touches(Region([0, 2, 3, 0], [0, 4, 5, 0], 'V')))
+			let region1 = Region([0, 1, 1, 0], [0, 5, 2, 0], "\<C-v>")
+			let region2 = Region([0, 2, 3, 0], [0, 4, 5, 0], 'V')
+			Assert True(region1.touches(region2))
 
-			Assert True(Region([0, 1, 6, 0], [0, 5, 7, 0], "\<C-v>").
-						\touches(Region([0, 2, 3, 0], [0, 4, 5, 0], 'V')))
+			let region1 = Region([0, 1, 6, 0], [0, 5, 7, 0], "\<C-v>")
+			let region2 = Region([0, 2, 3, 0], [0, 4, 5, 0], 'V')
+			Assert True(region1.touches(region2))
 
 			" a blockwise item touches a blockwise region
-			Assert True(Region([0, 1, 2, 0], [0, 2, 3, 0], "\<C-v>").
-						\touches(Region([0, 2, 3, 0], [0, 4, 5, 0], "\<C-v>")))
+			let region1 = Region([0, 1, 2, 0], [0, 2, 3, 0], "\<C-v>")
+			let region2 = Region([0, 2, 3, 0], [0, 4, 5, 0], "\<C-v>")
+			Assert True(region1.touches(region2))
 
-			Assert True(Region([0, 4, 5, 0], [0, 5, 6, 0], "\<C-v>").
-						\touches(Region([0, 2, 3, 0], [0, 4, 5, 0], "\<C-v>")))
+			let region1 = Region([0, 4, 5, 0], [0, 5, 6, 0], "\<C-v>")
+			let region2 = Region([0, 2, 3, 0], [0, 4, 5, 0], "\<C-v>")
+			Assert True(region1.touches(region2))
 
-			Assert True(Region([0, 1, 5, 0], [0, 2, 6, 0], "\<C-v>").
-						\touches(Region([0, 2, 3, 0], [0, 4, 5, 0], "\<C-v>")))
+			let region1 = Region([0, 1, 5, 0], [0, 2, 6, 0], "\<C-v>")
+			let region2 = Region([0, 2, 3, 0], [0, 4, 5, 0], "\<C-v>")
+			Assert True(region1.touches(region2))
 
-			Assert True(Region([0, 4, 2, 0], [0, 5, 3, 0], "\<C-v>").
-						\touches(Region([0, 2, 3, 0], [0, 4, 5, 0], "\<C-v>")))
+			let region1 = Region([0, 4, 2, 0], [0, 5, 3, 0], "\<C-v>")
+			let region2 = Region([0, 2, 3, 0], [0, 4, 5, 0], "\<C-v>")
+			Assert True(region1.touches(region2))
 
-			Assert True(Region([0, 1, 1, 0], [0, 5, 7, 0], "\<C-v>").
-						\touches(Region([0, 2, 3, 0], [0, 4, 5, 0], "\<C-v>")))
+			let region1 = Region([0, 1, 1, 0], [0, 5, 7, 0], "\<C-v>")
+			let region2 = Region([0, 2, 3, 0], [0, 4, 5, 0], "\<C-v>")
+			Assert True(region1.touches(region2))
 
-			Assert True(Region([0, 2, 3, 0], [0, 4, 5, 0], "\<C-v>").
-						\touches(Region([0, 2, 3, 0], [0, 4, 5, 0], "\<C-v>")))
+			let region1 = Region([0, 2, 3, 0], [0, 4, 5, 0], "\<C-v>")
+			let region2 = Region([0, 2, 3, 0], [0, 4, 5, 0], "\<C-v>")
+			Assert True(region1.touches(region2))
 
-			Assert True(Region([0, 1, 1, 0], [0, 5, 3, 0], "\<C-v>").
-						\touches(Region([0, 2, 3, 0], [0, 4, 5, 0], "\<C-v>")))
+			let region1 = Region([0, 1, 1, 0], [0, 5, 3, 0], "\<C-v>")
+			let region2 = Region([0, 2, 3, 0], [0, 4, 5, 0], "\<C-v>")
+			Assert True(region1.touches(region2))
 
-			Assert True(Region([0, 1, 5, 0], [0, 5, 6, 0], "\<C-v>").
-						\touches(Region([0, 2, 3, 0], [0, 4, 5, 0], "\<C-v>")))
+			let region1 = Region([0, 1, 5, 0], [0, 5, 6, 0], "\<C-v>")
+			let region2 = Region([0, 2, 3, 0], [0, 4, 5, 0], "\<C-v>")
+			Assert True(region1.touches(region2))
 		End
 
-		It returns FALSE if itself is not touching the region
+		It returns FALSE if itself is not touching a region
 			" a characterwise item does not touch a characterwise region
-			Assert False(Region([0, 1, 1, 0], [0, 2, 3, 0], 'v').
-						\touches(Region([0, 2, 4, 0], [0, 4, 4, 0], 'v')))
+			let region1 = Region([0, 1, 1, 0], [0, 2, 3, 0], 'v')
+			let region2 = Region([0, 2, 4, 0], [0, 4, 4, 0], 'v')
+			Assert False(region1.touches(region2))
 
-			Assert False(Region([0, 4, 5, 0], [0, 5, 7, 0], 'v').
-						\touches(Region([0, 2, 4, 0], [0, 4, 4, 0], 'v')))
+			let region1 = Region([0, 4, 5, 0], [0, 5, 7, 0], 'v')
+			let region2 = Region([0, 2, 4, 0], [0, 4, 4, 0], 'v')
+			Assert False(region1.touches(region2))
 
-			Assert False(Region([0, 2, 1, 0], [0, 2, 3, 0], 'v').
-						\touches(Region([0, 2, 4, 0], [0, 4, 4, 0], 'v')))
-
-			Assert False(Region([0, 4, 5, 0], [0, 4, 7, 0], 'v').
-						\touches(Region([0, 2, 4, 0], [0, 4, 4, 0], 'v')))
+			let region1 = Region([0, 2, 1, 0], [0, 2, 3, 0], 'v')
+			let region2 = Region([0, 2, 4, 0], [0, 4, 4, 0], 'v')
+			Assert False(region1.touches(region2))
 
 			" a characterwise item does not touch a linewise region
-			Assert False(Region([0, 1, 1, 0], [0, 1, 7, 0], 'v').
-						\touches(Region([0, 2, 4, 0], [0, 4, 4, 0], 'V')))
+			let region1 = Region([0, 1, 1, 0], [0, 1, 7, 0], 'v')
+			let region2 = Region([0, 2, 4, 0], [0, 4, 4, 0], 'V')
+			Assert False(region1.touches(region2))
 
-			Assert False(Region([0, 5, 1, 0], [0, 5, 7, 0], 'v').
-						\touches(Region([0, 2, 4, 0], [0, 4, 4, 0], 'V')))
+			let region1 = Region([0, 5, 1, 0], [0, 5, 7, 0], 'v')
+			let region2 = Region([0, 2, 4, 0], [0, 4, 4, 0], 'V')
+			Assert False(region1.touches(region2))
 
 			" a characterwise item does not touch a blockwise region
-			Assert False(Region([0, 1, 1, 0], [0, 1, 7, 0], 'v').
-						\touches(Region([0, 2, 3, 0], [0, 4, 5, 0], "\<C-v>")))
+			let region1 = Region([0, 1, 1, 0], [0, 1, 7, 0], 'v')
+			let region2 = Region([0, 2, 3, 0], [0, 4, 5, 0], "\<C-v>")
+			Assert False(region1.touches(region2))
 
-			Assert False(Region([0, 5, 1, 0], [0, 5, 7, 0], 'v').
-						\touches(Region([0, 2, 3, 0], [0, 4, 5, 0], "\<C-v>")))
+			let region1 = Region([0, 5, 1, 0], [0, 5, 7, 0], 'v')
+			let region2 = Region([0, 2, 3, 0], [0, 4, 5, 0], "\<C-v>")
+			Assert False(region1.touches(region2))
 
-			Assert False(Region([0, 2, 1, 0], [0, 2, 2, 0], 'v').
-						\touches(Region([0, 2, 3, 0], [0, 4, 5, 0], "\<C-v>")))
+			let region1 = Region([0, 2, 1, 0], [0, 2, 2, 0], 'v')
+			let region2 = Region([0, 2, 3, 0], [0, 4, 5, 0], "\<C-v>")
+			Assert False(region1.touches(region2))
 
-			Assert False(Region([0, 2, 6, 0], [0, 2, 7, 0], 'v').
-						\touches(Region([0, 2, 3, 0], [0, 4, 5, 0], "\<C-v>")))
+			let region1 = Region([0, 2, 6, 0], [0, 2, 7, 0], 'v')
+			let region2 = Region([0, 2, 3, 0], [0, 4, 5, 0], "\<C-v>")
+			Assert False(region1.touches(region2))
 
-			Assert False(Region([0, 3, 1, 0], [0, 3, 2, 0], 'v').
-						\touches(Region([0, 2, 3, 0], [0, 4, 5, 0], "\<C-v>")))
+			let region1 = Region([0, 3, 1, 0], [0, 3, 2, 0], 'v')
+			let region2 = Region([0, 2, 3, 0], [0, 4, 5, 0], "\<C-v>")
+			Assert False(region1.touches(region2))
 
-			Assert False(Region([0, 3, 6, 0], [0, 3, 7, 0], 'v').
-						\touches(Region([0, 2, 3, 0], [0, 4, 5, 0], "\<C-v>")))
+			let region1 = Region([0, 3, 6, 0], [0, 3, 7, 0], 'v')
+			let region2 = Region([0, 2, 3, 0], [0, 4, 5, 0], "\<C-v>")
+			Assert False(region1.touches(region2))
 
-			Assert False(Region([0, 4, 1, 0], [0, 4, 2, 0], 'v').
-						\touches(Region([0, 2, 3, 0], [0, 4, 5, 0], "\<C-v>")))
+			let region1 = Region([0, 4, 1, 0], [0, 4, 2, 0], 'v')
+			let region2 = Region([0, 2, 3, 0], [0, 4, 5, 0], "\<C-v>")
+			Assert False(region1.touches(region2))
 
-			Assert False(Region([0, 4, 6, 0], [0, 4, 7, 0], 'v').
-						\touches(Region([0, 2, 3, 0], [0, 4, 5, 0], "\<C-v>")))
+			let region1 = Region([0, 4, 6, 0], [0, 4, 7, 0], 'v')
+			let region2 = Region([0, 2, 3, 0], [0, 4, 5, 0], "\<C-v>")
+			Assert False(region1.touches(region2))
 
-			Assert False(Region([0, 1, 1, 0], [0, 2, 2, 0], 'v').
-						\touches(Region([0, 2, 3, 0], [0, 4, 5, 0], "\<C-v>")))
+			let region1 = Region([0, 1, 1, 0], [0, 2, 2, 0], 'v')
+			let region2 = Region([0, 2, 3, 0], [0, 4, 5, 0], "\<C-v>")
+			Assert False(region1.touches(region2))
 
-			Assert False(Region([0, 4, 6, 0], [0, 5, 7, 0], 'v').
-						\touches(Region([0, 2, 3, 0], [0, 4, 5, 0], "\<C-v>")))
+			let region1 = Region([0, 4, 6, 0], [0, 5, 7, 0], 'v')
+			let region2 = Region([0, 2, 3, 0], [0, 4, 5, 0], "\<C-v>")
+			Assert False(region1.touches(region2))
 
 			" a linewise item does not touch a characterwise region
-			Assert False(Region([0, 1, 1, 0], [0, 1, 1, 0], 'V').
-						\touches(Region([0, 2, 3, 0], [0, 4, 5, 0], 'v')))
+			let region1 = Region([0, 1, 1, 0], [0, 1, 1, 0], 'V')
+			let region2 = Region([0, 2, 3, 0], [0, 4, 5, 0], 'v')
+			Assert False(region1.touches(region2))
 
-			Assert False(Region([0, 5, 1, 0], [0, 5, 1, 0], 'V').
-						\touches(Region([0, 2, 3, 0], [0, 4, 5, 0], 'v')))
+			let region1 = Region([0, 5, 1, 0], [0, 5, 1, 0], 'V')
+			let region2 = Region([0, 2, 3, 0], [0, 4, 5, 0], 'v')
+			Assert False(region1.touches(region2))
 
 			" a linewise item does not touch a linewise region
-			Assert False(Region([0, 1, 1, 0], [0, 1, 1, 0], 'V').
-						\touches(Region([0, 2, 3, 0], [0, 4, 5, 0], 'V')))
+			let region1 = Region([0, 1, 1, 0], [0, 1, 1, 0], 'V')
+			let region2 = Region([0, 2, 3, 0], [0, 4, 5, 0], 'V')
+			Assert False(region1.touches(region2))
 
-			Assert False(Region([0, 5, 1, 0], [0, 5, 1, 0], 'V').
-						\touches(Region([0, 2, 3, 0], [0, 4, 5, 0], 'V')))
+			let region1 = Region([0, 5, 1, 0], [0, 5, 1, 0], 'V')
+			let region2 = Region([0, 2, 3, 0], [0, 4, 5, 0], 'V')
+			Assert False(region1.touches(region2))
 
 			" a linewise item does not touch a blockwise region
-			Assert False(Region([0, 1, 1, 0], [0, 1, 1, 0], 'V').
-						\touches(Region([0, 2, 3, 0], [0, 4, 5, 0], "\<C-v>")))
+			let region1 = Region([0, 1, 1, 0], [0, 1, 1, 0], 'V')
+			let region2 = Region([0, 2, 3, 0], [0, 4, 5, 0], "\<C-v>")
+			Assert False(region1.touches(region2))
 
-			Assert False(Region([0, 5, 1, 0], [0, 5, 1, 0], 'V').
-						\touches(Region([0, 2, 3, 0], [0, 4, 5, 0], "\<C-v>")))
+			let region1 = Region([0, 5, 1, 0], [0, 5, 1, 0], 'V')
+			let region2 = Region([0, 2, 3, 0], [0, 4, 5, 0], "\<C-v>")
+			Assert False(region1.touches(region2))
 
 			" a blockwise item does not touch a characterwise region
-			Assert False(Region([0, 1, 1, 0], [0, 2, 2, 0], "\<C-v>").
-						\touches(Region([0, 2, 3, 0], [0, 4, 5, 0], 'v')))
+			let region1 = Region([0, 1, 1, 0], [0, 2, 2, 0], "\<C-v>")
+			let region2 = Region([0, 2, 3, 0], [0, 4, 5, 0], 'v')
+			Assert False(region1.touches(region2))
 
-			Assert False(Region([0, 4, 6, 0], [0, 5, 7, 0], "\<C-v>").
-						\touches(Region([0, 2, 3, 0], [0, 4, 5, 0], 'v')))
+			let region1 = Region([0, 4, 6, 0], [0, 5, 7, 0], "\<C-v>")
+			let region2 = Region([0, 2, 3, 0], [0, 4, 5, 0], 'v')
+			Assert False(region1.touches(region2))
 
 			" a blockwise item does not touch a linewise region
-			Assert False(Region([0, 1, 1, 0], [0, 1, 7, 0], "\<C-v>").
-						\touches(Region([0, 2, 3, 0], [0, 4, 5, 0], 'V')))
+			let region1 = Region([0, 1, 1, 0], [0, 1, 7, 0], "\<C-v>")
+			let region2 = Region([0, 2, 3, 0], [0, 4, 5, 0], 'V')
+			Assert False(region1.touches(region2))
 
-			Assert False(Region([0, 5, 1, 0], [0, 5, 7, 0], "\<C-v>").
-						\touches(Region([0, 2, 3, 0], [0, 4, 5, 0], 'V')))
+			let region1 = Region([0, 5, 1, 0], [0, 5, 7, 0], "\<C-v>")
+			let region2 = Region([0, 2, 3, 0], [0, 4, 5, 0], 'V')
+			Assert False(region1.touches(region2))
 
 			" a blockwise item does not touch a blockwise region
-			Assert False(Region([0, 1, 1, 0], [0, 1, 7, 0], "\<C-v>").
-						\touches(Region([0, 2, 3, 0], [0, 4, 5, 0], "\<C-v>")))
+			let region1 = Region([0, 1, 1, 0], [0, 1, 7, 0], "\<C-v>")
+			let region2 = Region([0, 2, 3, 0], [0, 4, 5, 0], "\<C-v>")
+			Assert False(region1.touches(region2))
 
-			Assert False(Region([0, 5, 1, 0], [0, 5, 7, 0], "\<C-v>").
-						\touches(Region([0, 2, 3, 0], [0, 4, 5, 0], "\<C-v>")))
+			let region1 = Region([0, 5, 1, 0], [0, 5, 7, 0], "\<C-v>")
+			let region2 = Region([0, 2, 3, 0], [0, 4, 5, 0], "\<C-v>")
+			Assert False(region1.touches(region2))
 
-			Assert False(Region([0, 1, 1, 0], [0, 5, 2, 0], "\<C-v>").
-						\touches(Region([0, 2, 3, 0], [0, 4, 5, 0], "\<C-v>")))
+			let region1 = Region([0, 1, 1, 0], [0, 5, 2, 0], "\<C-v>")
+			let region2 = Region([0, 2, 3, 0], [0, 4, 5, 0], "\<C-v>")
+			Assert False(region1.touches(region2))
 
-			Assert False(Region([0, 1, 6, 0], [0, 5, 7, 0], "\<C-v>").
-						\touches(Region([0, 2, 3, 0], [0, 4, 5, 0], "\<C-v>")))
+			let region1 = Region([0, 1, 6, 0], [0, 5, 7, 0], "\<C-v>")
+			let region2 = Region([0, 2, 3, 0], [0, 4, 5, 0], "\<C-v>")
+			Assert False(region1.touches(region2))
 
-			Assert False(Region([0, 1, 1, 0], [0, 1, 2, 0], "\<C-v>").
-						\touches(Region([0, 2, 3, 0], [0, 4, 5, 0], "\<C-v>")))
+			let region1 = Region([0, 1, 1, 0], [0, 1, 2, 0], "\<C-v>")
+			let region2 = Region([0, 2, 3, 0], [0, 4, 5, 0], "\<C-v>")
+			Assert False(region1.touches(region2))
 
-			Assert False(Region([0, 1, 6, 0], [0, 1, 7, 0], "\<C-v>").
-						\touches(Region([0, 2, 3, 0], [0, 4, 5, 0], "\<C-v>")))
+			let region1 = Region([0, 1, 6, 0], [0, 1, 7, 0], "\<C-v>")
+			let region2 = Region([0, 2, 3, 0], [0, 4, 5, 0], "\<C-v>")
+			Assert False(region1.touches(region2))
 
-			Assert False(Region([0, 5, 1, 0], [0, 5, 2, 0], "\<C-v>").
-						\touches(Region([0, 2, 3, 0], [0, 4, 5, 0], "\<C-v>")))
+			let region1 = Region([0, 5, 1, 0], [0, 5, 2, 0], "\<C-v>")
+			let region2 = Region([0, 2, 3, 0], [0, 4, 5, 0], "\<C-v>")
+			Assert False(region1.touches(region2))
 
-			Assert False(Region([0, 5, 6, 0], [0, 5, 7, 0], "\<C-v>").
-						\touches(Region([0, 2, 3, 0], [0, 4, 5, 0], "\<C-v>")))
+			let region1 = Region([0, 5, 6, 0], [0, 5, 7, 0], "\<C-v>")
+			let region2 = Region([0, 2, 3, 0], [0, 4, 5, 0], "\<C-v>")
+			Assert False(region1.touches(region2))
 
-			Assert False(Region([0, 1, 3, 0], [0, 1, 5, 0], "\<C-v>").
-						\touches(Region([0, 2, 3, 0], [0, 4, 5, 0], "\<C-v>")))
+			let region1 = Region([0, 1, 3, 0], [0, 1, 5, 0], "\<C-v>")
+			let region2 = Region([0, 2, 3, 0], [0, 4, 5, 0], "\<C-v>")
+			Assert False(region1.touches(region2))
 
-			Assert False(Region([0, 5, 3, 0], [0, 5, 5, 0], "\<C-v>").
-						\touches(Region([0, 2, 3, 0], [0, 4, 5, 0], "\<C-v>")))
+			let region1 = Region([0, 5, 3, 0], [0, 5, 5, 0], "\<C-v>")
+			let region2 = Region([0, 2, 3, 0], [0, 4, 5, 0], "\<C-v>")
+			Assert False(region1.touches(region2))
 
-			Assert False(Region([0, 2, 1, 0], [0, 4, 2, 0], "\<C-v>").
-						\touches(Region([0, 2, 3, 0], [0, 4, 5, 0], "\<C-v>")))
+			let region1 = Region([0, 2, 1, 0], [0, 4, 2, 0], "\<C-v>")
+			let region2 = Region([0, 2, 3, 0], [0, 4, 5, 0], "\<C-v>")
+			Assert False(region1.touches(region2))
 
-			Assert False(Region([0, 2, 6, 0], [0, 4, 7, 0], "\<C-v>").
-						\touches(Region([0, 2, 3, 0], [0, 4, 5, 0], "\<C-v>")))
+			let region1 = Region([0, 2, 6, 0], [0, 4, 7, 0], "\<C-v>")
+			let region2 = Region([0, 2, 3, 0], [0, 4, 5, 0], "\<C-v>")
+			Assert False(region1.touches(region2))
 		End
 	End
 End
