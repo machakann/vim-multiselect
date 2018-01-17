@@ -4,6 +4,9 @@ Describe Multiselector
 		let Item = g:MS.Item
 		let Region = g:MS.Region
 		let DEFAULTS = g:DEFAULTS
+	End
+
+	Before all
 		%delete
 		call append(0, [
 			\ 'aaaaaaa',
@@ -1045,6 +1048,494 @@ Describe Multiselector
 			Assert Equals(multiselector.itemnum({_, item -> item.head[1] == 1}), 1)
 			Assert Equals(multiselector.itemnum({_, item -> item.head[1] >= 2}), 2)
 			Assert Equals(multiselector.itemnum({_, item -> item.head[1] > 3}), 0)
+		End
+	End
+
+	Context .keymap_check(mode)
+		It registers a word under the cursor in normal mode
+			let multiselector = MS.Multiselector(DEFAULTS)
+			Assert LengthOf(multiselector.itemlist, 0)
+			Assert Equals(multiselector._last.event, '')
+			Assert LengthOf(multiselector._last.itemlist, 0)
+
+			%delete
+			call setline(1, 'foo bar baz')
+
+			call cursor(1, 1)
+			call multiselector.keymap_check('n')
+			Assert LengthOf(multiselector.itemlist, 1)
+			Assert Equals(multiselector.itemlist[0]['head'], [0, 1, 1, 0])
+			Assert Equals(multiselector.itemlist[0]['tail'], [0, 1, 3, 0])
+			Assert Equals(multiselector.itemlist[0]['type'], 'char')
+			Assert Equals(multiselector._last.event, 'check')
+			Assert LengthOf(multiselector._last.itemlist, 1)
+
+			call cursor(1, 5)
+			call multiselector.keymap_check('n')
+			Assert LengthOf(multiselector.itemlist, 2)
+			Assert Equals(multiselector.itemlist[0]['head'], [0, 1, 1, 0])
+			Assert Equals(multiselector.itemlist[0]['tail'], [0, 1, 3, 0])
+			Assert Equals(multiselector.itemlist[0]['type'], 'char')
+			Assert Equals(multiselector.itemlist[1]['head'], [0, 1, 5, 0])
+			Assert Equals(multiselector.itemlist[1]['tail'], [0, 1, 7, 0])
+			Assert Equals(multiselector.itemlist[1]['type'], 'char')
+			Assert Equals(multiselector._last.event, 'check')
+			Assert LengthOf(multiselector._last.itemlist, 1)
+
+			call cursor(1, 9)
+			call multiselector.keymap_check('n')
+			Assert LengthOf(multiselector.itemlist, 3)
+			Assert Equals(multiselector.itemlist[0]['head'], [0, 1, 1, 0])
+			Assert Equals(multiselector.itemlist[0]['tail'], [0, 1, 3, 0])
+			Assert Equals(multiselector.itemlist[0]['type'], 'char')
+			Assert Equals(multiselector.itemlist[1]['head'], [0, 1, 5, 0])
+			Assert Equals(multiselector.itemlist[1]['tail'], [0, 1, 7, 0])
+			Assert Equals(multiselector.itemlist[1]['type'], 'char')
+			Assert Equals(multiselector.itemlist[2]['head'], [0, 1, 9, 0])
+			Assert Equals(multiselector.itemlist[2]['tail'], [0, 1, 11, 0])
+			Assert Equals(multiselector.itemlist[2]['type'], 'char')
+			Assert Equals(multiselector._last.event, 'check')
+			Assert LengthOf(multiselector._last.itemlist, 1)
+
+			call filter(multiselector, 0)
+		End
+
+		It registers a selected word in visual mode
+			let multiselector = MS.Multiselector(DEFAULTS)
+			Assert LengthOf(multiselector.itemlist, 0)
+			Assert Equals(multiselector._last.event, '')
+			Assert LengthOf(multiselector._last.itemlist, 0)
+
+			%delete
+			call append(0, ['foo bar baz', 'foo bar baz', 'foo bar baz'])
+
+			call cursor(1, 1)
+			normal! v
+			call cursor(1, 3)
+			execute "normal! \<Esc>"
+			call multiselector.keymap_check('x')
+			Assert LengthOf(multiselector.itemlist, 1)
+			Assert Equals(multiselector.itemlist[0]['head'], [0, 1, 1, 0])
+			Assert Equals(multiselector.itemlist[0]['tail'], [0, 1, 3, 0])
+			Assert Equals(multiselector.itemlist[0]['type'], 'char')
+			Assert Equals(multiselector._last.event, 'check')
+			Assert LengthOf(multiselector._last.itemlist, 1)
+
+			call cursor(1, 5)
+			normal! v
+			call cursor(1, 7)
+			execute "normal! \<Esc>"
+			call multiselector.keymap_check('x')
+			Assert LengthOf(multiselector.itemlist, 2)
+			Assert Equals(multiselector.itemlist[0]['head'], [0, 1, 1, 0])
+			Assert Equals(multiselector.itemlist[0]['tail'], [0, 1, 3, 0])
+			Assert Equals(multiselector.itemlist[0]['type'], 'char')
+			Assert Equals(multiselector.itemlist[1]['head'], [0, 1, 5, 0])
+			Assert Equals(multiselector.itemlist[1]['tail'], [0, 1, 7, 0])
+			Assert Equals(multiselector.itemlist[1]['type'], 'char')
+			Assert Equals(multiselector._last.event, 'check')
+			Assert LengthOf(multiselector._last.itemlist, 1)
+
+			call cursor(1, 9)
+			normal! v
+			call cursor(1, 11)
+			execute "normal! \<Esc>"
+			call multiselector.keymap_check('x')
+			Assert LengthOf(multiselector.itemlist, 3)
+			Assert Equals(multiselector.itemlist[0]['head'], [0, 1, 1, 0])
+			Assert Equals(multiselector.itemlist[0]['tail'], [0, 1, 3, 0])
+			Assert Equals(multiselector.itemlist[0]['type'], 'char')
+			Assert Equals(multiselector.itemlist[1]['head'], [0, 1, 5, 0])
+			Assert Equals(multiselector.itemlist[1]['tail'], [0, 1, 7, 0])
+			Assert Equals(multiselector.itemlist[1]['type'], 'char')
+			Assert Equals(multiselector.itemlist[2]['head'], [0, 1, 9, 0])
+			Assert Equals(multiselector.itemlist[2]['tail'], [0, 1, 11, 0])
+			Assert Equals(multiselector.itemlist[2]['type'], 'char')
+			Assert Equals(multiselector._last.event, 'check')
+			Assert LengthOf(multiselector._last.itemlist, 1)
+
+			call cursor(1, 9)
+			normal! v
+			call cursor(2, 3)
+			execute "normal! \<Esc>"
+			call multiselector.keymap_check('x')
+			Assert LengthOf(multiselector.itemlist, 3)
+			Assert Equals(multiselector.itemlist[0]['head'], [0, 1, 1, 0])
+			Assert Equals(multiselector.itemlist[0]['tail'], [0, 1, 3, 0])
+			Assert Equals(multiselector.itemlist[0]['type'], 'char')
+			Assert Equals(multiselector.itemlist[1]['head'], [0, 1, 5, 0])
+			Assert Equals(multiselector.itemlist[1]['tail'], [0, 1, 7, 0])
+			Assert Equals(multiselector.itemlist[1]['type'], 'char')
+			Assert Equals(multiselector.itemlist[2]['head'], [0, 1, 9, 0])
+			Assert Equals(multiselector.itemlist[2]['tail'], [0, 2, 3, 0])
+			Assert Equals(multiselector.itemlist[2]['type'], 'char')
+			Assert Equals(multiselector._last.event, 'check')
+			Assert LengthOf(multiselector._last.itemlist, 1)
+
+			call cursor(1, 1)
+			normal! V
+			execute "normal! \<Esc>"
+			call multiselector.keymap_check('x')
+			Assert LengthOf(multiselector.itemlist, 1)
+			Assert Equals(multiselector.itemlist[0]['head'][1], 1)
+			Assert Equals(multiselector.itemlist[0]['tail'][1], 1)
+			Assert Equals(multiselector.itemlist[0]['type'], 'line')
+			Assert Equals(multiselector._last.event, 'check')
+			Assert LengthOf(multiselector._last.itemlist, 1)
+
+			call cursor(1, 1)
+			normal! V
+			call cursor(2, 1)
+			execute "normal! \<Esc>"
+			call multiselector.keymap_check('x')
+			Assert LengthOf(multiselector.itemlist, 1)
+			Assert Equals(multiselector.itemlist[0]['head'][1], 1)
+			Assert Equals(multiselector.itemlist[0]['tail'][1], 2)
+			Assert Equals(multiselector.itemlist[0]['type'], 'line')
+			Assert Equals(multiselector._last.event, 'check')
+			Assert LengthOf(multiselector._last.itemlist, 1)
+
+			call cursor(1, 1)
+			execute "normal! \<C-v>"
+			call cursor(2, 2)
+			execute "normal! \<Esc>"
+			call multiselector.keymap_check('x')
+			Assert LengthOf(multiselector.itemlist, 1)
+			Assert Equals(multiselector.itemlist[0]['head'], [0, 1, 1, 0])
+			Assert Equals(multiselector.itemlist[0]['tail'], [0, 2, 2, 0])
+			Assert Equals(multiselector.itemlist[0]['type'], 'block')
+			Assert Equals(multiselector._last.event, 'check')
+			Assert LengthOf(multiselector._last.itemlist, 1)
+
+			call cursor(1, 1)
+			execute "normal! \<C-v>"
+			call cursor(3, 3)
+			execute "normal! \<Esc>"
+			call multiselector.keymap_check('x')
+			Assert LengthOf(multiselector.itemlist, 1)
+			Assert Equals(multiselector.itemlist[0]['head'], [0, 1, 1, 0])
+			Assert Equals(multiselector.itemlist[0]['tail'], [0, 3, 3, 0])
+			Assert Equals(multiselector.itemlist[0]['type'], 'block')
+			Assert Equals(multiselector._last.event, 'check')
+			Assert LengthOf(multiselector._last.itemlist, 1)
+
+			call cursor(1, 9)
+			execute "normal! \<C-v>"
+			call cursor(3, 11)
+			execute "normal! \<Esc>"
+			call multiselector.keymap_check('x')
+			Assert LengthOf(multiselector.itemlist, 2)
+			Assert Equals(multiselector.itemlist[0]['head'], [0, 1, 1, 0])
+			Assert Equals(multiselector.itemlist[0]['tail'], [0, 3, 3, 0])
+			Assert Equals(multiselector.itemlist[0]['type'], 'block')
+			Assert Equals(multiselector.itemlist[1]['head'], [0, 1, 9, 0])
+			Assert Equals(multiselector.itemlist[1]['tail'], [0, 3, 11, 0])
+			Assert Equals(multiselector.itemlist[1]['type'], 'block')
+			Assert Equals(multiselector._last.event, 'check')
+			Assert LengthOf(multiselector._last.itemlist, 1)
+
+			call filter(multiselector, 0)
+		End
+	End
+
+	Context .keymap_checkpattern(mode, pat)
+		It registers texts matching with a regex pattern over a buffer in normal mode
+			let multiselector = MS.Multiselector(DEFAULTS)
+			Assert LengthOf(multiselector.itemlist, 0)
+			Assert Equals(multiselector._last.event, '')
+			Assert LengthOf(multiselector._last.itemlist, 0)
+
+			%delete
+			call append(0, ['foo bar baz', 'foo bar baz', 'foo bar baz'])
+
+			call multiselector.keymap_checkpattern('n', 'foo')
+			Assert LengthOf(multiselector.itemlist, 3)
+			Assert Equals(multiselector.itemlist[0]['head'], [0, 1, 1, 0])
+			Assert Equals(multiselector.itemlist[0]['tail'], [0, 1, 3, 0])
+			Assert Equals(multiselector.itemlist[0]['type'], 'char')
+			Assert Equals(multiselector.itemlist[1]['head'], [0, 2, 1, 0])
+			Assert Equals(multiselector.itemlist[1]['tail'], [0, 2, 3, 0])
+			Assert Equals(multiselector.itemlist[1]['type'], 'char')
+			Assert Equals(multiselector.itemlist[2]['head'], [0, 3, 1, 0])
+			Assert Equals(multiselector.itemlist[2]['tail'], [0, 3, 3, 0])
+			Assert Equals(multiselector.itemlist[2]['type'], 'char')
+			Assert Equals(multiselector._last.event, 'check')
+			Assert LengthOf(multiselector._last.itemlist, 3)
+
+			call multiselector.keymap_checkpattern('n', 'ba')
+			Assert LengthOf(multiselector.itemlist, 9)
+			Assert Equals(multiselector.itemlist[0]['head'], [0, 1, 1, 0])
+			Assert Equals(multiselector.itemlist[0]['tail'], [0, 1, 3, 0])
+			Assert Equals(multiselector.itemlist[0]['type'], 'char')
+			Assert Equals(multiselector.itemlist[1]['head'], [0, 2, 1, 0])
+			Assert Equals(multiselector.itemlist[1]['tail'], [0, 2, 3, 0])
+			Assert Equals(multiselector.itemlist[1]['type'], 'char')
+			Assert Equals(multiselector.itemlist[2]['head'], [0, 3, 1, 0])
+			Assert Equals(multiselector.itemlist[2]['tail'], [0, 3, 3, 0])
+			Assert Equals(multiselector.itemlist[2]['type'], 'char')
+			Assert Equals(multiselector.itemlist[3]['head'], [0, 1, 5, 0])
+			Assert Equals(multiselector.itemlist[3]['tail'], [0, 1, 6, 0])
+			Assert Equals(multiselector.itemlist[3]['type'], 'char')
+			Assert Equals(multiselector.itemlist[4]['head'], [0, 1, 9, 0])
+			Assert Equals(multiselector.itemlist[4]['tail'], [0, 1, 10, 0])
+			Assert Equals(multiselector.itemlist[4]['type'], 'char')
+			Assert Equals(multiselector.itemlist[5]['head'], [0, 2, 5, 0])
+			Assert Equals(multiselector.itemlist[5]['tail'], [0, 2, 6, 0])
+			Assert Equals(multiselector.itemlist[5]['type'], 'char')
+			Assert Equals(multiselector.itemlist[6]['head'], [0, 2, 9, 0])
+			Assert Equals(multiselector.itemlist[6]['tail'], [0, 2, 10, 0])
+			Assert Equals(multiselector.itemlist[6]['type'], 'char')
+			Assert Equals(multiselector.itemlist[7]['head'], [0, 3, 5, 0])
+			Assert Equals(multiselector.itemlist[7]['tail'], [0, 3, 6, 0])
+			Assert Equals(multiselector.itemlist[7]['type'], 'char')
+			Assert Equals(multiselector.itemlist[8]['head'], [0, 3, 9, 0])
+			Assert Equals(multiselector.itemlist[8]['tail'], [0, 3, 10, 0])
+			Assert Equals(multiselector.itemlist[8]['type'], 'char')
+			Assert Equals(multiselector._last.event, 'check')
+			Assert LengthOf(multiselector._last.itemlist, 6)
+
+			call multiselector.keymap_checkpattern('n', 'bar')
+			Assert LengthOf(multiselector.itemlist, 9)
+			Assert Equals(multiselector.itemlist[0]['head'], [0, 1, 1, 0])
+			Assert Equals(multiselector.itemlist[0]['tail'], [0, 1, 3, 0])
+			Assert Equals(multiselector.itemlist[0]['type'], 'char')
+			Assert Equals(multiselector.itemlist[1]['head'], [0, 2, 1, 0])
+			Assert Equals(multiselector.itemlist[1]['tail'], [0, 2, 3, 0])
+			Assert Equals(multiselector.itemlist[1]['type'], 'char')
+			Assert Equals(multiselector.itemlist[2]['head'], [0, 3, 1, 0])
+			Assert Equals(multiselector.itemlist[2]['tail'], [0, 3, 3, 0])
+			Assert Equals(multiselector.itemlist[2]['type'], 'char')
+			Assert Equals(multiselector.itemlist[3]['head'], [0, 1, 9, 0])
+			Assert Equals(multiselector.itemlist[3]['tail'], [0, 1, 10, 0])
+			Assert Equals(multiselector.itemlist[3]['type'], 'char')
+			Assert Equals(multiselector.itemlist[4]['head'], [0, 2, 9, 0])
+			Assert Equals(multiselector.itemlist[4]['tail'], [0, 2, 10, 0])
+			Assert Equals(multiselector.itemlist[4]['type'], 'char')
+			Assert Equals(multiselector.itemlist[5]['head'], [0, 3, 9, 0])
+			Assert Equals(multiselector.itemlist[5]['tail'], [0, 3, 10, 0])
+			Assert Equals(multiselector.itemlist[5]['type'], 'char')
+			Assert Equals(multiselector.itemlist[6]['head'], [0, 1, 5, 0])
+			Assert Equals(multiselector.itemlist[6]['tail'], [0, 1, 7, 0])
+			Assert Equals(multiselector.itemlist[6]['type'], 'char')
+			Assert Equals(multiselector.itemlist[7]['head'], [0, 2, 5, 0])
+			Assert Equals(multiselector.itemlist[7]['tail'], [0, 2, 7, 0])
+			Assert Equals(multiselector.itemlist[7]['type'], 'char')
+			Assert Equals(multiselector.itemlist[8]['head'], [0, 3, 5, 0])
+			Assert Equals(multiselector.itemlist[8]['tail'], [0, 3, 7, 0])
+			Assert Equals(multiselector.itemlist[8]['type'], 'char')
+			Assert Equals(multiselector._last.event, 'check')
+			Assert LengthOf(multiselector._last.itemlist, 3)
+		End
+
+		It registers texts matching with a regex pattern inside the selection in visual mode
+			let multiselector = MS.Multiselector(DEFAULTS)
+			Assert LengthOf(multiselector.itemlist, 0)
+			Assert Equals(multiselector._last.event, '')
+			Assert LengthOf(multiselector._last.itemlist, 0)
+
+			%delete
+			call append(0, ['foo bar baz', 'foo bar baz', 'foo bar baz'])
+
+			call cursor(1, 1)
+			normal! v
+			call cursor(2, 3)
+			execute "normal! \<Esc>"
+			call multiselector.keymap_checkpattern('x', 'foo')
+			Assert LengthOf(multiselector.itemlist, 2)
+			Assert Equals(multiselector.itemlist[0]['head'], [0, 1, 1, 0])
+			Assert Equals(multiselector.itemlist[0]['tail'], [0, 1, 3, 0])
+			Assert Equals(multiselector.itemlist[0]['type'], 'char')
+			Assert Equals(multiselector.itemlist[1]['head'], [0, 2, 1, 0])
+			Assert Equals(multiselector.itemlist[1]['tail'], [0, 2, 3, 0])
+			Assert Equals(multiselector.itemlist[1]['type'], 'char')
+			Assert Equals(multiselector._last.event, 'check')
+			Assert LengthOf(multiselector._last.itemlist, 2)
+
+			call cursor(2, 1)
+			normal! V
+			call cursor(3, 1)
+			execute "normal! \<Esc>"
+			call multiselector.keymap_checkpattern('x', 'bar')
+			Assert LengthOf(multiselector.itemlist, 4)
+			Assert Equals(multiselector.itemlist[0]['head'], [0, 1, 1, 0])
+			Assert Equals(multiselector.itemlist[0]['tail'], [0, 1, 3, 0])
+			Assert Equals(multiselector.itemlist[0]['type'], 'char')
+			Assert Equals(multiselector.itemlist[1]['head'], [0, 2, 1, 0])
+			Assert Equals(multiselector.itemlist[1]['tail'], [0, 2, 3, 0])
+			Assert Equals(multiselector.itemlist[1]['type'], 'char')
+			Assert Equals(multiselector.itemlist[2]['head'], [0, 2, 5, 0])
+			Assert Equals(multiselector.itemlist[2]['tail'], [0, 2, 7, 0])
+			Assert Equals(multiselector.itemlist[2]['type'], 'char')
+			Assert Equals(multiselector.itemlist[3]['head'], [0, 3, 5, 0])
+			Assert Equals(multiselector.itemlist[3]['tail'], [0, 3, 7, 0])
+			Assert Equals(multiselector.itemlist[3]['type'], 'char')
+			Assert Equals(multiselector._last.event, 'check')
+			Assert LengthOf(multiselector._last.itemlist, 2)
+
+			call cursor(1, 5)
+			execute "normal! \<C-v>"
+			call cursor(2, 11)
+			execute "normal! \<Esc>"
+			call multiselector.keymap_checkpattern('x', 'baz')
+			Assert LengthOf(multiselector.itemlist, 6)
+			Assert Equals(multiselector.itemlist[0]['head'], [0, 1, 1, 0])
+			Assert Equals(multiselector.itemlist[0]['tail'], [0, 1, 3, 0])
+			Assert Equals(multiselector.itemlist[0]['type'], 'char')
+			Assert Equals(multiselector.itemlist[1]['head'], [0, 2, 1, 0])
+			Assert Equals(multiselector.itemlist[1]['tail'], [0, 2, 3, 0])
+			Assert Equals(multiselector.itemlist[1]['type'], 'char')
+			Assert Equals(multiselector.itemlist[2]['head'], [0, 2, 5, 0])
+			Assert Equals(multiselector.itemlist[2]['tail'], [0, 2, 7, 0])
+			Assert Equals(multiselector.itemlist[2]['type'], 'char')
+			Assert Equals(multiselector.itemlist[3]['head'], [0, 3, 5, 0])
+			Assert Equals(multiselector.itemlist[3]['tail'], [0, 3, 7, 0])
+			Assert Equals(multiselector.itemlist[3]['type'], 'char')
+			Assert Equals(multiselector.itemlist[4]['head'], [0, 1, 9, 0])
+			Assert Equals(multiselector.itemlist[4]['tail'], [0, 1, 11, 0])
+			Assert Equals(multiselector.itemlist[4]['type'], 'char')
+			Assert Equals(multiselector.itemlist[5]['head'], [0, 2, 9, 0])
+			Assert Equals(multiselector.itemlist[5]['tail'], [0, 2, 11, 0])
+			Assert Equals(multiselector.itemlist[5]['type'], 'char')
+			Assert Equals(multiselector._last.event, 'check')
+			Assert LengthOf(multiselector._last.itemlist, 2)
+		End
+	End
+
+	Context .keymap_uncheck(mode)
+		It removes an item under the cursor in normal mode
+			%delete
+			call setline(1, 'foo bar baz')
+
+			let multiselector = MS.Multiselector(DEFAULTS)
+			let item1 = Item([0, 1, 1, 0], [0, 1, 3, 0], 'v')
+			let item2 = Item([0, 1, 5, 0], [0, 1, 7, 0], 'v')
+			let item3 = Item([0, 1, 9, 0], [0, 1, 11, 0], 'v')
+			let added = [item1, item2, item3]
+			call multiselector.extend(added)
+			Assert LengthOf(multiselector.itemlist, 3)
+			Assert Equals(multiselector._last.event, 'check')
+			Assert LengthOf(multiselector._last.itemlist, 3)
+
+			call cursor(1, 1)
+			call multiselector.keymap_uncheck('n')
+			Assert LengthOf(multiselector.itemlist, 2)
+			Assert Same(multiselector.itemlist[0], item2)
+			Assert Same(multiselector.itemlist[1], item3)
+			Assert Equals(multiselector._last.event, 'uncheck')
+			Assert LengthOf(multiselector._last.itemlist, 1)
+
+			call cursor(1, 6)
+			call multiselector.keymap_uncheck('n')
+			Assert LengthOf(multiselector.itemlist, 1)
+			Assert Same(multiselector.itemlist[0], item3)
+			Assert Equals(multiselector._last.event, 'uncheck')
+			Assert LengthOf(multiselector._last.itemlist, 1)
+
+			call cursor(1, 11)
+			call multiselector.keymap_uncheck('n')
+			Assert LengthOf(multiselector.itemlist, 0)
+			Assert Equals(multiselector._last.event, 'uncheck')
+			Assert LengthOf(multiselector._last.itemlist, 1)
+
+			call filter(multiselector, 0)
+		End
+
+		It removes items inside selection in visual mode
+			%delete
+			call setline(1, 'foo bar baz')
+
+			let multiselector = MS.Multiselector(DEFAULTS)
+			let item1 = Item([0, 1, 1, 0], [0, 1, 3, 0], 'v')
+			let item2 = Item([0, 1, 5, 0], [0, 1, 7, 0], 'v')
+			let item3 = Item([0, 1, 9, 0], [0, 1, 11, 0], 'v')
+			let added = [item1, item2, item3]
+			call multiselector.extend(added)
+			Assert LengthOf(multiselector.itemlist, 3)
+			Assert Equals(multiselector._last.event, 'check')
+			Assert LengthOf(multiselector._last.itemlist, 3)
+
+			call cursor(1, 1)
+			normal! v
+			call cursor(1, 3)
+			execute "normal! \<Esc>"
+			call multiselector.keymap_uncheck('x')
+			Assert LengthOf(multiselector.itemlist, 2)
+			Assert Same(multiselector.itemlist[0], item2)
+			Assert Same(multiselector.itemlist[1], item3)
+			Assert Equals(multiselector._last.event, 'uncheck')
+			Assert LengthOf(multiselector._last.itemlist, 1)
+
+			call cursor(1, 4)
+			normal! v
+			call cursor(1, 8)
+			execute "normal! \<Esc>"
+			call multiselector.keymap_uncheck('x')
+			Assert LengthOf(multiselector.itemlist, 1)
+			Assert Same(multiselector.itemlist[0], item3)
+			Assert Equals(multiselector._last.event, 'uncheck')
+			Assert LengthOf(multiselector._last.itemlist, 1)
+
+			call cursor(1, 8)
+			normal! v
+			call cursor(1, 9)
+			execute "normal! \<Esc>"
+			call multiselector.keymap_uncheck('x')
+			Assert LengthOf(multiselector.itemlist, 0)
+			Assert Equals(multiselector._last.event, 'uncheck')
+			Assert LengthOf(multiselector._last.itemlist, 1)
+
+			call filter(multiselector, 0)
+		End
+	End
+
+	Context .keymap_uncheckall(mode)
+		It removes all items in normal mode
+			%delete
+			call setline(1, 'foo bar baz')
+
+			let multiselector = MS.Multiselector(DEFAULTS)
+			let item1 = Item([0, 1, 1, 0], [0, 1, 3, 0], 'v')
+			let item2 = Item([0, 1, 5, 0], [0, 1, 7, 0], 'v')
+			let item3 = Item([0, 1, 9, 0], [0, 1, 11, 0], 'v')
+			let added = [item1, item2, item3]
+			call multiselector.extend(added)
+			Assert LengthOf(multiselector.itemlist, 3)
+			Assert Equals(multiselector._last.event, 'check')
+			Assert LengthOf(multiselector._last.itemlist, 3)
+
+			call cursor(1, 1)
+			call multiselector.keymap_uncheckall()
+			Assert LengthOf(multiselector.itemlist, 0)
+			Assert Equals(multiselector._last.event, 'uncheck')
+			Assert LengthOf(multiselector._last.itemlist, 3)
+
+			call filter(multiselector, 0)
+		End
+
+		It removes all items in visual mode
+			%delete
+			call setline(1, 'foo bar baz')
+
+			let multiselector = MS.Multiselector(DEFAULTS)
+			let item1 = Item([0, 1, 1, 0], [0, 1, 3, 0], 'v')
+			let item2 = Item([0, 1, 5, 0], [0, 1, 7, 0], 'v')
+			let item3 = Item([0, 1, 9, 0], [0, 1, 11, 0], 'v')
+			let added = [item1, item2, item3]
+			call multiselector.extend(added)
+			Assert LengthOf(multiselector.itemlist, 3)
+			Assert Equals(multiselector._last.event, 'check')
+			Assert LengthOf(multiselector._last.itemlist, 3)
+
+			call cursor(1, 1)
+			normal! v
+			call cursor(1, 3)
+			execute "normal! \<Esc>"
+			call multiselector.keymap_uncheckall()
+			Assert LengthOf(multiselector.itemlist, 0)
+			Assert Equals(multiselector._last.event, 'uncheck')
+			Assert LengthOf(multiselector._last.itemlist, 3)
+
+			call filter(multiselector, 0)
 		End
 	End
 End
