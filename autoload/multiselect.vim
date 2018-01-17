@@ -561,6 +561,7 @@ function! s:Multiselector.keymap_check(mode) abort "{{{
 	let newitem = self.check(head, tail, type, extended)
 	let view = winsaveview()
 	call winrestview(view)
+	return newitem
 endfunction "}}}
 function! s:Multiselector.keymap_checkpattern(mode, pat, ...) abort "{{{
 	if empty(a:pat)
@@ -604,16 +605,16 @@ function! s:Multiselector.keymap_checkpattern(mode, pat, ...) abort "{{{
 		call self._checkpost(itemlist)
 	endif
 	call winrestview(view)
+	return itemlist
 endfunction "}}}
 function! s:Multiselector.keymap_uncheck(mode) abort "{{{
 	if a:mode ==# 'x'
-		call s:multiselector.uncheck(getpos("'<"), getpos("'>"))
-	else
-		call s:multiselector.uncheck(getpos('.'))
+		return self.uncheck(getpos("'<"), getpos("'>"))
 	endif
+	return self.uncheck(getpos('.'))
 endfunction "}}}
 function! s:Multiselector.keymap_uncheckall() abort "{{{
-	call s:multiselector.uncheckall()
+	return self.uncheckall()
 endfunction "}}}
 function! s:Multiselector.keymap_undo() abort "{{{
 	let last = self.lastevent()
@@ -636,7 +637,7 @@ function! s:Multiselector.keymap_select(mode) abort "{{{
 		let type = s:str2type(visualmode())
 		let extended = type ==# 'block' ? s:is_extended() : s:FALSE
 		let region = s:Region(getpos("'<"), getpos("'>"), type, extended)
-		let item_in_visual = s:multiselector.itemnum({_, item -> item.isinside(region)})
+		let item_in_visual = self.itemnum({_, item -> item.isinside(region)})
 		if item_in_visual == 0
 			if type ==# 'char'
 				let pat = s:patternofselection(region)
@@ -645,14 +646,14 @@ function! s:Multiselector.keymap_select(mode) abort "{{{
 				call self.keymap_check(a:mode)
 			endif
 		else
-			if item_in_visual != s:multiselector.itemnum()
-				call s:multiselector.filter({_, item -> item.isinside(region)})
+			if item_in_visual != self.itemnum()
+				call self.filter({_, item -> item.isinside(region)})
 			endif
 		endif
 		return
 	else
 		let curpos = getpos('.')
-		let itemlist = s:multiselector.emit_touching(curpos)
+		let itemlist = self.emit_touching(curpos)
 		if empty(itemlist)
 			let pat = printf('\<%s\>', expand('<cword>'))
 			call self.keymap_checkpattern(a:mode, pat)
