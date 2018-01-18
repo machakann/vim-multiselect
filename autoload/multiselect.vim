@@ -9,10 +9,13 @@ let s:MAXCOL = 2147483647
 let s:NULLPOS = [0, 0, 0, 0]
 let s:HIGROUP = 'MultiselectItem'
 
-let s:table = []
-
 function! multiselect#import() abort "{{{
 	return s:Multiselect
+endfunction "}}}
+
+let s:table = []
+function! multiselect#_gettable() abort "{{{
+	return s:table
 endfunction "}}}
 
 " Multiselector class "{{{
@@ -481,28 +484,6 @@ function! s:Multiselector._uncheckpost(removed) abort "{{{
 	call self.event.UncheckPost.trigger()
 endfunction "}}}
 lockvar! s:Multiselector
-"}}}
-
-" autocmd events{{{
-" initialize if leaving the current buffer
-" uncheck if the buffer is edited
-augroup multiselect-events
-	autocmd!
-	autocmd BufLeave * call multiselect#_doautocmd('BufLeave')
-	autocmd TabLeave * call multiselect#_doautocmd('TabLeave')
-	autocmd CmdwinEnter * call multiselect#_doautocmd('CmdwinEnter')
-	autocmd CmdwinLeave * call multiselect#_doautocmd('CmdwinLeave')
-	autocmd TextChanged * call multiselect#_doautocmd('TextChanged')
-	autocmd InsertEnter * call multiselect#_doautocmd('InsertEnter')
-	autocmd WinNew * call multiselect#_doautocmd('WinNew')
-augroup END
-
-function! multiselect#_doautocmd(event) abort "{{{
-	call filter(s:table, '!empty(v:val)')
-	for ms in s:table
-		call ms.event[a:event].trigger()
-	endfor
-endfunction "}}}
 "}}}
 
 " Multiselect module{{{

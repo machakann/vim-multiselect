@@ -1,6 +1,25 @@
 function! multiselect#Events#_import() abort "{{{
 	return s:Events
 endfunction "}}}
+function! multiselect#Events#_doautocmd(event) abort "{{{
+	let table = multiselect#_gettable()
+	call filter(table, '!empty(v:val)')
+	for ms in table
+		call ms.event[a:event].trigger()
+	endfor
+endfunction "}}}
+" autocmd events{{{
+augroup multiselect-events
+	autocmd!
+	autocmd BufLeave * call multiselect#Events#_doautocmd('BufLeave')
+	autocmd TabLeave * call multiselect#Events#_doautocmd('TabLeave')
+	autocmd CmdwinEnter * call multiselect#Events#_doautocmd('CmdwinEnter')
+	autocmd CmdwinLeave * call multiselect#Events#_doautocmd('CmdwinLeave')
+	autocmd TextChanged * call multiselect#Events#_doautocmd('TextChanged')
+	autocmd InsertEnter * call multiselect#Events#_doautocmd('InsertEnter')
+	autocmd WinNew * call multiselect#Events#_doautocmd('WinNew')
+augroup END
+"}}}
 
 " Event class{{{
 unlockvar! s:Event
