@@ -1,5 +1,5 @@
 " multiselect.vim : A library for multiple selection
-" TODO: better error messaging
+let s:Errors = multiselect#Errors#_import()
 let s:ClassSys = multiselect#ClassSys#_import()
 let s:Highlights = multiselect#Highlights#_import()
 let s:Events = multiselect#Events#_import()
@@ -392,7 +392,7 @@ function! s:Multiselector.check(expr, ...) abort  "{{{
 	try
 		let newitem = call('s:Item', [a:expr] + a:000)
 	catch /^Vim(echoerr):multiselect: Invalid argument for/
-		echoerr s:err_InvalidArgument('Multiselector.check')
+		echoerr s:Errors.InvalidArgument('Multiselector.check')
 	endtry
 	call self.add(newitem)
 	return newitem
@@ -401,7 +401,7 @@ function! s:Multiselector.uncheck(expr, ...) abort  "{{{
 	try
 		let unchecked = call(self.emit_touching, [a:expr] + a:000, self)
 	catch /^Vim(echoerr):multiselect: Invalid argument for/
-		echoerr s:err_InvalidArgument('Multiselector.uncheck')
+		echoerr s:Errors.InvalidArgument('Multiselector.uncheck')
 	endtry
 	return unchecked
 endfunction "}}}
@@ -424,7 +424,7 @@ function! s:Multiselector.emit_inside(expr, ...) abort "{{{
 	try
 		let itemlist = self.emit({_, item -> call(item.isinside, args, item)})
 	catch /^Vim(echoerr):multiselect: Invalid argument for/
-		echoerr s:err_InvalidArgument('Multiselector.emit_inside')
+		echoerr s:Errors.InvalidArgument('Multiselector.emit_inside')
 	endtry
 	return itemlist
 endfunction "}}}
@@ -433,7 +433,7 @@ function! s:Multiselector.emit_touching(expr, ...) abort "{{{
 	try
 		let itemlist = self.emit({_, item -> call(item.touches, args, item)})
 	catch /^Vim(echoerr):multiselect: Invalid argument for/
-		echoerr s:err_InvalidArgument('Multiselector.emit_touching')
+		echoerr s:Errors.InvalidArgument('Multiselector.emit_touching')
 	endtry
 	return itemlist
 endfunction "}}}
@@ -743,7 +743,7 @@ function! s:percolate(iter, Filterexpr) abort "{{{
 		endfor
 		return filtered
 	endif
-	echoerr s:err_InvalidArgument('percolate')
+	echoerr s:Errors.InvalidArgument('percolate')
 endfunction "}}}
 function! s:enumerate(list) abort "{{{
 	return map(copy(a:list), {i, item -> [i, item]})
