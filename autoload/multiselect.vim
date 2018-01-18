@@ -1,6 +1,6 @@
 " multiselect.vim : A library for multiple selection
 " TODO: better error messaging
-let s:Highlights = multiselect#highlight#import()
+let s:Highlights = multiselect#highlight#_import()
 let s:Events = multiselect#event#_import()
 let s:TRUE = 1
 let s:FALSE = 0
