@@ -266,8 +266,10 @@ let s:Item = {
 	\	'_highlight': {},
 	\	}
 function! s:Item(expr, ...) abort "{{{
+	let super = call('s:Region', [a:expr] + a:000)
+	let sub = deepcopy(s:Item)
 	try
-		let item = s:inherit('Item', 'Region', [a:expr] + a:000)
+		let item = s:inherit(sub, super)
 	catch /^Vim(echoerr):multiselect: Invalid argument for/
 		echoerr s:err_InvalidArgument('Item')
 	endtry
@@ -809,21 +811,15 @@ lockvar! s:Multiselector
 "}}}
 
 " class system
-function! s:inherit(subname, supername, args) abort "{{{
-	let super = call('s:' . a:supername, a:args)
-	if empty(super)
-		return super
-	endif
-
-	let sub = deepcopy(s:[a:subname])
-	call extend(sub, super, 'keep')
-	let sub.__SUPER__ = {}
-	for [key, l:Val] in items(super)
+function! s:inherit(sub, super) abort "{{{
+	call extend(a:sub, a:super, 'keep')
+	let a:sub.__SUPER__ = {}
+	for [key, l:Val] in items(a:super)
 		if type(l:Val) == v:t_func || key ==# '__SUPER__'
-			let sub.__SUPER__[key] = l:Val
+			let a:sub.__SUPER__[key] = l:Val
 		endif
 	endfor
-	return sub
+	return a:sub
 endfunction "}}}
 function! s:super(sub, ...) abort "{{{
 	if !has_key(a:sub, '__SUPER__')
