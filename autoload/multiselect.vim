@@ -1,6 +1,6 @@
 " multiselect.vim : A library for multiple selection
 let s:Errors = multiselect#Errors#_import()
-let s:ClassSys = multiselect#ClassSys#_import()
+let s:Buffer = multiselect#Buffer#_impor()
 let s:Highlights = multiselect#Highlights#_import()
 let s:Events = multiselect#Events#_import()
 let s:TRUE = 1
@@ -15,302 +15,6 @@ function! multiselect#import() abort "{{{
 	return s:Multiselect
 endfunction "}}}
 
-" Region class{{{
-let s:Region = {
-	\	'__CLASS__': 'Region',
-	\	'head': copy(s:NULLPOS),
-	\	'tail': copy(s:NULLPOS),
-	\	'type': 'char',
-	\	'extended': s:FALSE,
-	\	}
-function! s:Region(expr, ...) abort "{{{
-	let head = s:NULLPOS
-	let tail = s:NULLPOS
-	let t_expr = type(a:expr)
-	if a:0 == 0
-		if t_expr == v:t_number
-			let lnum = a:expr
-			let head = [0, lnum, 1, 0]
-			let tail = [0, lnum, s:MAXCOL, 0]
-			let type = 'line'
-		elseif t_expr == v:t_list
-			let pos = a:expr
-			let head = copy(pos)
-			let tail = copy(pos)
-			let type = 'char'
-		else
-			echoerr s:err_InvalidArgument('Region')
-		endif
-	else
-		if t_expr == v:t_number && type(a:1) == v:t_number
-			let lnum1 = a:expr
-			let lnum2 = a:1
-			let head = [0, lnum1, 1, 0]
-			let tail = [0, lnum2, s:MAXCOL, 0]
-			let type = 'line'
-		elseif t_expr == v:t_list && type(a:1) == v:t_list
-			let pos1 = a:expr
-			let pos2 = a:1
-			let type = s:str2type(get(a:000, 1, 'char'))
-			if type ==# 'line'
-				let head = [0, pos1[1], 1, 0]
-				let tail = [0, pos2[1], s:MAXCOL, 0]
-			else
-				let head = copy(pos1)
-				let tail = copy(pos2)
-			endif
-		else
-			echoerr s:err_InvalidArgument('Region')
-		endif
-	endif
-	if head == s:NULLPOS || tail == s:NULLPOS || s:inorderof(tail, head)
-		echoerr s:err_InvalidArgument('Region')
-	endif
-
-	let region = deepcopy(s:Region)
-	let region.head = head
-	let region.tail = tail
-	let region.type = type
-	if region.type ==# 'block'
-		let region.extended = !!get(a:000, 2, s:FALSE)
-	endif
-	return region
-endfunction "}}}
-function! s:Region.select() abort "{{{
-	let visualcmd = s:str2visualcmd(self.type)
-	execute 'normal! ' . visualcmd
-	call setpos('.', self.head)
-	normal! o
-	call setpos('.', self.tail)
-	if self.extended
-		normal! $
-	endif
-endfunction "}}}
-function! s:Region.yank() abort "{{{
-	" FIXME: Should I restore visualmode() ?
-	let reg = ['"', getreg('"'), getregtype('"')]
-	let modhead = getpos("'<")
-	let modtail = getpos("'>")
-	try
-		call self.select()
-		normal! ""y
-		let text = @@
-	finally
-		call setpos("'<", modhead)
-		call setpos("'>", modtail)
-		call call('setreg', reg)
-	endtry
-	return text
-endfunction "}}}
-function! s:Region.includes(expr, ...) abort "{{{
-	if a:0 == 0 && type(a:expr) == v:t_dict
-		let region = a:expr
-		if region.head == s:NULLPOS || region.tail == s:NULLPOS
-			return s:FALSE
-		endif
-		return s:{region.type}_is_included_in_{self.type}(region, self)
-	endif
-	try
-		let region = call('s:Region', [a:expr] + a:000)
-	catch /^Vim(echoerr):multiselect: Invalid argument for/
-		echoerr s:err_InvalidArgument('Region.includes')
-	endtry
-	return self.includes(region)
-endfunction "}}}
-function! s:Region.isinside(expr, ...) abort  "{{{
-	if a:0 == 0 && type(a:expr) == v:t_dict
-		let region = a:expr
-		if region.head == s:NULLPOS || region.tail == s:NULLPOS
-			return s:FALSE
-		endif
-		return s:{self.type}_is_included_in_{region.type}(self, region)
-	endif
-	try
-		let region = call('s:Region', [a:expr] + a:000)
-	catch /^Vim(echoerr):multiselect: Invalid argument for/
-		echoerr s:err_InvalidArgument('Region.isinside')
-	endtry
-	return self.isinside(region)
-endfunction "}}}
-function! s:Region.touches(expr, ...) abort "{{{
-	if a:0 == 0 && type(a:expr) == v:t_dict
-		let region = a:expr
-		if region.head == s:NULLPOS || region.tail == s:NULLPOS
-			return s:FALSE
-		endif
-		return s:{self.type}_is_touching_{region.type}(self, region)
-	endif
-	try
-		let region = call('s:Region', [a:expr] + a:000)
-	catch /^Vim(echoerr):multiselect: Invalid argument for/
-		echoerr s:err_InvalidArgument('Region.touches')
-	endtry
-	return self.touches(region)
-endfunction "}}}
-
-function! s:char_is_included_in_char(item, region) abort "{{{
-	return !s:inorderof(a:item.head, a:region.head) &&
-		\  !s:inorderof(a:region.tail, a:item.tail)
-endfunction "}}}
-function! s:char_is_included_in_line(item, region) abort "{{{
-	return a:region.head[1] <= a:item.head[1] &&
-		\  a:item.tail[1] <= a:region.tail[1]
-endfunction "}}}
-function! s:char_is_included_in_block(item, region) abort "{{{
-	if !s:char_is_included_in_char(a:item, a:region)
-		return s:FALSE
-	endif
-
-	if a:item.head[1] == a:item.tail[1]
-		let itemleft = virtcol(a:item.head[1:2]) + a:item.head[3]
-		let itemright = virtcol(a:item.tail[1:2]) + a:item.tail[3]
-	else
-		let itemleft = 1
-		let lines = range(a:item.head[1], a:item.tail[1] - 1)
-		let virtcoltaillist = map(lines, 'virtcol([v:val, "$"])')
-		let virtcoltaillist += [virtcol(a:item.tail[1:2]) + a:item.tail[3]]
-		let itemright = max(virtcoltaillist)
-	endif
-	let regionleft = virtcol(a:region.head[1:2]) + a:region.head[3]
-	let regionright = virtcol(a:region.tail[1:2]) + a:region.tail[3]
-	return regionleft <= itemleft && itemright <= regionright
-endfunction "}}}
-function! s:line_is_included_in_char(item, region) abort "{{{
-	let item = s:Region(a:item.head, a:item.tail, 'line')
-	let item.type = 'char'
-	let item.tail[2] = col([item.tail[1], '$'])
-	return s:char_is_included_in_char(item, a:region)
-endfunction "}}}
-function! s:line_is_included_in_line(item, region) abort "{{{
-	return a:region.head[1] <= a:item.head[1] &&
-		\  a:item.tail[1] <= a:region.tail[1]
-endfunction "}}}
-function! s:line_is_included_in_block(item, region) abort "{{{
-	let item = s:Region(a:item.head, a:item.tail, 'line')
-	let item.type = 'char'
-	let item.tail[2] = col([item.tail[1], '$'])
-	return s:char_is_included_in_block(item, a:region)
-endfunction "}}}
-function! s:block_is_included_in_char(item, region) abort "{{{
-	return s:char_is_included_in_char(a:item, a:region)
-endfunction "}}}
-function! s:block_is_included_in_line(item, region) abort "{{{
-	return s:char_is_included_in_line(a:item, a:region)
-endfunction "}}}
-function! s:block_is_included_in_block(item, region) abort "{{{
-	if a:item.head[1] < a:region.head[1] || a:region.tail[1] < a:item.tail[1]
-		return s:FALSE
-	endif
-	let itemleft = virtcol(a:item.head[1:2]) + a:item.head[3]
-	let itemright = virtcol(a:item.tail[1:2]) + a:item.tail[3]
-	let regionleft = virtcol(a:region.head[1:2]) + a:region.head[3]
-	let regionright = virtcol(a:region.tail[1:2]) + a:region.tail[3]
-	return regionleft <= itemleft && itemright <= regionright
-endfunction "}}}
-function! s:char_is_touching_char(item, region) abort "{{{
-	return !(s:inorderof(a:item.tail, a:region.head) ||
-	\        s:inorderof(a:region.tail, a:item.head))
-endfunction "}}}
-function! s:char_is_touching_line(item, region) abort "{{{
-	return s:line_is_touching_line(a:item, a:region)
-endfunction "}}}
-function! s:char_is_touching_block(item, region) abort "{{{
-	if s:inorderof(a:item.tail, a:region.head) ||
-	\  s:inorderof(a:region.tail, a:item.head)
-		return s:FALSE
-	endif
-	if a:item.tail[1] - a:item.head[1] >= 2
-		return s:TRUE
-	endif
-	let itemleft = virtcol(a:item.head[1:2]) + a:item.head[3]
-	let itemright = virtcol(a:item.tail[1:2]) + a:item.tail[3]
-	let regionleft = virtcol(a:region.head[1:2]) + a:region.head[3]
-	let regionright = virtcol(a:region.tail[1:2]) + a:region.tail[3]
-	if a:item.tail[1] - a:item.head[1] == 1
-		return !(itemright < regionleft && regionright < itemleft)
-	endif
-	return !(itemright < regionleft || regionright < itemleft)
-endfunction "}}}
-function! s:line_is_touching_char(item, region) abort "{{{
-	return s:char_is_touching_line(a:region, a:item)
-endfunction "}}}
-function! s:line_is_touching_line(item, region) abort "{{{
-	return !(a:item.tail[1] < a:region.head[1] ||
-	\        a:region.tail[1] < a:item.head[1])
-endfunction "}}}
-function! s:line_is_touching_block(item, region) abort "{{{
-	return s:line_is_touching_line(a:item, a:region)
-endfunction "}}}
-function! s:block_is_touching_char(item, region) abort "{{{
-	return s:char_is_touching_block(a:region, a:item)
-endfunction "}}}
-function! s:block_is_touching_line(item, region) abort "{{{
-	return s:line_is_touching_block(a:region, a:item)
-endfunction "}}}
-function! s:block_is_touching_block(item, region) abort "{{{
-	if !s:line_is_touching_line(a:item, a:region)
-		return s:FALSE
-	endif
-	let itemleft = virtcol(a:item.head[1:2]) + a:item.head[3]
-	let itemright = virtcol(a:item.tail[1:2]) + a:item.tail[3]
-	let regionleft = virtcol(a:region.head[1:2]) + a:region.head[3]
-	let regionright = virtcol(a:region.tail[1:2]) + a:region.tail[3]
-	return !(itemright < regionleft || regionright < itemleft)
-endfunction "}}}
-"}}}
-" Item class (inherits Region class)"{{{
-unlockvar! s:Item
-let s:Item = {
-	\	'__CLASS__': 'Item',
-	\	'id': 0,
-	\	'bufnr': 0,
-	\	'_highlight': {},
-	\	}
-function! s:Item(expr, ...) abort "{{{
-	let super = call('s:Region', [a:expr] + a:000)
-	let sub = deepcopy(s:Item)
-	try
-		let item = s:ClassSys.inherit(sub, super)
-	catch /^Vim(echoerr):multiselect: Invalid argument for/
-		echoerr s:err_InvalidArgument('Item')
-	endtry
-
-	let item.id = s:itemid()
-	let item.bufnr = bufnr('%')
-	let item._highlight = s:Highlights.Highlight()
-	return item
-endfunction "}}}
-function! s:Item.show(higroup) abort "{{{
-	if self._highlight.initialize(a:higroup, self)
-		call self._highlight.quench()
-	endif
-	call self._highlight.show()
-endfunction "}}}
-function! s:Item.quench() abort "{{{
-	call self._highlight.quench()
-endfunction "}}}
-function! s:Item._showlocal(higroup) abort "{{{
-	if self._highlight.initialize(a:higroup, self)
-		call self._highlight.quench()
-		call self._highlight.show()
-	else
-		call self._highlight.showlocal()
-	endif
-endfunction "}}}
-function! s:Item._quenchlocal() abort "{{{
-	call self._highlight.quenchlocal()
-endfunction "}}}
-function! s:Item._histatus(winid) abort "{{{
-	return self._highlight.status(a:winid)
-endfunction "}}}
-lockvar! s:Item
-
-let s:itemid = 0
-function! s:itemid() abort "{{{
-	let s:itemid += 1
-	return s:itemid
-endfunction "}}}
-"}}}
 " Multiselector class "{{{
 unlockvar! s:Multiselector
 let s:Multiselector = {
@@ -390,7 +94,7 @@ endfunction "}}}
 " main interfaces
 function! s:Multiselector.check(expr, ...) abort  "{{{
 	try
-		let newitem = call('s:Item', [a:expr] + a:000)
+		let newitem = call(s:Buffer.Item, [a:expr] + a:000)
 	catch /^Vim(echoerr):multiselect: Invalid argument for/
 		echoerr s:Errors.InvalidArgument('Multiselector.check')
 	endtry
@@ -463,7 +167,7 @@ function! s:sort_items(i1, i2) abort "{{{
 			return virtcol(a:i1.head[1:2]) - virtcol(a:i2.head[1:2])
 		endif
 	endif
-	return s:inorderof(a:i1.head, a:i2.head) ? -1 : 1
+	return s:Buffer.inorderof(a:i1.head, a:i2.head) ? -1 : 1
 endfunction "}}}
 
 " keymap interfaces
@@ -478,7 +182,11 @@ function! s:Multiselector.keymap_check(mode) abort "{{{
 	let head = getpos("'<")
 	let tail = getpos("'>")
 	let type = visualmode()
-	let extended = a:mode ==# 'x' && type ==# "\<C-v>" ? s:is_extended() : 0
+	if a:mode ==# 'x' && type ==# "\<C-v>"
+		let extended = s:Buffer.is_extended()
+	else
+		let extended = s:FALSE
+	endif
 	let newitem = self.check(head, tail, type, extended)
 	let view = winsaveview()
 	call winrestview(view)
@@ -499,22 +207,22 @@ function! s:Multiselector.keymap_checkpattern(mode, pat, ...) abort "{{{
 		let start = [0, 1, 1, 0]
 		let end = [0, line('$'), col([line('$'), '$']), 0]
 	endif
-	let region = s:Region(start, end)
+	let region = s:Buffer.Region(start, end)
 	call setpos('.', region.head)
 
 	let itemlist = []
-	let head = s:searchpos(a:pat, 'cW')
+	let head = s:Buffer.searchpos(a:pat, 'cW')
 	while head != s:NULLPOS && region.includes(head)
-		let tail = s:searchpos(a:pat, 'ceW')
+		let tail = s:Buffer.searchpos(a:pat, 'ceW')
 		if !region.includes(tail)
 			break
 		endif
-		let newitem = s:Item(head, tail, 'v')
+		let newitem = s:Buffer.Item(head, tail, 'v')
 		call add(itemlist, newitem)
 		if openfold is s:TRUE
-			call s:foldopen(newitem.head[1])
+			call s:Buffer.foldopen(newitem.head[1])
 		endif
-		let head = s:searchpos(a:pat, 'W')
+		let head = s:Buffer.searchpos(a:pat, 'W')
 	endwhile
 
 	" It is sure that the items in 'itemlist' has no overlap
@@ -555,13 +263,13 @@ endfunction "}}}
 function! s:Multiselector.keymap_multiselect(mode) abort "{{{
 	let itemlist = []
 	if a:mode ==# 'x'
-		let type = s:str2type(visualmode())
-		let extended = type ==# 'block' ? s:is_extended() : s:FALSE
-		let region = s:Region(getpos("'<"), getpos("'>"), type, extended)
+		let type = s:Buffer.str2type(visualmode())
+		let extended = type ==# 'block' ? s:Buffer.is_extended() : s:FALSE
+		let region = s:Buffer.Region(getpos("'<"), getpos("'>"), type, extended)
 		let item_in_visual = self.itemnum({_, item -> item.isinside(region)})
 		if item_in_visual == 0
 			if type ==# 'char'
-				let pat = s:patternofselection(region)
+				let pat = s:Buffer.patternofselection(region)
 				call self.keymap_checkpattern('n', pat)
 			else
 				call self.keymap_check(a:mode)
@@ -580,42 +288,6 @@ function! s:Multiselector.keymap_multiselect(mode) abort "{{{
 			call self.keymap_checkpattern(a:mode, pat)
 		endif
 	endif
-endfunction "}}}
-function! s:is_extended() abort "{{{
-	let view = winsaveview()
-	normal! gv
-	let extended = winsaveview().curswant == s:MAXCOL
-	execute "normal! \<Esc>"
-	call winrestview(view)
-	return extended
-endfunction
-"}}}
-function! s:searchpos(pat, flag) abort "{{{
-	return [0] + searchpos(a:pat, a:flag) + [0]
-endfunction "}}}
-function! s:foldopen(lnum) abort "{{{
-	if foldclosed(a:lnum) == -1
-		return
-	endif
-	call cursor(a:lnum, 1)
-	normal! zO
-endfunction "}}}
-function! s:patternofselection(region) abort "{{{
-	let pat = ''
-	let view = winsaveview()
-	call setpos('.', a:region.head)
-	if searchpos('\<', 'cn', line('.')) == a:region.head[1:2]
-		let pat .= '\<'
-	endif
-
-	let pat .= substitute(escape(a:region.yank(), '\'), '\n', '\\n', 'g')
-
-	call setpos('.', a:region.tail)
-	if searchpos('.\>', 'cn', line('.')) == a:region.head[1:2]
-		let pat .= '\>'
-	endif
-	call winrestview(view)
-	return pat
 endfunction "}}}
 
 " low-level interfaces
@@ -811,35 +483,6 @@ endfunction "}}}
 lockvar! s:Multiselector
 "}}}
 
-function! s:str2type(str) abort "{{{
-	if a:str ==# 'line' || a:str ==# 'V'
-		return 'line'
-	elseif a:str ==# 'block' || a:str[0] ==# "\<C-v>"
-		return 'block'
-	endif
-	return 'char'
-endfunction "}}}
-function! s:str2visualcmd(str) abort "{{{
-	if a:str ==# 'line' || a:str ==# 'V'
-		return 'V'
-	elseif a:str ==# 'block' || a:str[0] ==# "\<C-v>"
-		return "\<C-v>"
-	endif
-	return 'v'
-endfunction "}}}
-function! s:inorderof(pos1, pos2) abort  "{{{
-	return a:pos1[1] < a:pos2[1] || (a:pos1[1] == a:pos2[1] && a:pos1[2] + a:pos1[3] < a:pos2[2] + a:pos2[3])
-endfunction "}}}
-function! s:inbetween(pos, head, tail) abort  "{{{
-	return a:pos != s:NULLPOS && a:head != s:NULLPOS && a:tail != s:NULLPOS
-		\ && (a:pos[0] == a:head[0] && a:pos[0] == a:tail[0])
-		\ && ((a:pos[1] > a:head[1]) || ((a:pos[1] == a:head[1]) && (a:pos[2] + a:pos[3] >= a:head[2] + a:head[3])))
-		\ && ((a:pos[1] < a:tail[1]) || ((a:pos[1] == a:tail[1]) && (a:pos[2] + a:pos[3] <= a:tail[2] + a:tail[3])))
-endfunction "}}}
-function! s:err_InvalidArgument(name) abort "{{{
-	return printf('multiselect: Invalid argument for %s()', a:name)
-endfunction "}}}
-
 " autocmd events{{{
 " initialize if leaving the current buffer
 " uncheck if the buffer is edited
@@ -871,15 +514,15 @@ let s:Multiselect = {
 	\	'__MODULE__': 'Multiselect',
 	\	'DEFAULTHIGHLIGHTGROUP': s:HIGROUP,
 	\	'load': function('s:load'),
-	\	'Region': function('s:Region'),
-	\	'Item': function('s:Item'),
 	\	'Multiselector': function('s:Multiselector'),
+	\	'Region': s:Buffer.Region,
+	\	'Item': s:Buffer.Item,
 	\	'percolate': function('s:percolate'),
 	\	'enumerate': function('s:enumerate'),
-	\	'inorderof': function('s:inorderof'),
-	\	'inbetween': function('s:inbetween'),
-	\	'str2type': function('s:str2type'),
-	\	'str2visualcmd': function('s:str2visualcmd'),
+	\	'str2type': s:Buffer.str2type,
+	\	'str2visualcmd': s:Buffer.str2visualcmd,
+	\	'inorderof': s:Buffer.inorderof,
+	\	'inbetween': s:Buffer.inbetween,
 	\	}
 lockvar! s:Multiselect
 "}}}
