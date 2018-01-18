@@ -7,7 +7,7 @@ let s:NULLPOS = [0, 0, 0, 0]
 let s:HIGROUP = 'MultiselectItem'
 
 function! multiselect#Highlights#_import() abort  "{{{
-	return s:HighlightModule
+	return s:Highlights
 endfunction "}}}
 " highlight group{{{
 function! s:default_highlight() abort
@@ -235,15 +235,15 @@ function! s:in_cmdline_window() abort "{{{
 endfunction "}}}
 "}}}
 " Highlight module{{{
-unlockvar! s:HighlightModule
-let s:HighlightModule = {
+unlockvar! s:Highlights
+let s:Highlights = {
 	\	'__MODULE__': 'Highlight',
 	\	'DEFAULTHIGROUP': s:HIGROUP,
 	\	'ON': s:ON,
 	\	'OFF': s:OFF,
 	\	'Highlight': function('s:Highlight'),
 	\	}
-lockvar! s:HighlightModule
+lockvar! s:Highlights
 "}}}
 " vim:set foldmethod=marker:
 " vim:set commentstring="%s:
