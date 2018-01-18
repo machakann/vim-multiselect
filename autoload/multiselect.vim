@@ -1,8 +1,8 @@
 " multiselect.vim : A library for multiple selection
 " TODO: better error messaging
-let s:ClassSys = multiselect#classsys#_import()
-let s:Highlights = multiselect#highlight#_import()
-let s:Events = multiselect#event#_import()
+let s:ClassSys = multiselect#ClassSys#_import()
+let s:Highlights = multiselect#Highlights#_import()
+let s:Events = multiselect#Events#_import()
 let s:TRUE = 1
 let s:FALSE = 0
 let s:MAXCOL = 2147483647

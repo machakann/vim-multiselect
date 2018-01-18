@@ -1,4 +1,4 @@
-function! multiselect#event#_import() abort "{{{
+function! multiselect#Events#_import() abort "{{{
 	return s:Events
 endfunction "}}}
 

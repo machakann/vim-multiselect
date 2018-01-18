@@ -5,7 +5,7 @@ let s:ON = 1
 let s:OFF = 0
 let s:NULLPOS = [0, 0, 0, 0]
 
-function! multiselect#highlight#_import() abort  "{{{
+function! multiselect#Highlights#_import() abort  "{{{
 	return s:HighlightModule
 endfunction "}}}
 " highlight group{{{

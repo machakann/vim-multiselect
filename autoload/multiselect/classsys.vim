@@ -1,4 +1,4 @@
-function! multiselect#classsys#_import() abort "{{{
+function! multiselect#ClassSys#_import() abort "{{{
 	return s:ClassSys
 endfunction "}}}
 
