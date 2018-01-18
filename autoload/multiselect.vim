@@ -1,6 +1,7 @@
 " multiselect.vim : A library for multiple selection
 " TODO: better error messaging
 let s:Highlights = multiselect#highlight#import()
+let s:Events = multiselect#event#_import()
 let s:TRUE = 1
 let s:FALSE = 0
 let s:MAXCOL = 2147483647
@@ -310,92 +311,6 @@ function! s:itemid() abort "{{{
 	return s:itemid
 endfunction "}}}
 "}}}
-" Event class{{{
-let s:ON = 1
-let s:OFF = 0
-unlockvar! s:Event
-let s:eventid = 1
-let s:Event = {
-	\	'__CLASS__': 'Event',
-	\	'name': '',
-	\	'_state': s:OFF,
-	\	'_orderlist': [],
-	\	'_skipcount': -1,
-	\	}
-function! s:Event(name) abort "{{{
-	let event = deepcopy(s:Event)
-	let event.name = a:name
-	return event
-endfunction "}}}
-function! s:Event.set(expr) abort "{{{
-	let order = [s:eventid, type(a:expr), a:expr]
-	call add(self._orderlist, order)
-	let s:eventid += 1
-	return order[0]
-endfunction "}}}
-function! s:Event.unset(id) abort "{{{
-	call filter(self._orderlist, 'v:val[0] != a:id')
-endfunction "}}}
-function! s:Event.trigger() abort "{{{
-	call self._decrement_skipcount()
-	if !self.isactive()
-		call self._check_skipcount()
-		return
-	endif
-
-	for [_, type, l:Expr] in self._orderlist
-		if type == v:t_string
-			execute l:Expr
-		elseif type == v:t_func
-			call call(l:Expr, [self.name])
-		endif
-	endfor
-endfunction "}}}
-function! s:Event.on() abort "{{{
-	let self._state = s:ON
-	let self._skipcount = -1
-	return self._state
-endfunction "}}}
-function! s:Event.off() abort "{{{
-	let self._state = s:OFF
-	let self._skipcount = -1
-	return self._state
-endfunction "}}}
-function! s:Event.skip(...) abort "{{{
-	let n = get(a:000, 0, 1)
-	if n <= 0
-		return
-	endif
-	call self.off()
-	let self._skipcount = n
-endfunction "}}}
-function! s:Event.isactive() abort "{{{
-	return self._state
-endfunction "}}}
-function! s:Event._decrement_skipcount() abort "{{{
-	if self._state is s:ON
-		return
-	endif
-	if self._skipcount > 0
-		let self._skipcount -= 1
-	endif
-endfunction "}}}
-function! s:Event._check_skipcount() abort "{{{
-	if self._state is s:ON
-		return
-	endif
-	if self._skipcount == 0
-		call self.on()
-	endif
-endfunction "}}}
-function! s:douserautocmd(name) abort "{{{
-	if !exists('#User#' . a:name)
-		return
-	endif
-	execute 'doautocmd <nomodeline> User ' . a:name
-endfunction "}}}
-lockvar! s:Event
-"}}}
 " Multiselector class "{{{
 unlockvar! s:Multiselector
 let s:Multiselector = {
@@ -405,13 +320,13 @@ let s:Multiselector = {
 	\	'itemlist': [],
 	\	'higroup': '',
 	\	'event': {
-	\		'BufLeave': s:Event('BufLeave'),
-	\		'TabLeave': s:Event('TabLeave'),
-	\		'CmdwinEnter': s:Event('CmdwinEnter'),
-	\		'CmdwinLeave': s:Event('CmdwinLeave'),
-	\		'TextChanged': s:Event('TextChanged'),
-	\		'InsertEnter': s:Event('InsertEnter'),
-	\		'WinNew': s:Event('WinNew'),
+	\		'BufLeave': s:Events.Event('BufLeave'),
+	\		'TabLeave': s:Events.Event('TabLeave'),
+	\		'CmdwinEnter': s:Events.Event('CmdwinEnter'),
+	\		'CmdwinLeave': s:Events.Event('CmdwinLeave'),
+	\		'TextChanged': s:Events.Event('TextChanged'),
+	\		'InsertEnter': s:Events.Event('InsertEnter'),
+	\		'WinNew': s:Events.Event('WinNew'),
 	\		'Init': {},
 	\		'CheckPost': {},
 	\		'UncheckPost': {},
@@ -435,9 +350,9 @@ function! s:Multiselector(...) abort "{{{
 	let EVENTINIT = get(options, 'eventinit', '')
 	let EVENTCHECKPOST = get(options, 'eventcheckpost', '')
 	let EVENTUNCHECKPOST = get(options, 'eventuncheckpost', '')
-	let multiselector.event.Init = s:Event(EVENTINIT)
-	let multiselector.event.CheckPost = s:Event(EVENTCHECKPOST)
-	let multiselector.event.UncheckPost = s:Event(EVENTUNCHECKPOST)
+	let multiselector.event.Init = s:Events.Event(EVENTINIT)
+	let multiselector.event.CheckPost = s:Events.Event(EVENTCHECKPOST)
+	let multiselector.event.UncheckPost = s:Events.Event(EVENTUNCHECKPOST)
 
 	let l:Initializefunc = function(multiselector._initialize, [], multiselector)
 	let l:Suspendfunc = function(multiselector._suspend, [], multiselector)
@@ -464,6 +379,12 @@ function! s:Multiselector(...) abort "{{{
 	call add(s:table, multiselector)
 	call multiselector._initialize()
 	return multiselector
+endfunction "}}}
+function! s:douserautocmd(name) abort "{{{
+	if !exists('#User#' . a:name)
+		return
+	endif
+	execute 'doautocmd <nomodeline> User ' . a:name
 endfunction "}}}
 
 " main interfaces
