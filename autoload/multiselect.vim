@@ -184,7 +184,7 @@ function! s:Multiselector.keymap_check(mode) abort "{{{
 	let tail = getpos("'>")
 	let type = visualmode()
 	if a:mode ==# 'x' && type ==# "\<C-v>"
-		let extended = s:Buffer.is_extended()
+		let extended = s:Buffer.isextended()
 	else
 		let extended = s:FALSE
 	endif
@@ -265,7 +265,7 @@ function! s:Multiselector.keymap_multiselect(mode) abort "{{{
 	let itemlist = []
 	if a:mode ==# 'x'
 		let type = s:Buffer.str2type(visualmode())
-		let extended = type ==# 'block' ? s:Buffer.is_extended() : s:FALSE
+		let extended = type ==# 'block' ? s:Buffer.isextended() : s:FALSE
 		let region = s:Buffer.Region(getpos("'<"), getpos("'>"), type, extended)
 		let item_in_visual = self.itemnum({_, item -> item.isinside(region)})
 		if item_in_visual == 0

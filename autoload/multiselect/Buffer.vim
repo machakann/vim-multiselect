@@ -332,7 +332,7 @@ function! s:inbetween(pos, head, tail) abort  "{{{
 		\ && ((a:pos[1] > a:head[1]) || ((a:pos[1] == a:head[1]) && (a:pos[2] + a:pos[3] >= a:head[2] + a:head[3])))
 		\ && ((a:pos[1] < a:tail[1]) || ((a:pos[1] == a:tail[1]) && (a:pos[2] + a:pos[3] <= a:tail[2] + a:tail[3])))
 endfunction "}}}
-function! s:is_extended() abort "{{{
+function! s:isextended() abort "{{{
 	let view = winsaveview()
 	normal! gv
 	let extended = winsaveview().curswant == s:MAXCOL
@@ -378,7 +378,7 @@ let s:Buffer = {
 	\	'str2visualcmd': function('s:str2visualcmd'),
 	\	'inorderof': function('s:inorderof'),
 	\	'inbetween': function('s:inbetween'),
-	\	'is_extended': function('s:is_extended'),
+	\	'isextended': function('s:isextended'),
 	\	'searchpos': function('s:searchpos'),
 	\	'foldopen': function('s:foldopen'),
 	\	'patternofselection': function('s:patternofselection'),
