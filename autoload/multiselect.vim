@@ -1,5 +1,6 @@
 " multiselect.vim : A library for multiple selection
 " TODO: better error messaging
+let s:ClassSys = multiselect#classsys#_import()
 let s:Highlights = multiselect#highlight#_import()
 let s:Events = multiselect#event#_import()
 let s:TRUE = 1
@@ -269,7 +270,7 @@ function! s:Item(expr, ...) abort "{{{
 	let super = call('s:Region', [a:expr] + a:000)
 	let sub = deepcopy(s:Item)
 	try
-		let item = s:inherit(sub, super)
+		let item = s:ClassSys.inherit(sub, super)
 	catch /^Vim(echoerr):multiselect: Invalid argument for/
 		echoerr s:err_InvalidArgument('Item')
 	endtry
@@ -810,40 +811,6 @@ endfunction "}}}
 lockvar! s:Multiselector
 "}}}
 
-" class system
-function! s:inherit(sub, super) abort "{{{
-	call extend(a:sub, a:super, 'keep')
-	let a:sub.__SUPER__ = {}
-	for [key, l:Val] in items(a:super)
-		if type(l:Val) == v:t_func || key ==# '__SUPER__'
-			let a:sub.__SUPER__[key] = l:Val
-		endif
-	endfor
-	return a:sub
-endfunction "}}}
-function! s:super(sub, ...) abort "{{{
-	if !has_key(a:sub, '__SUPER__')
-		return {}
-	endif
-
-	let level = get(a:000, 0, 1)
-	let supermethods = a:sub
-	for _ in range(level)
-		let supermethods = supermethods.__SUPER__
-	endfor
-
-	let super = {}
-	for [key, l:Val] in items(supermethods)
-		if type(l:Val) == v:t_func
-			let super[key] = function('s:supercall', [a:sub, l:Val])
-		endif
-	endfor
-	return super
-endfunction "}}}
-function! s:supercall(sub, Funcref, ...) abort "{{{
-	return call(a:Funcref, a:000, a:sub)
-endfunction "}}}
-
 function! s:str2type(str) abort "{{{
 	if a:str ==# 'line' || a:str ==# 'V'
 		return 'line'
@@ -913,7 +880,6 @@ let s:Multiselect = {
 	\	'inbetween': function('s:inbetween'),
 	\	'str2type': function('s:str2type'),
 	\	'str2visualcmd': function('s:str2visualcmd'),
-	\	'super': function('s:super'),
 	\	}
 lockvar! s:Multiselect
 "}}}
