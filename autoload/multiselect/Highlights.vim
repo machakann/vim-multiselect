@@ -4,6 +4,7 @@ let s:FALSE = 0
 let s:ON = 1
 let s:OFF = 0
 let s:NULLPOS = [0, 0, 0, 0]
+let s:HIGROUP = 'MultiselectItem'
 
 function! multiselect#Highlights#_import() abort  "{{{
 	return s:HighlightModule
@@ -237,6 +238,7 @@ endfunction "}}}
 unlockvar! s:HighlightModule
 let s:HighlightModule = {
 	\	'__MODULE__': 'Highlight',
+	\	'DEFAULTHIGROUP': s:HIGROUP,
 	\	'ON': s:ON,
 	\	'OFF': s:OFF,
 	\	'Highlight': function('s:Highlight'),

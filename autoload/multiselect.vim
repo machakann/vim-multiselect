@@ -7,7 +7,6 @@ let s:TRUE = 1
 let s:FALSE = 0
 let s:MAXCOL = 2147483647
 let s:NULLPOS = [0, 0, 0, 0]
-let s:HIGROUP = 'MultiselectItem'
 
 function! multiselect#import() abort "{{{
 	return s:Multiselect
@@ -51,7 +50,7 @@ let s:Multiselector = {
 function! s:Multiselector(...) abort "{{{
 	let options = get(a:000, 0, {})
 	let multiselector = deepcopy(s:Multiselector)
-	let multiselector.higroup = get(options, 'higroup', s:HIGROUP)
+	let multiselector.higroup = get(options, 'higroup', s:Highlights.DEFAULTHIGROUP)
 	let multiselector.name = get(options, 'name', '')
 
 	let EVENTINIT = get(options, 'eventinit', '')
@@ -493,7 +492,7 @@ function! s:load() abort "{{{
 endfunction "}}}
 let s:Multiselect = {
 	\	'__MODULE__': 'Multiselect',
-	\	'DEFAULTHIGHLIGHTGROUP': s:HIGROUP,
+	\	'DEFAULTHIGROUP': s:Highlights.DEFAULTHIGROUP,
 	\	'load': function('s:load'),
 	\	'Multiselector': function('s:Multiselector'),
 	\	'Region': s:Buffer.Region,
@@ -509,7 +508,7 @@ lockvar! s:Multiselect
 "}}}
 let s:multiselector = s:Multiselect.Multiselector({
 	\	'name': 'multiselect',
-	\	'higroup': s:HIGROUP,
+	\	'higroup': s:Highlights.DEFAULTHIGROUP,
 	\	'eventinit': 'MultiselectInit',
 	\	'eventcheckpost': 'MultiselectCheckPost',
 	\	'eventuncheckpost': 'MultiselectUncheckPost',

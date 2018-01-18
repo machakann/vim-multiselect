@@ -336,8 +336,8 @@ List of contents~
   multiselect#import()		|multiselect#import()|
   Multiselect			|multiselect-module-Multiselect|
 
-  Multiselect.DEFAULTHIGHLIGHTGROUP
-			       |multiselect-Multiselect.DEFAULTHIGHLIGHTGROUP|
+  Multiselect.DEFAULTHIGROUP
+			       |multiselect-Multiselect.DEFAULTHIGROUP|
   Multiselect.load()		|multiselect-Multiselect.load()|
   Multiselect.Multiselector()	|multiselect-Multiselect.Multiselector()|
   Multiselect.Region()		|multiselect-Multiselect.Region()|
@@ -424,8 +424,8 @@ multiselect#import()			*multiselect#import()*
 		let s:Multiselect = multiselect#import()
 <
 
-			       *multiselect-Multiselect.DEFAULTHIGHLIGHTGROUP*
-Multiselect.DEFAULTHIGHLIGHTGROUP    [string]
+				*multiselect-Multiselect.DEFAULTHIGROUP*
+Multiselect.DEFAULTHIGROUP    [string]
 	This is the default name of highlight group for the selected region,
 	"MultiselectItem".
 
