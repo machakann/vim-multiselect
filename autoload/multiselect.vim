@@ -5,7 +5,6 @@ let s:Highlights = multiselect#Highlights#_import()
 let s:Events = multiselect#Events#_import()
 let s:TRUE = 1
 let s:FALSE = 0
-let s:MAXCOL = 2147483647
 let s:NULLPOS = [0, 0, 0, 0]
 
 function! multiselect#import() abort "{{{
