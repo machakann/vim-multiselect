@@ -63,7 +63,7 @@ function! s:Region(expr, ...) abort "{{{
 		endif
 	endif
 	if head == s:NULLPOS || tail == s:NULLPOS || s:inorderof(tail, head)
-		return {}
+		echoerr s:err_InvalidArgument('Region')
 	endif
 
 	let region = deepcopy(s:Region)
@@ -271,9 +271,6 @@ function! s:Item(expr, ...) abort "{{{
 	catch /^Vim(echoerr):multiselect: Invalid argument for/
 		echoerr s:err_InvalidArgument('Item')
 	endtry
-	if empty(item)
-		return item
-	endif
 
 	let item.id = s:itemid()
 	let item.bufnr = bufnr('%')
