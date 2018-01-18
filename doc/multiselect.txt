@@ -1,5 +1,5 @@
 *multiselect.txt*	A library for multiple selection
-						Last change:17-Jan-2018.
+						Last change:18-Jan-2018.
 
 Author  : machakann <https://github.com/machakann>
 License : MIT license
@@ -121,9 +121,10 @@ AUTOCMD EVENTS				*multiselect-events*
 
 MultiselectInit				*MultiselectInit*
 	This autocmd event is triggered when a `Multiselector` instance is
-	initialized. In an initialization, all the multiselect items are
-	removed to empty `Multiselect.itemlist` and `Multiselector.bufnr` is
-	updated. >
+	initialized.
+
+	In an initialization process, all the multiselect items are removed to
+	empty `Multiselector.itemlist` and `Multiselector.bufnr` is cleared. >
 		autocmd User MultiselectInit echom 'Initialized!'
 <
 	This is triggered when:
@@ -132,20 +133,26 @@ MultiselectInit				*MultiselectInit*
 	  - |TabLeave| event is triggered
 	  - |CmdwinLeave| event is triggered
 
+	|multiselect-class-Multiselector|
+	|multiselect-Multiselector.itemlist|
+	|multiselect-Multiselector.bufnr|
+
 
 MultiselectCheckPost			*MultiselectCheckPost*
 	This autocmd event is triggered when any multiselect item is added.
-	`Multiselect.lastevent()` method returns the selected items.
 >
 		autocmd User MultiselectCheckPost echom 'Check!'
 <
+	`Multiselector.lastevent()` method returns the selected items.
+	|multiselect-Multiselector.lastevent()|
 
 MultiselectUncheckPost			*MultiselectUncheckPost*
 	This autocmd event is triggered when any multiselect item is removed.
-	`Multiselect.lastevent()` method returns the unselected items.
 >
 		autocmd User MultiselectUncheckPost echom 'Uncheck!'
 <
+	`Multiselect.lastevent()` method returns the unselected items.
+	|multiselect-Multiselector.lastevent()|
 
 ==============================================================================
 HOW TO MAKE A PLUGIN			*multiselect-pluginmaking*
@@ -323,19 +330,107 @@ This file is in `macros/multiselect/demo/fooize.vim`.
 ==============================================================================
 API					*multiselect-api*
 
+List of contents~
+
+* Multiselect module~
+  multiselect#import()		|multiselect#import()|
+  Multiselect			|multiselect-module-Multiselect|
+
+  Multiselect.DEFAULTHIGHLIGHTGROUP
+			       |multiselect-Multiselect.DEFAULTHIGHLIGHTGROUP|
+  Multiselect.load()		|multiselect-Multiselect.load()|
+  Multiselect.Multiselector()	|multiselect-Multiselect.Multiselector()|
+  Multiselect.Region()		|multiselect-Multiselect.Region()|
+  Multiselect.Item()		|multiselect-Multiselect.Item()|
+
+* Multiselector class~
+  Multiselector			|multiselect-class-Multiselector|
+
+  - members
+  Multiselector.name
+  Multiselector.bufnr
+  Multiselector.higroup
+  Multiselector.itemlist	|multiselect-Multiselector.itemlist|
+
+  - main interfaces
+  Multiselector.check()		|multiselect-Multiselector.check()|
+  Multiselector.uncheck()	|multiselect-Multiselector.uncheck()|
+  Multiselector.uncheckall()	|multiselect-Multiselector.uncheckall()|
+  Multiselector.emit()		|multiselect-Multiselector.emit()|
+  Multiselector.emit_inside()	|multiselect-Multiselector.emit_inside()|
+  Multiselector.emit_touching()	|multiselect-Multiselector.emit_touching()|
+  Multiselector.filter()	|multiselect-Multiselector.filter()|
+  Multiselector.sort()		|multiselect-Multiselector.sort()|
+
+  - keymap interfaces
+  Multiselector.keymap_check()	|multiselect-Multiselector.keymap_check()|
+  Multiselector.keymap_checkpattern()
+			     |multiselect-Multiselector.keymap_checkpattern()|
+  Multiselector.keymap_uncheck()
+				|multiselect-Multiselector.keymap_uncheck()|
+  Multiselector.keymap_uncheckall()
+			       |multiselect-Multiselector.keymap_uncheckall()|
+
+  - low-level interfaces
+  Multiselector.extend()	|multiselect-Multiselector.extend()|
+  Multiselector.add()		|multiselect-Multiselector.add()|
+  Multiselector.remove()	|multiselect-Multiselector.remove()|
+  Multiselector.enumerate()	|multiselect-Multiselector.enumerate()|
+  Multiselector.itemnum()	|multiselect-Multiselector.itemnum()|
+  Multiselector.isempty()	|multiselect-Multiselector.isempty()|
+  Multiselector.lastevent()	|multiselect-Multiselector.lastevent()|
+  Multiselector.show()		|multiselect-Multiselector.show()|
+  Multiselector.quench()	|multiselect-Multiselector.quench()|
+
+  -event controls
+  Multiselector.event		|multiselect-Multiselector.event|
+
+* Region class~
+  Region			|multiselect-class-Region|
+  Region.head			|multiselect-Region.head|
+  Region.tail			|multiselect-Region.tail|
+  Region.type			|multiselect-Region.type|
+  Region.extended		|multiselect-Region.extended|
+  Region.select()		|multiselect-Region.select()|
+  Region.yank()			|multiselect-Region.yank()|
+  Region.includes()		|multiselect-Region.includes()|
+  Region.isinside()		|multiselect-Region.isinside()|
+  Region.touches()		|multiselect-Region.touches()|
+
+* Item class~
+  Item				|multiselect-class-Item|
+  Item.id			|multiselect-Item.id|
+  Item.bufnr			|multiselect-Item.bufnr|
+  Item.show()			|multiselect-Item.show()|
+  Item.quench()			|multiselect-Item.quench()|
+
+* Event class~
+  Event				|multiselect-class-Event|
+  Event.name			|multiselect-Event.name|
+  Event.set()			|multiselect-Event.set()|
+  Event.unset()			|multiselect-Event.unset()|
+  Event.trigger()		|multiselect-Event.trigger()|
+  Event.on()			|multiselect-Event.on()|
+  Event.off()			|multiselect-Event.off()|
+  Event.isactive()		|multiselect-Event.isactive()|
+  Event.skip()			|multiselect-Event.skip()|
+
+------------------------------------------------------------------------------
 Multiselect module~
 					*multiselect-module-Multiselect*
 
 multiselect#import()			*multiselect#import()*
 	This function returns a `Multiselect` module. >
 		let s:Multiselect = multiselect#import()
+<
 
-
+			       *multiselect-Multiselect.DEFAULTHIGHLIGHTGROUP*
 Multiselect.DEFAULTHIGHLIGHTGROUP    [string]
 	This is the default name of highlight group for the selected region,
 	"MultiselectItem".
 
 
+					*multiselect-Multiselect.load()*
 Multiselect.load()    [function]
 	This function returns the "global" `Multiselector` instance.
 	See |multiselect-class-Multiselector|. >
@@ -345,10 +440,12 @@ Multiselect.load()    [function]
 	keymappings |multiselect-keymappings|.
 
 
+				*multiselect-Multiselect.Multiselector()*
 Multiselect.Multiselector([{options}])    [function]
 	This is a constructor of `Multiselector` class. A plugin developer can
 	obtain a new `Multiselector` instance. Each `Multiselector` instance
 	is independent, it does not affect to others.
+	See |multiselect-class-Multiselector|.
 
 	{options} is a |Dictionary| containing optional arguments.
 	The following keys are available.
@@ -390,10 +487,11 @@ Multiselect.Multiselector([{options}])    [function]
 	The new "local" (private) instance cannot be controlled by the
 	provided mappings |multiselect-keymappings|, alternative keymappings
 	should be defined by developers themselves. `Multiselector` instance
-	has some functions for prototyped keymappings, see
+	has some basic functions for the keymappings, see
 	|multiselect-class-Multiselector|.
 
 
+					*multiselect-Multiselect.Region()*
 Multiselect.Region({head}[, {tail}[, {type}[, {extended}]]])    [function]
 Multiselect.Region({lnum})
 Multiselect.Region({startlnum}, {endlnum})
@@ -427,12 +525,15 @@ Multiselect.Region({startlnum}, {endlnum})
 	instance representing the range from {startlnum} to {endlnum}.
 
 
+					*multiselect-Multiselect.Item()*
 Multiselect.Item({head}[, {tail}[, {type}[, {extended}]]])   [function]
 Multiselect.Item({lnum})
 Multiselect.Item({startlnum}, {endlnum})
 	This is a constructor of `Item` class, it is a subclass of `Region`
-	class used for handling a selection region on a buffer. The arguments
-	are common with `Multiselect.Region()`.  >
+	class used for handling a selection region on a buffer.
+	See |multiselect-class-Item|.
+
+	The arguments are common with `Multiselect.Region()`.  >
 		let head = [0, 1, 1, 0]
 		let tail = [0, 3, 1, 0]
 		let item = s:Multiselect.Item(head, tail, 'block', 1)
@@ -443,20 +544,31 @@ Multiselect.Item({startlnum}, {endlnum})
 Multiselector class~
 					*multiselect-class-Multiselector*
 
+A developer can access to the "global" multiselector instance by
+`Multiselect.load()` function. |multiselect-Multiselect.load()|
+
+If you need a new (private) multiselector instance, the constructor of
+`Multiselector` class is available with `Multiselect` module.
+|multiselect-Multiselect.Multiselector()|
+
   - members
+					*multiselect-Multiselector.name*
 Multiselector.name    [string]
-	The identifier of the `Multiselector` instance. It does not affect its
+	The identifier of the `Multiselector` instance. It does not affect any
 	functionality.
 
 
+					*multiselect-Multiselector.bufnr*
 Multiselector.bufnr    [number]
 	The current buffer number belonging to.
 
 
+					*multiselect-Multiselector.higroup*
 Multiselector.higroup    [string]
 	The highlight group name applied for the selection regions.
 
 
+					*multiselect-Multiselector.itemlist*
 Multiselector.itemlist    [list]
 	The list of the current multiple selection items. The items are the
 	instances of `Item` class.
@@ -464,42 +576,54 @@ Multiselector.itemlist    [list]
 
 
   - main interfaces
+					*multiselect-Multiselector.check()*
 Multiselector.check({head}[, {tail}[, {type}[, {extended}]]])    [method]
 Multiselector.check({lnum})
 Multiselector.check({startlnum}, {endlnum})
 Multiselector.check({region})
 	This method produces an `Item` instance and add it into
 	`Multiselector.itemlist`. This method returns the added item.
+	|multiselect-Multiselector.itemlist|
+
 	The arguments are common with `Multiselect.Region()`, and additionally
-	an instance of `Region` class or its subclasses is also acceptable. >
+	an instance of `Region` class or its subclasses is also acceptable.
+	|multiselect-Multiselect.Region()| >
 		let head = [0, 1, 1, 0]
 		let tail = [0, 3, 3, 0]
 		let region = s:Multiselect.Region(head, tail, 'block', 1)
 		call s:multiselector.check(region)
 <
 
+					*multiselect-Multiselector.uncheck()*
 Multiselector.uncheck({head}[, {tail}[, {type}[, {extended}]]])    [method]
 Multiselector.uncheck({lnum})
 Multiselector.uncheck({startlnum}, {endlnum})
 Multiselector.uncheck({region})
 	This method removes items in `Multiselector.itemlist`, it removes the
 	items touching with the assigned region.
+	|multiselect-Multiselector.itemlist|
+
 	The arguments are common with `Multiselect.Region()`, and additionally
-	an instance of `Region` class or its subclasses is also acceptable. >
+	an instance of `Region` class or its subclasses is also acceptable.
+	|multiselect-Multiselect.Region()| >
 		let head = [0, 1, 1, 0]
 		let tail = [0, 3, 1, 0]
 		let region = s:Multiselect.Region(head, tail, 'line')
 		call s:multiselector.uncheck(region)
 <
 
+				*multiselect-Multiselector.uncheckall()*
 Multiselector.uncheckall()    [method]
-	This method removes all the items from `Multiselector.itemlist`. >
+	This method removes all the items from `Multiselector.itemlist`.
+	|multiselect-Multiselector.itemlist| >
 		call s:multiselector.uncheckall()
 <
 
+					*multiselect-Multiselector.emit()*
 Multiselector.emit([{Filterexpr}])    [method]
 	This method removes items from `Multiselector.itemlist` and returns a
-	list of these items.
+	list of these items. |multiselect-Multiselector.itemlist|
+
 	Without {Filterexpr}, it removes all the items. >
 		let itemlist = s:multiselector.emit()
 <
@@ -515,18 +639,19 @@ Multiselector.emit([{Filterexpr}])    [method]
 		let itemlist = s:multiselector.emit(
 			\ {_, item -> item.isinside(region)})
 <
-	  NOTE: You can use a convenient alias
-	        `Multiselector.emit_inside()` instead.
+	  NOTE: You can use an alias `Multiselector.emit_inside()` instead.
+	        |multiselect-Multiselector.emit_inside()|
 
 	  - Example2: emit items touching the cursor >
 		let curpos = getpos('.')
 		let itemlist = s:multiselector.emit(
 			\ {_, item -> item.touches(curpos)})
 <
-	  NOTE: You can use a convenient alias
-	        ``Multiselector.emit_touching()` ` instead.
+	  NOTE: You can use an alias `Multiselector.emit_touching()` instead.
+	        |multiselect-Multiselector.emit_touching()|
 
 
+				*multiselect-Multiselector.emit_inside()*
 Multiselector.emit_inside({head}[, {tail}[, {type}[, {extended}]]])   [method]
 Multiselector.emit_inside({lnum})
 Multiselector.emit_inside({startlnum}, {endlnum})
@@ -534,8 +659,11 @@ Multiselector.emit_inside({region})
 	This method removes items from `Multiselector.itemlist` and returns a
 	list of these items. This method removes only the items inside the
 	assigned region will be removed to return.
+	|multiselect-Multiselector.itemlist|
+
 	The arguments are common with `Multiselect.Region()`, and additionally
-	an instance of `Region` class or its subclasses is also acceptable. >
+	an instance of `Region` class or its subclasses is also acceptable.
+	|multiselect-Multiselect.Region()| >
 		let head = getpos("'<")
 		let tail = getpos("'>")
 		let type = visualmode()
@@ -543,8 +671,10 @@ Multiselector.emit_inside({region})
 		let itemlist = s:multiselector.emit_inside(region)
 <
 	This actually equals to the above Example1 in `Multiselector.emit()`.
+	|multiselect-Multiselector.emit()|
 
 
+				*multiselect-Multiselector.emit_touching()*
 Multiselector.emit_touching({head}[, {tail}[, {type}[, {extended}]]]) [method]
 Multiselector.emit_touching({lnum})
 Multiselector.emit_touching({startlnum}, {endlnum})
@@ -552,16 +682,23 @@ Multiselector.emit_touching({region})
 	This method removes items from `Multiselector.itemlist` and returns a
 	list of these items. This method removes only the items touching the
 	assigned region will be removed to return.
+	|multiselect-Multiselector.itemlist|
+
 	The arguments are common with `Multiselect.Region()`, and additionally
-	an instance of `Region` class or its subclasses is also acceptable. >
+	an instance of `Region` class or its subclasses is also acceptable.
+	|multiselect-Multiselect.Region()| >
 		let curpos = getpos('.')
 		let itemlist = s:multiselector.emit_touching(curpos)
 <
 	This actually equals to the above Example2 in `Multiselector.emit()`.
+	|multiselect-Multiselector.emit()|
 
 
+					*multiselect-Multiselector.filter()*
 Multiselector.filter({Filterexpr})    [method]
 	This method filters the items in  `Multiselector.itemlist`.
+	|multiselect-Multiselector.itemlist|
+
 	{Filterexpr} is an |Funcref|. {Filterexpr} is evaluated for each item
 	in `Multiselector.itemlist`, and when the result is FALSE, this
 	function removes the item. The resulted `Multiselector.itemlist` is
@@ -572,6 +709,10 @@ Multiselector.filter({Filterexpr})    [method]
 		call s:Multiselector.filter(
 			\ {_, item -> item.isinside(line5)})
 <
+	|multiselect-Multiselect.Region()|
+	|multiselect-class-Region| |multiselect-class-Item|
+	|multiselect-Region.isinside()|
+
 	  - Example2: filter items outside the visual selection >
 		let vhead = getpos("'<")
 		let vtail = getpos("'>")
@@ -580,7 +721,12 @@ Multiselector.filter({Filterexpr})    [method]
 		call s:Multiselector.filter(
 			\ {_, item -> item.isinside(visual)})
 <
+	|multiselect-Multiselect.Region()|
+	|multiselect-class-Region| |multiselect-class-Item|
+	|multiselect-Region.isinside()|
 
+
+					*multiselect-Multiselector.sort()*
 Multiselector.sort({itemlist})    [method]
 	This method sorts the items in {itemlist}. An item in {itemlist}
 	should be an instance of `Region` class or its subclasses. An item
@@ -603,6 +749,7 @@ Multiselector.sort({itemlist})    [method]
 <
 
   - keymap interfaces
+				*multiselect-Multiselector.keymap_check()*
 Multiselector.keymap_check({mode})    [method]
 	This method is employed to define a keymapping to communicate with the
 	`Multiselector` instance. This method registers a current visual
@@ -618,7 +765,11 @@ Multiselector.keymap_check({mode})    [method]
 		nnoremap <Plug>(check) :<C-u>call <SID>check('n')<CR>
 		xnoremap <Plug>(check) <Esc>:call <SID>check('x')<CR>
 <
+	|multiselect#import()|
+	|multiselect-Multiselect.Multiselector()|
 
+
+			     *multiselect-Multiselector.keymap_checkpattern()*
 Multiselector.keymap_checkpattern({mode}, {pat})    [method]
 	This method is employed to define a keymapping to communicate with the
 	`Multiselector` instance. This method registers the texts matching
@@ -635,7 +786,11 @@ Multiselector.keymap_checkpattern({mode}, {pat})    [method]
 		nnoremap <Plug>(checks) :<C-u>call <SID>checksearch('n')<CR>
 		xnoremap <Plug>(checks) <Esc>:call <SID>checksearch('x')<CR>
 <
+	|multiselect#import()|
+	|multiselect-Multiselect.Multiselector()|
 
+
+				*multiselect-Multiselector.keymap_uncheck()*
 Multiselector.keymap_uncheck({mode})    [method]
 	This method is employed to define a keymapping to communicate with the
 	`Multiselector` instance. This method deletes registered multiple
@@ -652,7 +807,11 @@ Multiselector.keymap_uncheck({mode})    [method]
 		nnoremap <Plug>(uncheck) :<C-u>call <SID>uncheck('n')<CR>
 		xnoremap <Plug>(uncheck) <Esc>:call <SID>uncheck('x')<CR>
 <
+	|multiselect#import()|
+	|multiselect-Multiselect.Multiselector()|
 
+
+			       *multiselect-Multiselector.keymap_uncheckall()*
 Multiselector.keymap_uncheckall()    [method]
 	This method is employed to define a keymapping to communicate with the
 	`Multiselector` instance. This method deletes all registered items. >
@@ -664,7 +823,11 @@ Multiselector.keymap_uncheckall()    [method]
 		nnoremap <Plug>(uncheckall) :<C-u>call <SID>uncheckall()<CR>
 		xnoremap <Plug>(uncheckall) <Esc>:call <SID>uncheckall()<CR>
 <
+	|multiselect#import()|
+	|multiselect-Multiselect.Multiselector()|
 
+
+				*multiselect-Multiselector.keymap_toggle()*
 Multiselector.keymap_toggle({mode})    [method]
 	This method is employed to define a keymapping to communicate with the
 	`Multiselector` instance. This keymapping toggles selections.
@@ -678,13 +841,18 @@ Multiselector.keymap_toggle({mode})    [method]
 		nnoremap <Plug>(toggle) :<C-u>call <SID>toggle('n')<CR>
 		xnoremap <Plug>(toggle) <Esc>:call <SID>toggle('x')<CR>
 <
+	|multiselect#import()|
+	|multiselect-Multiselect.Multiselector()|
+
 
   - low-level interfaces
+					*multiselect-Multiselector.extend()*
 Multiselector.extend({itemlist})    [method]
 	This method extends `Multiselector.itemlist` to append items in
 	{itemlist}. The items in {itemlist} should be instances of `Item`
 	class. The items are appended at the end of `Multiselector.itemlist`.
 	This method returns `Multiselector.itemlist`.
+	|multiselect-Multiselector.itemlist|
 >
 		call s:multiselector.uncheckall()
 		let item1 = s:Multiselect.Item([0, 1, 1, 0], [0, 1, 1, 0])
@@ -695,23 +863,33 @@ Multiselector.extend({itemlist})    [method]
 		call s:multiselector.extend(itemlist)
 		" s:multiselector.itemlist == [item1, item2, item3]
 <
+	|multiselect-Multiselector.uncheckall()|
+	|multiselect-Multiselect.Item()|
 
 
+					*multiselect-Multiselector.add()*
 Multiselector.add({item})    [method]
 	This method add an {item} to `Multiselector.itemlist`. The {item}
 	should be an instance of `Item` class. The item is appended at the
-	end of `Multiselector.itemlist`.
-	This method returns `Multiselector.itemlist`. >
+	end of `Multiselector.itemlist`. This method returns
+	`Multiselector.itemlist`. |multiselect-Multiselector.itemlist|
+ >
 		call s:multiselector.uncheckall()
 		let item = s:Multiselect.Item([0, 1, 1, 0], [0, 1, 1, 0])
 
 		call s:multiselector.add(item)
 		" s:multiselector.itemlist == [item]
 <
+	|multiselect-Multiselector.uncheckall()|
+	|multiselect-Multiselect.Item()|
 
+
+					*multiselect-Multiselector.remove()*
 Multiselector.remove({idx}[, {end}])    [method]
 Multiselector.remove({indexlist})
 	This method removes the item in  `Multiselector.itemlist`.
+	|multiselect-Multiselector.itemlist|
+
 	Without {end}: Remove the item at {idx} from `Multiselector.itemlist`
 	and return the item. >
 		call s:multiselector.uncheckall()
@@ -724,6 +902,10 @@ Multiselector.remove({indexlist})
 		let lastitem = s:multiselector.remove(-1)
 		" lastitem is item3
 <
+	|multiselect-Multiselector.uncheckall()|
+	|multiselect-Multiselect.Item()|
+	|multiselect-Multiselector.extend()|
+
 	With {end}: Remove items from {idx} to {end} and return a |List| of
 	these items. >
 		call s:multiselector.uncheckall()
@@ -747,11 +929,17 @@ Multiselector.remove({indexlist})
 		let removed = s:multiselector.remove([0, 2])
 		" removed is [item1, item3]
 <
+	|multiselect-Multiselector.uncheckall()|
+	|multiselect-Multiselect.Item()|
+	|multiselect-Multiselector.extend()|
 
+
+				*multiselect-Multiselector.enumerate()*
 Multiselector.enumerate([{Filterexpr}])    [method]
 	This method returns a list of lists of an index and an item.
 	Note that this method does not change uncheck the returned items,
-	not like `Multiselector.emit()`. >
+	not like `Multiselector.emit()`.
+	|multiselect-Multiselector.emit()| >
 		call s:multiselector.uncheckall()
 		let item1 = s:Multiselect.Item([0, 1, 1, 0], [0, 1, 1, 0])
 		let item2 = s:Multiselect.Item([0, 1, 2, 0], [0, 1, 2, 0])
@@ -771,9 +959,10 @@ Multiselector.enumerate([{Filterexpr}])    [method]
 		" list == [[0, item1], [2, item3]]
 <
 
+					*multiselect-Multiselector.itemnum()*
 Multiselector.itemnum([{Filterexpr}])    [method]
 	This method returns the number of items in  `Multiselector.itemlist`.
->
+	|multiselect-Multiselector.itemlist| >
 		call s:multiselector.uncheckall()
 		let item1 = s:Multiselect.Item([0, 1, 1, 0], [0, 1, 1, 0])
 		let item2 = s:Multiselect.Item([0, 1, 2, 0], [0, 1, 2, 0])
@@ -793,9 +982,10 @@ Multiselector.itemnum([{Filterexpr}])    [method]
 		call s:multiselector.itemnum({i, item -> item.head[1] == 1})
 <
 
+					*multiselect-Multiselector.isempty()*
 Multiselector.isempty()    [method]
 	This method returns a boolean; |TRUE| if `Multiselector.itemlist` is
-	empty, otherwise |FALSE|. >
+	empty, otherwise |FALSE|. |multiselect-Multiselector.itemlist| >
 		call s:multiselector.uncheckall()
 		let bool = s:multiselector.isempty()
 		" bool is 1
@@ -810,6 +1000,7 @@ Multiselector.isempty()    [method]
 		" bool is 0
 <
 
+				*multiselect-Multiselector.lastevent()*
 Multiselector.lastevent()    [method]
 	This method returns a history of the last event; check or uncheck. The
 	return value is a dictionary which have the following keys.
@@ -833,11 +1024,20 @@ Multiselector.lastevent()    [method]
 		" last.event ==# 'uncheck'
 		" last.itemlist == [item3]
 <
+	|multiselect-Multiselector.uncheckall()|
+	|multiselect-Multiselect.Item()|
+	|multiselect-Multiselector.extend()|
+	|multiselect-Multiselector.remove()|
 
+
+					*multiselect-Multiselector.show()*
 Multiselector.show()    [method]
 	This method highlight all the items in `Multiselector.itemlist`.
+	|multiselect-Multiselector.itemlist|
+
 	Unless you turned off the highlightings by `Multiselector.quench()`
 	intentionally, you don't need to use this method.
+	|multiselect-Multiselector.quench()|
 >
 		" hide multiple selection
 		call s:multiselector.quench()
@@ -846,10 +1046,12 @@ Multiselector.show()    [method]
 		call s:multiselector.show()
 <
 
+					*multiselect-Multiselector.quench()*
 Multiselector.quench()    [method]
 	This method turns off the highlightings of multiple selection items on
 	the current buffer. It does not unselect, just hide. You can use
 	`Multiselector.show()` to highlight them again.
+	|multiselect-Multiselector.show()|
 >
 		" hide multiple selection
 		call s:multiselector.quench()
@@ -859,8 +1061,10 @@ Multiselector.quench()    [method]
 <
 
   - event controls
+					*multiselect-Multiselector.event*
 Multiselector.event.BufLeave       [Event-instance]
 Multiselector.event.TabLeave       [Event-instance]
+Multiselector.event.CmdwinEnter    [Event-instance]
 Multiselector.event.CmdwinLeave    [Event-instance]
 Multiselector.event.TextChanged    [Event-instance]
 Multiselector.event.InsertEnter    [Event-instance]
@@ -872,21 +1076,34 @@ Multiselector.event.UncheckPost    [Event-instance]
 	Check |multiselect-class-Event|.
 
 	`Multiselector.event.BufLeave` controls the behavior on |BufLeave|
-	event.
+	event. An initialization process is executed in default; all the items
+	are unchecked and clear |multiselect-Multiselector.bufnr|.
 
 	`Multiselector.event.TabLeave` controls the behavior on |TabLeave|
-	event.
+	event. An initialization process is executed in default; all the items
+	are unchecked and clear |multiselect-Multiselector.bufnr|.
+
+	`Multiselector.event.CmdwinEnter` controls the behavior on
+	|CmdwinEnter| event. A pending process is executed in default; some
+	information of `Multiselector` instance is saved and switched to the
+	one for the |command-line-window| temporary.
 
 	`Multiselector.event.CmdwinLeave` controls the behavior on
-	|CmdwinLeave| event.
+	|CmdwinLeave| event. An initialization process and a resume process
+	are executed in default; the saved information in the previous pending
+	process is restored.
 
 	`Multiselector.event.TextChanged` controls the behavior on
-	|TextChanged| event.
+	|TextChanged| event. All the multiselect items in the current buffer
+	are unchecked in default.
 
 	`Multiselector.event.InsertEnter` controls the behavior on
-	|InsertEnter| event.
+	|InsertEnter| event. All the multiselect items in the current buffer
+	are unchecked in default.
 
 	`Multiselector.event.WinNew` controls the behavior on |WinNew| event.
+	If the new window displays the same buffer, the multiselect items on
+	the window are highlighted.
 
 	`Multiselector.event.Init` controls the behavior on
 	|MultiselectInit| event.
@@ -906,6 +1123,10 @@ Multiselector.event.UncheckPost    [Event-instance]
 Region class~
 					*multiselect-class-Region*
 
+The constructor of `Region` class is available with `Multiselect` module.
+|multiselect-Multiselect.Region()|
+
+					*multiselect-Region.head*
 Region.head    [list]
 	This is the head position of the `Region` on a buffer. It is an
 	four-item list and can be used for the argument of |setpos()|. >
@@ -917,6 +1138,7 @@ Region.head    [list]
 		" getpos('.') == head
 <
 
+					*multiselect-Region.tail*
 Region.tail    [list]
 	This is the tail position of the `Region` on a buffer. It is an
 	four-item list and can be used for the argument of |setpos()|. >
@@ -928,17 +1150,20 @@ Region.tail    [list]
 		" getpos('.') == tail
 <
 
+					*multiselect-Region.type*
 Region.type    [string]
 	This is a string standing for the type of the `Region`; "char", "line"
 	or "block".
 
 
+					*multiselect-Region.extended*
 Region.extended    [boolean]
 	This is a boolean which is effective only when the `Region` is
 	block-wise. It is |TRUE| if the end column of each line is extended to
 	the end of line, otherwise |FALSE| (0). See |v_$|.
 
 
+					*multiselect-Region.select()*
 Region.select()    [method]
 	This method selects the area of `Region`.
 	  - Example: Delete a Region >
@@ -960,23 +1185,28 @@ Region.select()    [method]
 	appropriately.
 
 
+					*multiselect-Region.yank()*
 Region.yank()    [method]
 	This method yank the text of the `Region` and return the string. >
 		call setline(1, 'foo bar baz')
 		let head = [0, 1, 5, 0]
 		let tail = [0, 1, 7, 0]
 		let region = s:Multiselect.Region(head, tail, 'char')
-		echo region.yank()  " bar
+		let text = region.yank()
+		echo text   " bar
 <
 
+					*multiselect-Region.includes()*
 Region.includes({head}[, {tail}[, {type}[, {extended}]]])    [method]
 Region.includes({lnum})
 Region.includes({startlnum}, {endlnum})
 Region.includes({region})
 	This method returns |TRUE| if the `Region` instance includes an
 	assigned region, otherwise |FALSE|.
+
 	The arguments are common with `Multiselect.Region()`, and additionally
-	an instance of `Region` class or its subclasses is also acceptable. >
+	an instance of `Region` class or its subclasses is also acceptable.
+	|multiselect-Multiselect.Region()| >
 		let head = [0, 1, 2, 0]
 		let tail = [0, 1, 4, 0]
 		let region1 = s:Multiselect.Region(head, tail, 'char')
@@ -1003,14 +1233,17 @@ Region.includes({region})
 		" bool is TRUE
 <
 
+					*multiselect-Region.isinside()*
 Region.isinside({head}[, {tail}[, {type}[, {extended}]]])    [method]
 Region.isinside({lnum})
 Region.isinside({startlnum}, {endlnum})
 Region.isinside({region})
 	This method returns |TRUE| if the `Region` instance is inside an
 	assigned region, otherwise |FALSE|.
+
 	The arguments are common with `Multiselect.Region()`, and additionally
-	an instance of `Region` class or its subclasses is also acceptable. >
+	an instance of `Region` class or its subclasses is also acceptable.
+	|multiselect-Multiselect.Region()| >
 		let head = [0, 1, 2, 0]
 		let tail = [0, 1, 4, 0]
 		let region1 = s:Multiselect.Region(head, tail, 'char')
@@ -1037,14 +1270,17 @@ Region.isinside({region})
 		" bool is TRUE
 <
 
+					*multiselect-Region.touches()*
 Region.touches({head}[, {tail}[, {type}[, {extended}]]])    [method]
 Region.touches({lnum})
 Region.touches({startlnum}, {endlnum})
 Region.touches({region})
 	This method returns |TRUE| if the `Region` instance is touching an
 	assigned region, otherwise |FALSE|.
+
 	The arguments are common with `Multiselect.Region()`, and additionally
-	an instance of `Region` class or its subclasses is also acceptable. >
+	an instance of `Region` class or its subclasses is also acceptable.
+	|multiselect-Multiselect.Region()| >
 		let head = [0, 1, 2, 0]
 		let tail = [0, 1, 4, 0]
 		let region1 = s:Multiselect.Region(head, tail, 'char')
@@ -1091,23 +1327,31 @@ Region.touches({region})
 
 
 ------------------------------------------------------------------------------
-					*multiselect-class-Item*
 Item class~
-	`Item` class is a subclass of `Region` class, thus `Item` class
-	inherites all the properties of `Region` class.
+					*multiselect-class-Item*
 
+The constructor of `Item` class is available with `Multiselect` module.
+|multiselect-Multiselect.Item()|
+
+`Item` class is a subclass of `Region` class, thus `Item` class inherites all
+the properties of `Region` class.
+
+					*multiselect-Item.id*
 Item.id    [number]
 	This is a number specific for each item.
 
 
+					*multiselect-Item.bufnr*
 Item.bufnr    [number]
 	This is a buffer number of the item belonging to.
 
 
+					*multiselect-Item.show()*
 Item.show()    [method]
 	This is a method to highlight the item region on a buffer.
 
 
+					*multiselect-Item.quench()*
 Item.quench()    [method]
 	This is a method to turn off the highlight of the item.
 
@@ -1117,10 +1361,12 @@ Item.quench()    [method]
 Event class~
 					*multiselect-class-Event*
 
+					*multiselect-Event.name*
 Event.name    [string]
 	The name of autocmd event responsible for.
 
 
+					*multiselect-Event.set()*
 Event.set({expr})    [method]
 	This method sets an autocmd task {expr}. {expr} should be a |String|
 	or a |Funcref|.
@@ -1140,6 +1386,7 @@ Event.set({expr})    [method]
 		call s:multiselector.event.BufLeave.unset(id)
 <
 
+					*multiselect-Event.unset()*
 Event.unset({eventid})    [method]
 	This method removes an autocmd task corresponding to {eventid}.
 	{eventid} is a return value of `Event.set()` method. >
@@ -1147,23 +1394,28 @@ Event.unset({eventid})    [method]
 		call s:multiselector.event.BufLeave.unset(id)
 <
 
+					*multiselect-Event.trigger()*
 Event.trigger()    [method]
 	This method execute all the registered autocmd task.
 
 
+					*multiselect-Event.on()*
 Event.on()    [method]
 	This method activate the `Event` tasks.
 
 
+					*multiselect-Event.off()*
 Event.off()    [method]
 	This method deactivate the `Event` tasks.
 
 
+					*multiselect-Event.isactive()*
 Event.isactive()    [method]
 	This method returns |TRUE| if the `Event` is activated, |FALSE| if it
 	is deactivated.
 
 
+					*multiselect-Event.skip()*
 Event.skip([{count}])    [method]
 	If this method is called, the following `Event` tasks are skipped
 	(not executed) {count} times. {count} is 1 if omitted.
