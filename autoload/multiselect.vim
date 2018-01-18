@@ -749,8 +749,7 @@ function! s:Multiselector.remove(...) abort "{{{
 	return removed
 endfunction "}}}
 function! s:Multiselector.enumerate(...) abort "{{{
-	let itemlist = copy(self.itemlist)
-	call map(itemlist, {index, item -> [index, item]})
+	let itemlist = s:enumerate(self.itemlist)
 	if a:0 == 0
 		return itemlist
 	endif
@@ -804,25 +803,29 @@ function! s:Multiselector.quench(...) abort "{{{
 	endfor
 endfunction "}}}
 function! s:percolate(iter, Filterexpr) abort "{{{
-	let i = len(a:iter) - 1
+	let t_iter = type(a:iter)
 	let filtered = []
-	if type(a:iter) == v:t_list
+	if t_iter == v:t_list
+		let i = len(a:iter) - 1
 		while i >= 0
 			if call(a:Filterexpr, [i, a:iter[i]])
 				call add(filtered, remove(a:iter, i))
 			endif
 			let i -= 1
 		endwhile
-	elseif type(a:iter) == v:t_dict
+		return filtered
+	elseif t_iter == v:t_dict
 		for [key, val] in items(a:iter)
 			if call(a:Filterexpr, [key, val])
 				call add(filtered, remove(a:iter, key))
 			endif
 		endfor
-	else
-		echoerr s:err_InvalidArgument('percolate')
+		return filtered
 	endif
-	return filtered
+	echoerr s:err_InvalidArgument('percolate')
+endfunction "}}}
+function! s:enumerate(list) abort "{{{
+	return map(copy(a:list), {i, item -> [i, item]})
 endfunction "}}}
 
 " private methods
@@ -991,6 +994,7 @@ let s:Multiselect = {
 	\	'Item': function('s:Item'),
 	\	'Multiselector': function('s:Multiselector'),
 	\	'percolate': function('s:percolate'),
+	\	'enumerate': function('s:enumerate'),
 	\	'inorderof': function('s:inorderof'),
 	\	'inbetween': function('s:inbetween'),
 	\	'str2type': function('s:str2type'),
