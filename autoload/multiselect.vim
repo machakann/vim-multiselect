@@ -631,7 +631,7 @@ function! s:Multiselector.keymap_undo() abort "{{{
 		call self.extend(last.itemlist)
 	endif
 endfunction "}}}
-function! s:Multiselector.keymap_select(mode) abort "{{{
+function! s:Multiselector.keymap_multiselect(mode) abort "{{{
 	let itemlist = []
 	if a:mode ==# 'x'
 		let type = s:str2type(visualmode())

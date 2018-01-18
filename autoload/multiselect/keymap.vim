@@ -25,8 +25,8 @@ endfunction "}}}
 function! multiselect#keymap#undo() abort "{{{
 	call s:multiselector.keymap_undo()
 endfunction "}}}
-function! multiselect#keymap#select(mode) abort "{{{
-	call s:multiselector.keymap_select(a:mode)
+function! multiselect#keymap#multiselect(mode) abort "{{{
+	call s:multiselector.keymap_multiselect(a:mode)
 endfunction "}}}
 
 " vim:set foldmethod=marker:
