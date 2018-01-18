@@ -86,10 +86,10 @@ The following keymappings are available with |:nmap| and |:xmap|.
 <Plug>(multiselect-undo)		*<Plug>(multiselect-undo)*
 	This keymapping rollback the last action.
 
-<Plug>(multiselect)		*<Plug>(multiselect)*
-	|Normal| mode: If the text under the cursor is selected, this
-	keymapping removes the item. Otherwise, this keymapping registers all
-	texts matching with the word under the cursor over the current buffer.
+<Plug>(multiselect)			*<Plug>(multiselect)*
+	|Normal| mode: This keymapping removes an item under the cursor if
+	the text is selected. Otherwise this keymapping selects the |word|
+	under the cursor over the current buffer.
 
 	|Visual| mode: If multiselect items are in the selection region, this
 	keymapping removes the items outside the selection. Otherwise, this
@@ -752,9 +752,12 @@ Multiselector.sort({itemlist})    [method]
 				*multiselect-Multiselector.keymap_check()*
 Multiselector.keymap_check({mode})    [method]
 	This method is employed to define a keymapping to communicate with the
-	`Multiselector` instance. This method registers a current visual
-	selection area as a multiple selection area. In normal mode, it
-	registers a |word| under the cursor.
+	`Multiselector` instance.
+
+	This method registers a current visual selection area as a multiple
+	selection area. In normal mode, it registers a |word| under the
+	cursor.
+
 	{mode} is a character representing the mode mapped; 'n' for |Normal|
 	mode, 'x' for |Visual| mode. >
 		let s:Multiselect = multiselect#import()
@@ -772,10 +775,13 @@ Multiselector.keymap_check({mode})    [method]
 			     *multiselect-Multiselector.keymap_checkpattern()*
 Multiselector.keymap_checkpattern({mode}, {pat})    [method]
 	This method is employed to define a keymapping to communicate with the
-	`Multiselector` instance. This method registers the texts matching
-	with the given regular expression pattern {pat}. In normal mode, it
-	registers all the matched texts in the current buffer. In visual mode,
-	it registers the matched pattern in the visual-selected range.
+	`Multiselector` instance.
+
+	This method registers the texts matching with the given regular
+	expression pattern {pat}. In normal mode, it registers all the matched
+	texts in the current buffer. In visual mode, it registers the matched
+	pattern in the visual-selected range.
+
 	{mode} is a character representing the mode mapped; 'n' for |Normal|
 	mode, 'x' for |Visual| mode. >
 		let s:Multiselect = multiselect#import()
@@ -793,10 +799,12 @@ Multiselector.keymap_checkpattern({mode}, {pat})    [method]
 				*multiselect-Multiselector.keymap_uncheck()*
 Multiselector.keymap_uncheck({mode})    [method]
 	This method is employed to define a keymapping to communicate with the
-	`Multiselector` instance. This method deletes registered multiple
-	selet items. In normal mode, it deletes an item under the cursor. In
-	visual mode, it deletes registered items in the current
-	visual-selected range.
+	`Multiselector` instance.
+
+	This method deletes registered multiple selet items. In normal mode,
+	it deletes an item under the cursor. In visual mode, it deletes
+	registered items in the current visual-selected range.
+
 	{mode} is a character representing the mode mapped; 'n' for |Normal|
 	mode, 'x' for |Visual| mode. >
 		let s:Multiselect = multiselect#import()
@@ -814,7 +822,9 @@ Multiselector.keymap_uncheck({mode})    [method]
 			       *multiselect-Multiselector.keymap_uncheckall()*
 Multiselector.keymap_uncheckall()    [method]
 	This method is employed to define a keymapping to communicate with the
-	`Multiselector` instance. This method deletes all registered items. >
+	`Multiselector` instance.
+
+	This method deletes all registered items. >
 		let s:Multiselect = multiselect#import()
 		let s:private_ms = s:Multiselect.Multiselector()
 		function! s:uncheckall() abort
@@ -827,10 +837,31 @@ Multiselector.keymap_uncheckall()    [method]
 	|multiselect-Multiselect.Multiselector()|
 
 
-				*multiselect-Multiselector.keymap_toggle()*
-Multiselector.keymap_toggle({mode})    [method]
+				*multiselect-Multiselector.keymap_undo()*
+Multiselector.keymap_undo()    [method]
 	This method is employed to define a keymapping to communicate with the
-	`Multiselector` instance. This keymapping toggles selections.
+	`Multiselector` instance.
+
+	This method undo the last check or uncheck action. This undo itself is
+	an action, thus the undo action will be undone by the subsequent call
+	of .keymap_undo(). That is, the undo depth is currently only one
+	times.
+
+
+			      *multiselect-Multiselector.keymap_multiselect()*
+Multiselector.keymap_multiselect({mode})    [method]
+	This method is employed to define a keymapping to communicate with the
+	`Multiselector` instance.
+
+	In |Normal| mode, this method removes an item under the cursor if the
+	text is selected. Otherwise this method selects the |word| under the
+	cursor over the current buffer.
+
+	In |Visual| mode, this method filters out the items outside the visual
+	selection. If no item is inside, this method selects it.
+	Especially with character-wise selection, this method selects the
+	selected word over the current buffer.
+
 	{mode} is a character representing the mode mapped; 'n' for |Normal|
 	mode, 'x' for |Visual| mode. >
 		let s:Multiselect = multiselect#import()
