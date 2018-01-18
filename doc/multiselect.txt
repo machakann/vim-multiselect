@@ -489,6 +489,12 @@ Multiselect.Multiselector([{options}])    [function]
 	should be defined by developers themselves. `Multiselector` instance
 	has some basic functions for the keymappings, see
 	|multiselect-class-Multiselector|.
+	|multiselect-Multiselector.keymap_check()|
+	|multiselect-Multiselector.keymap_checkpattern()|
+	|multiselect-Multiselector.keymap_uncheck()|
+	|multiselect-Multiselector.keymap_uncheckall()|
+	|multiselect-Multiselector.keymap_undo()|
+	|multiselect-Multiselector.keymap_multiselect()|
 
 
 					*multiselect-Multiselect.Region()*
