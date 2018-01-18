@@ -1,13 +1,30 @@
 " highlight object - managing highlight on a buffer
 let s:TRUE = 1
 let s:FALSE = 0
-let s:ON = s:TRUE
-let s:OFF = s:FALSE
+let s:ON = 1
+let s:OFF = 0
 let s:NULLPOS = [0, 0, 0, 0]
 
 function! multiselect#highlight#import() abort  "{{{
 	return s:HighlightModule
 endfunction "}}}
+" highlight group{{{
+function! s:default_highlight() abort
+	if hlexists('VisualNOS')
+		highlight default link MultiselectItem VisualNOS
+	elseif hlexists('Visual')
+		highlight default link MultiselectItem Visual
+	else
+		highlight default MultiselectItem cterm=reverse gui=reverse
+	endif
+endfunction
+call s:default_highlight()
+
+augroup multiselect-highlgiht
+	autocmd!
+	autocmd ColorScheme * call s:default_highlight()
+augroup END
+"}}}
 
 " id class{{{
 let s:Id = {

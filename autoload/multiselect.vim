@@ -311,8 +311,8 @@ function! s:itemid() abort "{{{
 endfunction "}}}
 "}}}
 " Event class{{{
-let s:ON = s:TRUE
-let s:OFF = s:FALSE
+let s:ON = 1
+let s:OFF = 0
 unlockvar! s:Event
 let s:eventid = 1
 let s:Event = {
@@ -936,7 +936,7 @@ function! s:str2type(str) abort "{{{
 	return 'char'
 endfunction "}}}
 function! s:str2visualcmd(str) abort "{{{
-	if a:str ==# 'line' || a:str[0] ==# 'V'
+	if a:str ==# 'line' || a:str ==# 'V'
 		return 'V'
 	elseif a:str ==# 'block' || a:str[0] ==# "\<C-v>"
 		return "\<C-v>"
@@ -956,23 +956,6 @@ function! s:err_InvalidArgument(name) abort "{{{
 	return printf('multiselect: Invalid argument for %s()', a:name)
 endfunction "}}}
 
-" highlight group{{{
-function! s:default_highlight() abort
-	if hlexists('VisualNOS')
-		highlight default link MultiselectItem VisualNOS
-	elseif hlexists('Visual')
-		highlight default link MultiselectItem Visual
-	else
-		highlight default MultiselectItem cterm=reverse gui=reverse
-	endif
-endfunction
-call s:default_highlight()
-
-augroup multiselect-highlgiht
-	autocmd!
-	autocmd ColorScheme * call s:default_highlight()
-augroup END
-"}}}
 " autocmd events{{{
 " initialize if leaving the current buffer
 " uncheck if the buffer is edited
