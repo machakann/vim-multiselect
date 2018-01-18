@@ -7,7 +7,7 @@ let s:NULLPOS = [0, 0, 0, 0]
 
 let s:inorderof = s:Multiselect.inorderof
 
-let g:multiselect#keymap#openfold = get(g:, 'multiselect#keymap#openfold', s:FALSE)
+let g:multiselect#keymap#openfold = !!get(g:, 'multiselect#keymap#openfold', s:FALSE)
 
 function! multiselect#keymap#check(mode) abort  "{{{
 	call s:multiselector.keymap_check(a:mode)
