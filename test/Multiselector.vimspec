@@ -1238,8 +1238,8 @@ Describe Multiselector
 		End
 	End
 
-	Context .keymap_checkpattern(mode, pat)
-		It registers texts matching with a regex pattern over a buffer in normal mode
+	Context .keymap_checkpattern('n', pat)
+		It registers texts matching with a regex pattern
 			let multiselector = MS.Multiselector(DEFAULTS)
 			Assert LengthOf(multiselector.itemlist, 0)
 			Assert Equals(multiselector._last.event, '')
@@ -1326,8 +1326,10 @@ Describe Multiselector
 			Assert Equals(multiselector._last.event, 'check')
 			Assert LengthOf(multiselector._last.itemlist, 3)
 		End
+	End
 
-		It registers texts matching with a regex pattern inside the selection in visual mode
+	Context .keymap_checkpattern('x', pat)
+		It registers texts matching with a regex pattern inside the selection
 			let multiselector = MS.Multiselector(DEFAULTS)
 			Assert LengthOf(multiselector.itemlist, 0)
 			Assert Equals(multiselector._last.event, '')
