@@ -262,14 +262,14 @@ let s:Item = {
 	\	'_highlight': {},
 	\	}
 function! s:Item(expr, ...) abort "{{{
-	let super = call('s:Region', [a:expr] + a:000)
 	let sub = deepcopy(s:Item)
 	try
-		let item = s:ClassSys.inherit(sub, super)
+		let super = call('s:Region', [a:expr] + a:000)
 	catch /^Vim(echoerr):multiselect: Invalid argument for/
 		echoerr s:Errors.InvalidArgument('Item')
 	endtry
 
+	let item = s:ClassSys.inherit(sub, super)
 	let item.id = s:itemid()
 	let item.bufnr = bufnr('%')
 	let item._highlight = s:Highlights.Highlight()
