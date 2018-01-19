@@ -1541,4 +1541,36 @@ Describe Multiselector
 		End
 	End
 End
+
+Describe utility functions
+	Before
+		let Percolate = g:MS.percolate
+	End
+
+	Context percolate({expr}, {Filterexpr})
+		It filters items in a list
+			let list = ['foo', 'bar', 'baz']
+			let filtered = Percolate(list, {i, item -> i == 1})
+			Assert Equals(list, ['foo', 'baz'])
+			Assert Equals(filtered, ['bar'])
+
+			let list = ['foo', 'bar', 'baz']
+			let filtered = Percolate(list, {i, item -> item[0] ==# 'b'})
+			Assert Equals(list, ['foo'])
+			Assert Equals(filtered, ['bar', 'baz'])
+		End
+
+		It filters items in a dictionary
+			let dict = {'foo': 1, 'bar': 2, 'baz': 3}
+			let filtered = Percolate(dict, {key, val -> key[0] ==# 'b'})
+			Assert Equals(dict, {'foo': 1})
+			Assert Equals(filtered, {'bar': 2, 'baz': 3})
+
+			let dict = {'foo': 1, 'bar': 2, 'baz': 3}
+			let filtered = Percolate(dict, {key, val -> val == 1})
+			Assert Equals(dict, {'bar': 2, 'baz': 3})
+			Assert Equals(filtered, {'foo': 1})
+		End
+	End
+End
 " vim:set noet ts=4 sw=4 sts=-1:

@@ -398,8 +398,8 @@ function! s:Multiselector.quench(...) abort "{{{
 endfunction "}}}
 function! s:percolate(iter, Filterexpr) abort "{{{
 	let t_iter = type(a:iter)
-	let filtered = []
 	if t_iter == v:t_list
+		let filtered = []
 		let i = len(a:iter) - 1
 		while i >= 0
 			if call(a:Filterexpr, [i, a:iter[i]])
@@ -407,11 +407,12 @@ function! s:percolate(iter, Filterexpr) abort "{{{
 			endif
 			let i -= 1
 		endwhile
-		return filtered
+		return reverse(filtered)
 	elseif t_iter == v:t_dict
+		let filtered = {}
 		for [key, val] in items(a:iter)
 			if call(a:Filterexpr, [key, val])
-				call add(filtered, remove(a:iter, key))
+				let filtered[key] = remove(a:iter, key)
 			endif
 		endfor
 		return filtered

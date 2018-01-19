@@ -551,6 +551,36 @@ Multiselect.Item({startlnum}, {endlnum})
 		let item = s:Multiselect.Item(head, tail, 'block', 1)
 <
 
+					*multiselect-Multiselect.percolate()*
+Multiselect.percolate({expr}, {Filterexpr})    [function]
+	This function removes items in |List| or |Dictionary| based on
+	{Filterexpr}, it is a |Funcref|, and return the removed items.
+
+	If {expr} is a |List|, this function evaluates {Filterexpr} for each
+	item in {expr} with two arguments, an item index and an item itself,
+	and removes the items that {Filterexpr} returns |TRUE|. The removed
+	items are returned as another |List|. >
+		let s:percolate = s:Multiselect.percolate
+		let list = ['foo', 'bar', 'baz']
+		let filtered = s:percolate(list, {i, item -> item[0] ==# 'b'})
+		" filtered == ['bar', 'baz']
+		" list == ['foo']
+<
+	If {expr} is a |Dictionary|, this function evaluates {Filterexpr} for
+	each value in {expr} with a key and a value, and removes the items
+	that {Filterexpr} returns |TRUE|. The removed items are returned as
+	another |Dictionary|. >
+		let dict = {'foo': 1, 'bar': 2, 'baz': 3}
+		let filtered = s:percolate(dict, {key, val -> key[0] ==# 'b'})
+		" dict == {'bar': 2, 'baz': 3}
+		" filtered == {'foo': 1}
+<
+	This function is similar to |filter()| but it filters the items that
+	{Filterexpr} is |FALSE| and returns the {expr} while this function
+	filters the items that {Filterexpr} is |TRUE| and returns the filtered
+	items.
+
+
 
 ------------------------------------------------------------------------------
 Multiselector class~
