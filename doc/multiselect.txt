@@ -639,10 +639,10 @@ Multiselector.emit([{Filterexpr}])    [method]
 	Without {Filterexpr}, it removes all the items. >
 		let itemlist = s:multiselector.emit()
 <
-	With {Filterexpr}, it removes the items that {Filterexpr} returns
-	|TRUE|. {Filterexpr} is a |Funcref| and it is evaluated for each
-	item in `Multiselector.itemlist` with two arguments, an item index and
-	an item itself.
+	With {Filterexpr}, this method evaluates {Filterexpr}, a |Funcref|,
+	for each item in `Multiselector.itemlist` with two arguments,
+	an item index and an item, and removes the items that {Filterexpr}
+	returns |TRUE|.
 	  - Example1: emit items inside the visual selection region >
 		let head = getpos("'<")
 		let tail = getpos("'>")
