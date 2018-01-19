@@ -306,6 +306,208 @@ function! s:itemid() abort "{{{
 	return s:itemid
 endfunction "}}}
 "}}}
+" Change class "{{{
+let s:Change = {
+	\	'__CLASS__': 'Change',
+	\	'_changelist': [],
+	\	}
+function! s:Change() abort "{{{
+	return deepcopy(s:Change)
+endfunction "}}}
+function! s:Change.beforedelete(expr, ...) abort "{{{
+	if a:0 == 0 && type(a:expr) == v:t_dict
+		let deletion = deepcopy(a:expr)
+	else
+		try
+			let deletion = call('s:Item', [a:expr] + a:000)
+		catch /^Vim(echoerr):multiselect: Invalid argument for/
+			echoerr s:Errors.InvalidArgument('Change.beforedelete')
+		endtry
+	endif
+
+	if deletion.type ==# 'char'
+		if deletion.tail[2] == col([deletion.tail[1], '$'])
+			let deletion.tail[1] += 1
+			let deletion.tail[2] = 0
+		endif
+		call add(self._changelist, ['delete', deletion])
+	elseif deletion.type ==# 'line'
+		let deletion.head[2] = 1
+		let deletion.tail[2] = col([deletion.tail[1], '$'])
+		call add(self._changelist, ['delete', deletion])
+	elseif deletion.type ==# 'block'
+		for item in s:splitblock(deletion)
+			call add(self._changelist, ['delete', item])
+		endfor
+	endif
+	return self
+endfunction "}}}
+function! s:Change.afterinsert(expr, ...) abort "{{{
+	if a:0 == 0 && type(a:expr) == v:t_dict
+		let insertion = deepcopy(a:expr)
+	else
+		try
+			let insertion = call('s:Item', [a:expr] + a:000)
+		catch /^Vim(echoerr):multiselect: Invalid argument for/
+			echoerr s:Errors.InvalidArgument('Change.afterinsert')
+		endtry
+	endif
+
+	if insertion.type ==# 'char'
+		call add(self._changelist, ['insert', insertion])
+	elseif insertion.type ==# 'line'
+		let insertion.head[2] = 1
+		let insertion.tail[2] = col([insertion.tail[1], '$'])
+		call add(self._changelist, ['insert', insertion])
+	elseif insertion.type ==# 'block'
+		for item in s:splitblock(insertion)
+			call add(self._changelist, ['insert', item])
+		endfor
+	endif
+	return self
+endfunction "}}}
+function! s:Change.apply(expr) abort "{{{
+	if type(a:expr) == v:t_list
+		let pos = a:expr
+		for [change, item] in self._changelist
+			if change ==# 'delete'
+				call s:pull(pos, item.head, item.tail, item.type ==# 'line')
+			elseif change ==# 'insert'
+				call s:push(pos, item.head, item.tail, item.type ==# 'line')
+			endif
+		endfor
+	elseif type(a:expr) == v:t_dict
+		let region = a:expr
+		call self.apply(region.head)
+		call self.apply(region.tail)
+	endif
+	return a:expr
+endfunction "}}}
+function! s:push(shiftedpos, head, tail, linewise) abort  "{{{
+	if a:shiftedpos == s:NULLPOS
+		return a:shiftedpos
+	endif
+
+	let shift = [0, 0, 0, 0]
+	if a:linewise[0] && a:shiftedpos[1] >= a:head[1]
+		" lnum
+		let shift[1] += 1
+	endif
+
+	if !s:inorderof(a:shiftedpos, a:head) || (a:linewise && a:shiftedpos[1] == a:head[1])
+		" lnum
+		let shift[1] += a:tail[1] - a:head[1]
+		" column
+		if !a:linewise && a:head[1] == a:shiftedpos[1]
+			if a:head[1] == a:tail[1]
+				let shift[2] += a:tail[2] - a:head[2]
+			else
+				if a:head[2] < a:shiftedpos[2]
+					let shift[2] += a:tail[2] - a:head[2]
+				else
+					let shift[2] += a:tail[2] - a:shiftedpos[2]
+				endif
+			endif
+		endif
+	endif
+	let a:shiftedpos[1:2] += shift[1:2]
+	return a:shiftedpos
+endfunction "}}}
+function! s:pull(shiftedpos, head, tail, linewise) abort "{{{
+	if a:shiftedpos == s:NULLPOS
+		return a:shiftedpos
+	endif
+
+	let shift = [0, 0, 0, 0]
+	" lnum
+	if a:shiftedpos[1] > a:head[1]
+		if a:shiftedpos[1] <= a:tail[1]
+			let shift[1] -= a:shiftedpos[1] - a:head[1]
+		else
+			let shift[1] -= a:tail[1] - a:head[1]
+		endif
+	endif
+	" column
+	if s:inorderof(a:head, a:shiftedpos) && a:shiftedpos[1] <= a:tail[1]
+		if s:inorderof(a:tail, a:shiftedpos)
+			if a:head[1] == a:shiftedpos[1]
+				let shift[2] -= a:tail[2] - a:head[2] + 1
+			else
+				let shift[2] -= a:tail[2]
+			endif
+		else
+			let shift[2] -= a:shiftedpos[2] - a:head[2]
+		endif
+	endif
+
+	let a:shiftedpos[1] += shift[1]
+
+	" the case for linewise action
+	if a:linewise
+		if a:shiftedpos[1] == a:head[1]
+			" col
+			let a:shiftedpos[2] = 0
+		endif
+		if a:shiftedpos[1] > a:head[1]
+			" lnum
+			let a:shiftedpos[1] -= 1
+		endif
+	endif
+
+	if a:shiftedpos[2] == 0
+		let a:shiftedpos[2] = 1
+	elseif a:shiftedpos[2] == s:MAXCOL
+		let a:shiftedpos[2] = col([a:shiftedpos[1], '$']) - 1
+		let a:shiftedpos[2] += shift[2]
+	else
+		let a:shiftedpos[2] += shift[2]
+	endif
+	return a:shiftedpos
+endfunction "}}}
+function! s:splitblock(item) abort "{{{
+	let view = winsaveview()
+	let dispheadcol = virtcol(a:item.head[1:2])
+	let disptailcol = virtcol(a:item.tail[1:2])
+	let virtualedit = &virtualedit
+	let &virtualedit = 'onemore'
+	try
+		let itemlist = []
+		if a:item.extended
+			for lnum in range(a:item.head[1], a:item.tail[1])
+				if empty(getline(lnum))
+					continue
+				endif
+				execute printf('normal! %sG%s|', lnum, dispheadcol)
+				let head = getpos('.')
+				normal! $
+				let tail = getpos('.')
+				if virtcol(tail[1:2]) < dispheadcol
+					continue
+				endif
+				let itemlist += [s:Item(head, tail, 'v')]
+			endfor
+		else
+			for lnum in range(a:item.head[1], a:item.tail[1])
+				if empty(getline(lnum))
+					continue
+				endif
+				execute printf('normal! %sG%s|', lnum, dispheadcol)
+				let head = getpos('.')
+				execute printf('normal! %s|', disptailcol)
+				let tail = getpos('.')
+				if virtcol(tail[1:2]) < dispheadcol
+					continue
+				endif
+				let itemlist += [s:Item(head, tail, 'v')]
+			endfor
+		endif
+	finally
+		let &virtualedit = virtualedit
+		call winrestview(view)
+	endtry
+	return itemlist
+endfunction "}}}
+"}}}
 
 function! s:str2type(str) abort "{{{
 	if a:str ==# 'line' || a:str ==# 'V'
@@ -374,6 +576,7 @@ let s:Buffer = {
 	\	'__MODULE__': 'Buffer',
 	\	'Region': function('s:Region'),
 	\	'Item': function('s:Item'),
+	\	'Change': function('s:Change'),
 	\	'str2type': function('s:str2type'),
 	\	'str2visualcmd': function('s:str2visualcmd'),
 	\	'inorderof': function('s:inorderof'),

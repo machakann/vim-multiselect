@@ -1,5 +1,5 @@
 *multiselect.txt*	A library for multiple selection
-						Last change:18-Jan-2018.
+						Last change:19-Jan-2018.
 
 Author  : machakann <https://github.com/machakann>
 License : MIT license
@@ -403,6 +403,12 @@ List of contents~
   Item.bufnr			|multiselect-Item.bufnr|
   Item.show()			|multiselect-Item.show()|
   Item.quench()			|multiselect-Item.quench()|
+
+* Change class~
+  Change			|multiselect-class-Change|
+  Change.beforedelete()		|multiselect-Change.beforedelete()|
+  Change.afterinsert()		|multiselect-Change.afterinsert()|
+  Change.apply()		|multiselect-Change.apply()|
 
 * Event class~
   Event				|multiselect-class-Event|
@@ -1392,6 +1398,85 @@ Item.show()    [method]
 Item.quench()    [method]
 	This is a method to turn off the highlight of the item.
 
+
+
+------------------------------------------------------------------------------
+Change class~
+					*multiselect-class-Change*
+
+This is an utility class to track a position after deletions and additions of
+texts into the current buffer. It might be useful when a plugin developer
+makes a new plugin to do well with |multiselect.vim|
+
+Note that the `Change` class instance cannot track the change by 'autoindent'
+option and its relatives ('smartindent', 'cindent', 'indentexpr') perfectly.
+
+					*multiselect-Change.beforedelete()*
+Change.beforedelete({head}[, {tail}[, {type}[, {extended}]]])    [method]
+Change.beforedelete({lnum})
+Change.beforedelete({startlnum}, {endlnum})
+Change.beforedelete({region})
+	This method should be called before deleting a text on the current
+	buffer to record the region. The deletion is regarded as an
+	|inclusive| delete action. Thus the last character pointed by {tail}
+	is included.
+
+	This method returns the `Change` instance itself.
+
+
+					*multiselect-Change.afterinsert()*
+Change.afterinsert({head}[, {tail}[, {type}[, {extended}]]])    [method]
+Change.afterinsert({lnum})
+Change.afterinsert({startlnum}, {endlnum})
+Change.afterinsert({region})
+	This method should be called after adding a text into the current
+	buffer to record the region. The {tail} should point the ending edge
+	of the insertion.
+
+	This method returns the `Change` instance itself.
+
+
+					*multiselect-Change.apply()*
+Change.apply(pos)    [method]
+Change.apply(region)
+	This method calculates the position after a series of editings.
+	This method updates the position (or a `Region` instance) in-place and
+	returns it.
+
+
+  - Usage
+The current buffer is like this. >
+	foo bar baz
+<
+For example, if you want to track the cursor position after an edit, you
+need to save the cursor position. >
+	let curpos = getpos('.')
+<
+The cursor is on the 'z' of "baz" and then you are going to delete "bar" and
+insert "x" instead.
+Before deleting, you need to call `Change.beforedelete()`. >
+	let bar = s:Multiselect.Region([0, 1, 5, 0], [0, 1, 7, 0], 'char')
+	let change = s:Multiselect.Change()
+	call change.beforedelete(bar)
+<
+Edit the buffer. >
+	call bar.select()
+	normal! cx
+<
+Now the buffer is: >
+	foo x baz
+<
+After inserting a text, you need to call `Change.afterinsert()`. >
+	call change.afterinsert(getpos("'["), getpos("']"), 'char')
+<
+After those processes, use `Change.apply()` to update the cursor position. >
+	call change.apply(curpos)
+	" curpos == [0, 1, 9, 0]
+<
+Finally you can move the cursor to the new position taking into account the
+last edit. >
+	call setpos('.', curpos)
+<
 
 
 ------------------------------------------------------------------------------

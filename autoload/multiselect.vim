@@ -496,6 +496,7 @@ let s:Multiselect = {
 	\	'Multiselector': function('s:Multiselector'),
 	\	'Region': s:Buffer.Region,
 	\	'Item': s:Buffer.Item,
+	\	'Change': s:Buffer.Change,
 	\	'percolate': function('s:percolate'),
 	\	'enumerate': function('s:enumerate'),
 	\	'str2type': s:Buffer.str2type,
