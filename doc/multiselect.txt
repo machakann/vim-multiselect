@@ -921,7 +921,7 @@ Multiselector.filter({Filterexpr})    [method]
 	  - Example1: filter items except in line 5 >
 		let pos = [0, 5, 1, 0]
 		let line5 = s:Multiselect.Region(pos, pos, 'V')
-		call s:Multiselector.filter(
+		call s:multiselector.filter(
 			\ {_, item -> item.isinside(line5)})
 <
 	|multiselect-Multiselect.Region()|
@@ -933,7 +933,7 @@ Multiselector.filter({Filterexpr})    [method]
 		let vtail = getpos("'>")
 		let vmode = visualmode()
 		let visual = s:Multiselect.Region(vhead, vtail, vmode)
-		call s:Multiselector.filter(
+		call s:multiselector.filter(
 			\ {_, item -> item.isinside(visual)})
 <
 	|multiselect-Multiselect.Region()|
@@ -960,12 +960,12 @@ Multiselector.sort({itemlist})    [function]
 	{itemlist}. If you want a {itemlist} to remain unmodified make a copy
 	first: >
 		let copied = copy(itemlist)
-		call s:Multiselector.sort(copied)
+		call s:multiselector.sort(copied)
 <
 	The return value of `Multiselector.enumerate()` is also acceptable as
 	a {itemlist}. >
-		let itemlist = s:Multiselector.enumerate()
-		call s:Multiselector.sort(itemlist)
+		let itemlist = s:multiselector.enumerate()
+		call s:multiselector.sort(itemlist)
 <
 
   - keymap interfaces
