@@ -201,7 +201,7 @@ function! s:Multiselector.keymap_checkpattern(mode, pat, ...) abort "{{{
 	endif
 
 	let options = get(a:000, 0, {})
-	let openfold = get(options, 'openfold', s:FALSE)
+	let openfold = !!get(options, 'openfold', s:FALSE)
 	let view = winsaveview()
 	if a:mode is# 'x'
 		let start = getpos("'<")
