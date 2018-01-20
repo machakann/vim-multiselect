@@ -33,7 +33,7 @@ INTRODUCTION				|multiselect-introduction|
 KEYMAPPINGS				|multiselect-keymappings|
 HIGHLIGHT GROUPS			|multiselect-higroups|
 AUTOCMD EVENTS				|multiselect-events|
-HOW TO MAKE A PLUGIN			|multiselect-pluginmaking|
+HOW TO MAKE A PLUGIN			|multiselect-howtomakeaplugin|
 API					|multiselect-api|
 
 ==============================================================================
@@ -157,13 +157,13 @@ MultiselectUncheckPost			*MultiselectUncheckPost*
 
 
 ==============================================================================
-HOW TO MAKE A PLUGIN			*multiselect-pluginmaking*
+HOW TO MAKE A PLUGIN			*multiselect-howtomakeaplugin*
 
 Anyone can make a new plugin utilizing this plugin. Here, let's make a plugin
 which edit multiple selected texts converting to "foo", to learn how to use
-the available API. This is, of course, not a useful plugin, but taking a
-glance of the following processes may be helpful to start communicating with
-the APIs. See the next |multiselect-api| section also.
+the available API. This is, of course, nothing useful, but taking a glance of
+the following processes may be helpful to start communicating with the APIs.
+See the next |multiselect-api| section also.
 
 Step 0~
 Read |write-plugin| and prepare a plugin file: >
@@ -226,29 +226,14 @@ Simply use `Multiselector.sort()` method to avoid the positional confusions.
 	  endfor
 	endfunction
 <
-The auto-indent may also cause the positional confusions. If in case your
-plugin inserts texts into a buffer, it would be safer to turn off 'autoindent'
-families temporary.
+In case you want to insert a text into a buffer, the auto-indent may also
+cause the positional confusions. Unfortunately, this is difficult to avoid but
+it is possible to minimize the risk to set 'indentkeys' (or 'cinkeys') as its
+default. |multiselect-Multiselect.shiftenv()| and
+|multiselect-Multiselect.restoreenv()| are useful to do this.
 >
-	function! s:stopautoindent() abort
-	  let indentopt = {}
-	  let indentopt.autoindent = &l:autoindent
-	  let indentopt.smartindent = &l:smartindent
-	  let indentopt.cindent = &l:cindent
-	  let indentopt.indentexpr = &l:indentexpr
-	  let &l:autoindent = 0
-	  let &l:smartindent = 0
-	  let &l:cindent = 0
-	  let &l:indentexpr = ''
-	  return indentopt
-	endfunction
-
-	function! s:restoreautoindent(indentopt) abort
-	  let &l:autoindent = a:indentopt.autoindent
-	  let &l:smartindent = a:indentopt.smartindent
-	  let &l:cindent = a:indentopt.cindent
-	  let &l:indentexpr = a:indentopt.indentexpr
-	endfunction
+	let s:shiftenv = s:Multiselect.shiftenv
+	let s:restoreenv = s:Multiselect.restoreenv
 
 	function! Fooize() abort
 	  let itemlist = s:multiselector.emit()
@@ -257,14 +242,14 @@ families temporary.
 	  endif
 
 	  call s:multiselector.sort(itemlist)
-	  let indentopt = s:stopautoindent()
+	  let env = s:shiftenv()
 	  try
 	    for item in reverse(itemlist)
 	      call item.select()
 	      normal! cfoo
 	    endfor
 	  finally
-	    call s:restoreautoindent(indentopt)
+	    call s:restoreenv(env)
 	  endtry
 	endfunction
 <
@@ -287,26 +272,8 @@ The resulted plugin is:
 
 	let s:Multiselect = multiselect#import()
 	let s:multiselector = s:Multiselect.load()
-
-	function! s:stopautoindent() abort
-	  let indentopt = {}
-	  let indentopt.autoindent = &l:autoindent
-	  let indentopt.smartindent = &l:smartindent
-	  let indentopt.cindent = &l:cindent
-	  let indentopt.indentexpr = &l:indentexpr
-	  let &l:autoindent = 0
-	  let &l:smartindent = 0
-	  let &l:cindent = 0
-	  let &l:indentexpr = ''
-	  return indentopt
-	endfunction
-
-	function! s:restoreautoindent(indentopt) abort
-	  let &l:autoindent = a:indentopt.autoindent
-	  let &l:smartindent = a:indentopt.smartindent
-	  let &l:cindent = a:indentopt.cindent
-	  let &l:indentexpr = a:indentopt.indentexpr
-	endfunction
+	let s:shiftenv = s:Multiselect.shiftenv
+	let s:restoreenv = s:Multiselect.restoreenv
 
 	function! Fooize() abort
 	  let itemlist = s:multiselector.emit()
@@ -315,14 +282,14 @@ The resulted plugin is:
 	  endif
 
 	  call s:multiselector.sort(itemlist)
-	  let indentopt = s:stopautoindent()
+	  let env = s:shiftenv()
 	  try
 	    for item in reverse(itemlist)
 	      call item.select()
 	      normal! cfoo
 	    endfor
 	  finally
-	    call s:restoreautoindent(indentopt)
+	    call s:restoreenv(env)
 	  endtry
 	endfunction
 
@@ -576,6 +543,34 @@ Multiselect.Item({startlnum}, {endlnum})
 <
 
   - utility functions
+					*multiselect-Multiselect.shiftenv()*
+Multiselect.shiftenv({expr}, {Filterexpr})    [function]
+	This function sets 'indentkeys' or 'cinkeys' as its default and
+	returns a |Dictionary| including the original setting. It will be
+	passed to |multiselect-Multiselect.restoreenv()| to restore it.
+	See |multiselect-howtomakeaplugin|.
+>
+		let s:shiftenv = s:Multiselect.shiftenv
+		let s:restoreenv = s:Multiselect.restoreenv
+		let indentopt = s:shiftenv()
+		" do something
+		call s:restoreenv(indentopt)
+<
+
+					*multiselect-Multiselect.restoreenv()*
+Multiselect.restoreenv({expr}, {Filterexpr})    [function]
+	This function accepts the return value of
+	|multiselect-Multiselect.shiftenv()|, and restore the original
+	indent-option settings.
+	See |multiselect-howtomakeaplugin|.
+>
+		let s:shiftenv = s:Multiselect.shiftenv
+		let s:restoreenv = s:Multiselect.restoreenv
+		let indentopt = s:shiftenv()
+		" do something
+		call s:restoreenv(indentopt)
+<
+
 					*multiselect-Multiselect.percolate()*
 Multiselect.percolate({expr}, {Filterexpr})    [function]
 	This function removes items in |List| or |Dictionary| based on

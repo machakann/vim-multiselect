@@ -487,6 +487,28 @@ function! s:Multiselector._uncheckpost(removed) abort "{{{
 endfunction "}}}
 lockvar! s:Multiselector
 "}}}
+function! s:shiftenv() abort "{{{
+	let env = {}
+	if !empty(&l:indentexpr)
+		let env.indentkeys = &l:indentkeys
+		setlocal indentkeys&
+	elseif &l:cindent is s:TRUE
+		let env.cinkeys = &l:cinkeys
+		setlocal cinkeys&
+	endif
+	return env
+endfunction "}}}
+function! s:restoreenv(env) abort "{{{
+	if empty(a:env)
+		return
+	endif
+
+	if has_key(a:env, 'indentkeys')
+		let &l:indentkeys = a:env.indentkeys
+	elseif has_key(a:env, 'cinkeys')
+		let &l:cinkeys = a:env.cinkeys
+	endif
+endfunction "}}}
 
 " Multiselect module{{{
 unlockvar! s:Multiselect
@@ -501,6 +523,8 @@ let s:Multiselect = {
 	\	'Region': s:Buffer.Region,
 	\	'Item': s:Buffer.Item,
 	\	'Change': s:Buffer.Change,
+	\	'shiftenv': function('s:shiftenv'),
+	\	'restoreenv': function('s:restoreenv'),
 	\	'percolate': function('s:percolate'),
 	\	'enumerate': function('s:enumerate'),
 	\	'str2type': s:Buffer.str2type,

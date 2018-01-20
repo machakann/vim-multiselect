@@ -1533,6 +1533,15 @@ Describe utility functions
 		let Inorderof = g:MS.inorderof
 		let Inbetween = g:MS.inbetween
 		let Isextended = g:MS.isextended
+		let Shiftenv = g:MS.shiftenv
+		let Restoreenv = g:MS.restoreenv
+	End
+
+	Before all
+		setlocal cindent&
+		setlocal cinkeys&
+		setlocal indentexpr&
+		setlocal indentkeys&
 	End
 
 	Context percolate({expr}, {Filterexpr})
@@ -1650,5 +1659,46 @@ Describe utility functions
 	" 		Assert False(Isextended())
 	" 	End
 	" End
+
+	Context shiftenv()/restoreenv()
+		It swich indent options and restore it.
+			setlocal cindent
+			setlocal cinkeys&
+			let defaultindentkeys = &l:cinkeys
+			setlocal cinkeys+=;
+
+			Assert Equals(&l:cinkeys, defaultindentkeys . ',;')
+
+			let indentopt = Shiftenv()
+
+			Assert Equals(&l:cinkeys, defaultindentkeys)
+
+			call Restoreenv(indentopt)
+
+			Assert Equals(&l:cinkeys, defaultindentkeys . ',;')
+
+
+
+			setlocal indentexpr=SomethigIndentFuncName
+			setlocal indentkeys&
+			let defaultindentkeys = &l:indentkeys
+			setlocal indentkeys+=;
+
+			Assert Equals(&l:indentkeys, defaultindentkeys . ',;')
+
+			let indentopt = Shiftenv()
+
+			Assert Equals(&l:indentkeys, defaultindentkeys)
+
+			call Restoreenv(indentopt)
+
+			Assert Equals(&l:indentkeys, defaultindentkeys . ',;')
+
+			setlocal cindent&
+			setlocal cinkeys&
+			setlocal indentexpr&
+			setlocal indentkeys&
+		End
+	End
 End
 " vim:set noet ts=4 sw=4 sts=-1:
