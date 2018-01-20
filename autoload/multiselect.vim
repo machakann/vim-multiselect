@@ -223,7 +223,7 @@ function! s:Multiselector.keymap_checkpattern(mode, pat, ...) abort "{{{
 		let newitem = s:Buffer.Item(head, tail, 'v')
 		call add(itemlist, newitem)
 		if openfold is s:TRUE
-			call s:Buffer.foldopen(newitem.head[1])
+			call s:Buffer.openfold(newitem.head[1])
 		endif
 		let head = s:Buffer.searchpos(a:pat, 'W')
 	endwhile
@@ -316,7 +316,7 @@ function! s:Multiselector.keymap_broadcast(cmd, ...) abort "{{{
 		let item = s:try(lnum, column, command)
 		if !empty(item)
 			if openfold
-				call s:Buffer.foldopen(lnum)
+				call s:Buffer.openfold(lnum)
 			endif
 			call add(itemlist, item)
 		endif

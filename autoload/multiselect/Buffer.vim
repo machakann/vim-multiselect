@@ -560,7 +560,7 @@ endfunction
 function! s:searchpos(pat, ...) abort "{{{
 	return [0] + call('searchpos', [a:pat] + a:000) + [0]
 endfunction "}}}
-function! s:foldopen(lnum) abort "{{{
+function! s:openfold(lnum) abort "{{{
 	if foldclosed(a:lnum) == -1
 		return
 	endif
@@ -597,7 +597,7 @@ let s:Buffer = {
 	\	'inbetween': function('s:inbetween'),
 	\	'isextended': function('s:isextended'),
 	\	'searchpos': function('s:searchpos'),
-	\	'foldopen': function('s:foldopen'),
+	\	'openfold': function('s:openfold'),
 	\	'patternofselection': function('s:patternofselection'),
 	\	}
 "}}}
