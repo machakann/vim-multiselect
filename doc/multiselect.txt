@@ -146,6 +146,7 @@ MultiselectCheckPost			*MultiselectCheckPost*
 	`Multiselector.lastevent()` method returns the selected items.
 	|multiselect-Multiselector.lastevent()|
 
+
 MultiselectUncheckPost			*MultiselectUncheckPost*
 	This autocmd event is triggered when any multiselect item is removed.
 >
@@ -153,6 +154,7 @@ MultiselectUncheckPost			*MultiselectUncheckPost*
 <
 	`Multiselect.lastevent()` method returns the unselected items.
 	|multiselect-Multiselector.lastevent()|
+
 
 ==============================================================================
 HOW TO MAKE A PLUGIN			*multiselect-pluginmaking*
@@ -169,6 +171,8 @@ Read |write-plugin| and prepare a plugin file: >
 <
 Although we will write everything this tiny plugin into it, if you make your
 new plugin, it would be better to think the use of |autoload| scripts.
+
+
 
 Step 1~
 The first thing to do is to load the `Multiselect` module and to obtain an
@@ -423,6 +427,14 @@ List of contents~
 ------------------------------------------------------------------------------
 Multiselect module~
 					*multiselect-module-Multiselect*
+
+This module holds a function to get "global" multiselector instance,
+|multiselect-Multiselect.load()|.
+
+Additionally, class constructors and utility functions are included. These
+might be unnecessary but might be helpful to develop a plugin.
+
+
 
 multiselect#import()			*multiselect#import()*
 	This function returns a `Multiselect` module. >
