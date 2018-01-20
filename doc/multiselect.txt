@@ -710,6 +710,23 @@ Multiselect.inbetween({pos}, {head}, {tail})    [function]
 		" bool is FALSE
 <
 
+					*multiselect-Multiselect.isextended()*
+Multiselect.isextended()    [function]
+	This function returns |TRUE| if the last visual selection is
+	block-wise and |v_$| is used. >
+		let s:isextended = s:Multiselect.isextended
+
+		execute "normal! \<C-v>2j$"
+		execute "normal! \<Esc>"
+		let bool = s:isextended()
+		" bool is TRUE
+
+		execute "normal! \<C-v>2j"
+		execute "normal! \<Esc>"
+		let bool = s:isextended()
+		" bool is FALSE
+<
+
 
 ------------------------------------------------------------------------------
 Multiselector class~

@@ -1550,6 +1550,7 @@ Describe utility functions
 		let Str2visualcmd = g:MS.str2visualcmd
 		let Inorderof = g:MS.inorderof
 		let Inbetween = g:MS.inbetween
+		let Isextended = g:MS.isextended
 	End
 
 	Context percolate({expr}, {Filterexpr})
@@ -1655,5 +1656,17 @@ Describe utility functions
 			Assert False(Inbetween([0, 2, 3, 0], [0, 3, 2, 0], [0, 3, 4, 0]))
 		End
 	End
+
+	" Context isextended()
+	" 	It This function returns TRUE if extended-blockwise visual selected
+	" 		execute "normal! \<C-v>2j$"
+	" 		execute "normal! \<Esc>"
+	" 		Assert True(Isextended())
+
+	" 		execute "normal! \<C-v>2j"
+	" 		execute "normal! \<Esc>"
+	" 		Assert False(Isextended())
+	" 	End
+	" End
 End
 " vim:set noet ts=4 sw=4 sts=-1:

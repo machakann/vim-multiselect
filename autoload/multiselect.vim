@@ -505,6 +505,7 @@ let s:Multiselect = {
 	\	'str2visualcmd': s:Buffer.str2visualcmd,
 	\	'inorderof': s:Buffer.inorderof,
 	\	'inbetween': s:Buffer.inbetween,
+	\	'isextended': s:Buffer.isextended,
 	\	}
 lockvar! s:Multiselect
 "}}}
