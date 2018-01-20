@@ -2,8 +2,16 @@ function! multiselect#Errors#_import() abort "{{{
 	return s:Errors
 endfunction "}}}
 
-function! s:InvalidArgument(name) abort "{{{
-	return printf('multiselect: Invalid argument for %s()', a:name)
+function! s:InvalidArgument(name, args) abort "{{{
+	let argstr = join(map(copy(a:args), 'string(v:val)'), ', ')
+	let argstr = s:trimLR(argstr)
+	return printf('multiselect: Invalid argument: %s(%s)', a:name, argstr)
+endfunction "}}}
+function! s:trimLR(str) abort "{{{
+	if strlen(a:str) <= 30
+		return a:str
+	endif
+	return a:str[:19] . ' ... ' a:str[-5:-1]
 endfunction "}}}
 
 " Errors module {{{

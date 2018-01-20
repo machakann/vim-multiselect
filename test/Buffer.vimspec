@@ -100,10 +100,10 @@ Describe Region
 		End
 
 		It throws an exception with inappropriate arguments
-			Throws /^Vim(echoerr):multiselect: Invalid argument for Region()/ Region({})
-			Throws /^Vim(echoerr):multiselect: Invalid argument for Region()/ Region('')
-			Throws /^Vim(echoerr):multiselect: Invalid argument for Region()/ Region(1, [0, 1, 1, 0])
-			Throws /^Vim(echoerr):multiselect: Invalid argument for Region()/ Region([0, 1, 1, 0], 1)
+			Throws /^Vim(echoerr):multiselect: Invalid argument: Region({})/ Region({})
+			Throws /^Vim(echoerr):multiselect: Invalid argument: Region('')/ Region('')
+			Throws /^Vim(echoerr):multiselect: Invalid argument: Region(1, \[0, 1, 1, 0\])/ Region(1, [0, 1, 1, 0])
+			Throws /^Vim(echoerr):multiselect: Invalid argument: Region(\[0, 1, 1, 0\], 1)/ Region([0, 1, 1, 0], 1)
 		End
 	End
 
@@ -255,9 +255,9 @@ Describe Region
 			let head = [0, 1, 1, 0]
 			let tail = [0, 1, 1, 0]
 			let region = Region(head, tail, 'v')
-			Throws /^Vim(echoerr):multiselect: Invalid argument for Region.includes()/ region.includes('')
-			Throws /^Vim(echoerr):multiselect: Invalid argument for Region.includes()/ region.includes(1, [0, 1, 1, 0])
-			Throws /^Vim(echoerr):multiselect: Invalid argument for Region.includes()/ region.includes([0, 1, 1, 0], 1)
+			Throws /^Vim(echoerr):multiselect: Invalid argument: Region.includes('')/ region.includes('')
+			Throws /^Vim(echoerr):multiselect: Invalid argument: Region.includes(1, \[0, 1, 1, 0\])/ region.includes(1, [0, 1, 1, 0])
+			Throws /^Vim(echoerr):multiselect: Invalid argument: Region.includes(\[0, 1, 1, 0\], 1)/ region.includes([0, 1, 1, 0], 1)
 		End
 	End
 
@@ -581,9 +581,9 @@ Describe Region
 			let head = [0, 1, 1, 0]
 			let tail = [0, 1, 1, 0]
 			let region = Region(head, tail, 'v')
-			Throws /^Vim(echoerr):multiselect: Invalid argument for Region.isinside()/ region.isinside('')
-			Throws /^Vim(echoerr):multiselect: Invalid argument for Region.isinside()/ region.isinside(1, [0, 1, 1, 0])
-			Throws /^Vim(echoerr):multiselect: Invalid argument for Region.isinside()/ region.isinside([0, 1, 1, 0], 1)
+			Throws /^Vim(echoerr):multiselect: Invalid argument: Region.isinside('')/ region.isinside('')
+			Throws /^Vim(echoerr):multiselect: Invalid argument: Region.isinside(1, \[0, 1, 1, 0\])/ region.isinside(1, [0, 1, 1, 0])
+			Throws /^Vim(echoerr):multiselect: Invalid argument: Region.isinside(\[0, 1, 1, 0\], 1)/ region.isinside([0, 1, 1, 0], 1)
 		End
 	End
 
@@ -893,9 +893,9 @@ Describe Region
 			let head = [0, 1, 1, 0]
 			let tail = [0, 1, 1, 0]
 			let region = Region(head, tail, 'v')
-			Throws /^Vim(echoerr):multiselect: Invalid argument for Region.touches()/ region.touches('')
-			Throws /^Vim(echoerr):multiselect: Invalid argument for Region.touches()/ region.touches(1, [0, 1, 1, 0])
-			Throws /^Vim(echoerr):multiselect: Invalid argument for Region.touches()/ region.touches([0, 1, 1, 0], 1)
+			Throws /^Vim(echoerr):multiselect: Invalid argument: Region.touches('')/ region.touches('')
+			Throws /^Vim(echoerr):multiselect: Invalid argument: Region.touches(1, \[0, 1, 1, 0\])/ region.touches(1, [0, 1, 1, 0])
+			Throws /^Vim(echoerr):multiselect: Invalid argument: Region.touches(\[0, 1, 1, 0\], 1)/ region.touches([0, 1, 1, 0], 1)
 		End
 	End
 

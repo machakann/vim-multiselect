@@ -94,19 +94,21 @@ endfunction "}}}
 
 " main interfaces
 function! s:Multiselector.check(expr, ...) abort  "{{{
+	let args = [a:expr] + a:000
 	try
-		let newitem = call(s:Buffer.Item, [a:expr] + a:000)
-	catch /^Vim(echoerr):multiselect: Invalid argument for/
-		echoerr s:Errors.InvalidArgument('Multiselector.check')
+		let newitem = call(s:Buffer.Item, args)
+	catch /^Vim(echoerr):multiselect: Invalid argument: /
+		echoerr s:Errors.InvalidArgument('Multiselector.check', args)
 	endtry
 	call self.add(newitem)
 	return newitem
 endfunction "}}}
 function! s:Multiselector.uncheck(expr, ...) abort  "{{{
+	let args = [a:expr] + a:000
 	try
-		let unchecked = call(self.emit_touching, [a:expr] + a:000, self)
-	catch /^Vim(echoerr):multiselect: Invalid argument for/
-		echoerr s:Errors.InvalidArgument('Multiselector.uncheck')
+		let unchecked = call(self.emit_touching, args, self)
+	catch /^Vim(echoerr):multiselect: Invalid argument: /
+		echoerr s:Errors.InvalidArgument('Multiselector.uncheck', args)
 	endtry
 	return unchecked
 endfunction "}}}
@@ -128,8 +130,8 @@ function! s:Multiselector.emit_inside(expr, ...) abort "{{{
 	let args = [a:expr] + a:000
 	try
 		let itemlist = self.emit({_, item -> call(item.isinside, args, item)})
-	catch /^Vim(echoerr):multiselect: Invalid argument for/
-		echoerr s:Errors.InvalidArgument('Multiselector.emit_inside')
+	catch /^Vim(echoerr):multiselect: Invalid argument: /
+		echoerr s:Errors.InvalidArgument('Multiselector.emit_inside', args)
 	endtry
 	return itemlist
 endfunction "}}}
@@ -137,8 +139,8 @@ function! s:Multiselector.emit_touching(expr, ...) abort "{{{
 	let args = [a:expr] + a:000
 	try
 		let itemlist = self.emit({_, item -> call(item.touches, args, item)})
-	catch /^Vim(echoerr):multiselect: Invalid argument for/
-		echoerr s:Errors.InvalidArgument('Multiselector.emit_touching')
+	catch /^Vim(echoerr):multiselect: Invalid argument: /
+		echoerr s:Errors.InvalidArgument('Multiselector.emit_touching', args)
 	endtry
 	return itemlist
 endfunction "}}}
@@ -417,7 +419,7 @@ function! s:percolate(iter, Filterexpr) abort "{{{
 		endfor
 		return filtered
 	endif
-	echoerr s:Errors.InvalidArgument('percolate')
+	echoerr s:Errors.InvalidArgument('percolate', [a:iter, a:Filterexpr])
 endfunction "}}}
 function! s:enumerate(list, ...) abort "{{{
 	let start = get(a:000, 0, 0)
@@ -456,7 +458,7 @@ endfunction "}}}
 function! s:Multiselector._show(...) abort "{{{
 	let winid = win_getid()
 	for item in self.itemlist
-		if item._histatus(winid) is s:Highlights.OFF
+		if item.isshownin(winid)
 			call item._showlocal(self.higroup)
 		endif
 	endfor

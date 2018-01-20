@@ -34,7 +34,7 @@ function! s:Region(expr, ...) abort "{{{
 			let tail = copy(pos)
 			let type = 'char'
 		else
-			echoerr s:Errors.InvalidArgument('Region')
+			echoerr s:Errors.InvalidArgument('Region', [a:expr] + a:000)
 		endif
 	else
 		if t_expr == v:t_number && type(a:1) == v:t_number
@@ -55,11 +55,11 @@ function! s:Region(expr, ...) abort "{{{
 				let tail = copy(pos2)
 			endif
 		else
-			echoerr s:Errors.InvalidArgument('Region')
+			echoerr s:Errors.InvalidArgument('Region', [a:expr] + a:000)
 		endif
 	endif
 	if head == s:NULLPOS || tail == s:NULLPOS || s:inorderof(tail, head)
-		echoerr s:Errors.InvalidArgument('Region')
+		echoerr s:Errors.InvalidArgument('Region', [a:expr] + a:000)
 	endif
 
 	let region = deepcopy(s:Region)
@@ -105,10 +105,12 @@ function! s:Region.includes(expr, ...) abort "{{{
 		endif
 		return s:{region.type}_is_included_in_{self.type}(region, self)
 	endif
+
+	let args = [a:expr] + a:000
 	try
-		let region = call('s:Region', [a:expr] + a:000)
-	catch /^Vim(echoerr):multiselect: Invalid argument for/
-		echoerr s:Errors.InvalidArgument('Region.includes')
+		let region = call('s:Region', args)
+	catch /^Vim(echoerr):multiselect: Invalid argument: /
+		echoerr s:Errors.InvalidArgument('Region.includes', args)
 	endtry
 	return self.includes(region)
 endfunction "}}}
@@ -120,10 +122,12 @@ function! s:Region.isinside(expr, ...) abort  "{{{
 		endif
 		return s:{self.type}_is_included_in_{region.type}(self, region)
 	endif
+
+	let args = [a:expr] + a:000
 	try
-		let region = call('s:Region', [a:expr] + a:000)
-	catch /^Vim(echoerr):multiselect: Invalid argument for/
-		echoerr s:Errors.InvalidArgument('Region.isinside')
+		let region = call('s:Region', args)
+	catch /^Vim(echoerr):multiselect: Invalid argument: /
+		echoerr s:Errors.InvalidArgument('Region.isinside', args)
 	endtry
 	return self.isinside(region)
 endfunction "}}}
@@ -135,10 +139,12 @@ function! s:Region.touches(expr, ...) abort "{{{
 		endif
 		return s:{self.type}_is_touching_{region.type}(self, region)
 	endif
+
+	let args = [a:expr] + a:000
 	try
-		let region = call('s:Region', [a:expr] + a:000)
-	catch /^Vim(echoerr):multiselect: Invalid argument for/
-		echoerr s:Errors.InvalidArgument('Region.touches')
+		let region = call('s:Region', args)
+	catch /^Vim(echoerr):multiselect: Invalid argument: /
+		echoerr s:Errors.InvalidArgument('Region.touches', args)
 	endtry
 	return self.touches(region)
 endfunction "}}}
@@ -263,10 +269,11 @@ let s:Item = {
 	\	}
 function! s:Item(expr, ...) abort "{{{
 	let sub = deepcopy(s:Item)
+	let args = [a:expr] + a:000
 	try
-		let super = call('s:Region', [a:expr] + a:000)
-	catch /^Vim(echoerr):multiselect: Invalid argument for/
-		echoerr s:Errors.InvalidArgument('Item')
+		let super = call('s:Region', args)
+	catch /^Vim(echoerr):multiselect: Invalid argument: /
+		echoerr s:Errors.InvalidArgument('Item', args)
 	endtry
 
 	let item = s:ClassSys.inherit(sub, super)
@@ -319,10 +326,11 @@ function! s:Change.beforedelete(expr, ...) abort "{{{
 	if a:0 == 0 && type(a:expr) == v:t_dict
 		let deletion = deepcopy(a:expr)
 	else
+		let args = [a:expr] + a:000
 		try
-			let deletion = call('s:Item', [a:expr] + a:000)
-		catch /^Vim(echoerr):multiselect: Invalid argument for/
-			echoerr s:Errors.InvalidArgument('Change.beforedelete')
+			let deletion = call('s:Item', args)
+		catch /^Vim(echoerr):multiselect: Invalid argument: /
+			echoerr s:Errors.InvalidArgument('Change.beforedelete', args)
 		endtry
 	endif
 
@@ -347,10 +355,11 @@ function! s:Change.afterinsert(expr, ...) abort "{{{
 	if a:0 == 0 && type(a:expr) == v:t_dict
 		let insertion = deepcopy(a:expr)
 	else
+		let args = [a:expr] + a:000
 		try
-			let insertion = call('s:Item', [a:expr] + a:000)
-		catch /^Vim(echoerr):multiselect: Invalid argument for/
-			echoerr s:Errors.InvalidArgument('Change.afterinsert')
+			let insertion = call('s:Item', args)
+		catch /^Vim(echoerr):multiselect: Invalid argument: /
+			echoerr s:Errors.InvalidArgument('Change.afterinsert', args)
 		endtry
 	endif
 
