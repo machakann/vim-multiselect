@@ -336,8 +336,7 @@ List of contents~
   multiselect#import()		|multiselect#import()|
   Multiselect			|multiselect-module-Multiselect|
 
-  Multiselect.DEFAULTHIGROUP
-			       |multiselect-Multiselect.DEFAULTHIGROUP|
+  Multiselect.DEFAULTHIGROUP	|multiselect-Multiselect.DEFAULTHIGROUP|
   Multiselect.load()		|multiselect-Multiselect.load()|
   Multiselect.Multiselector()	|multiselect-Multiselect.Multiselector()|
   Multiselect.Region()		|multiselect-Multiselect.Region()|
