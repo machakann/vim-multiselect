@@ -995,6 +995,23 @@ Describe Multiselector
 
 			call filter(multiselector, 0)
 		End
+
+		It can sort a return value of Multiselector.enumerate()
+			let multiselector = MS.Multiselector(DEFAULTS)
+			let item1 = Item([0, 1, 1, 0], [0, 1, 1, 0], 'v')
+			let item2 = Item([0, 2, 1, 0], [0, 2, 1, 0], 'v')
+			let item3 = Item([0, 3, 1, 0], [0, 3, 1, 0], 'v')
+			let list = [item2, item3, item1]
+			call multiselector.extend(list)
+			let enumerated = multiselector.enumerate()
+
+			let sorted = multiselector.sort(enumerated)
+			Assert Same(sorted, enumerated)
+			Assert LengthOf(sorted, 3)
+			Assert Equals(sorted[0], [2, item1])
+			Assert Equals(sorted[1], [0, item2])
+			Assert Equals(sorted[2], [1, item3])
+		End
 	End
 
 	Context .itemnum()

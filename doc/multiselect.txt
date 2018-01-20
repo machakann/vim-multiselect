@@ -962,6 +962,11 @@ Multiselector.sort({itemlist})    [function]
 		let copied = copy(itemlist)
 		call s:Multiselector.sort(copied)
 <
+	The return value of `Multiselector.enumerate()` is also acceptable as
+	a {itemlist}. >
+		let itemlist = s:Multiselector.enumerate()
+		call s:Multiselector.sort(itemlist)
+<
 
   - keymap interfaces
 				*multiselect-Multiselector.keymap_check()*

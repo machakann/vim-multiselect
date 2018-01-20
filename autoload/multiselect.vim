@@ -150,7 +150,17 @@ function! s:Multiselector.filter(Filterexpr) abort "{{{
 endfunction
 "}}}
 function! s:Multiselector.sort(itemlist) abort "{{{
-	return sort(a:itemlist, 's:sort_items')
+	if empty(a:itemlist)
+		return a:itemlist
+	endif
+	let item = a:itemlist[0]
+	if type(item) is v:t_list && len(item) == 2 &&
+			\ type(item[0]) is v:t_number && type(item[1]) is v:t_dict
+		return sort(a:itemlist, 's:sort_enumerated_items')
+	elseif type(item) is v:t_dict
+		return sort(a:itemlist, 's:sort_items')
+	endif
+	echoerr s:Errors.InvalidArgument('Multiselect.sort', [a:itemlist])
 endfunction "}}}
 function! s:sort_items(i1, i2) abort "{{{
 	if a:i1.head == a:i2.head
@@ -171,6 +181,9 @@ function! s:sort_items(i1, i2) abort "{{{
 		endif
 	endif
 	return s:Buffer.inorderof(a:i1.head, a:i2.head) ? -1 : 1
+endfunction "}}}
+function! s:sort_enumerated_items(i1, i2) abort "{{{
+	return s:sort_items(a:i1[1], a:i2[1])
 endfunction "}}}
 
 " keymap interfaces
