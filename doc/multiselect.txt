@@ -940,14 +940,14 @@ Multiselector.filter({Filterexpr})    [method]
 
 
 					*multiselect-Multiselector.sort()*
-Multiselector.sort({itemlist})    [method]
+Multiselector.sort({itemlist})    [function]
 	This method sorts the items in {itemlist}. An item in {itemlist}
 	should be an instance of `Region` class or its subclasses. An item
 	closer to the beginning of a buffer comes to the earlier order in the
 	{itemlist}; however if blockwise items and characterwise items are in
 	a same line, these items are sorted by screen columns. The items at
 	left-side comes earlier. >
-		"#" represents selection and the number is the index in the
+		"#" represents selection and the number is the order in the
 		sorted list
 
 		##1##	#####	##4##
