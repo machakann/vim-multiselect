@@ -1522,6 +1522,41 @@ Describe Multiselector
 			call filter(multiselector, 0)
 		End
 	End
+
+	Context .keymap_broadcast({cmd})
+		It trys {cmd} for each lines to add multiselect items
+			let multiselector = MS.Multiselector(DEFAULTS)
+			Assert LengthOf(multiselector.itemlist, 0)
+			Assert Equals(multiselector._last.event, '')
+			Assert LengthOf(multiselector._last.itemlist, 0)
+
+			%delete
+			let lines = []
+			let lines += ['fooo']
+			let lines += ['  bar']
+			let lines += [' bazzzz']
+			call append(0, lines)
+			$delete
+
+			call cursor(1, 3)
+			normal! V
+			call cursor(3, 3)
+			execute "normal! \<Esc>"
+			call multiselector.keymap_broadcast('iw')
+			Assert LengthOf(multiselector.itemlist, 3)
+			Assert Equals(multiselector.itemlist[0]['head'], [0, 1, 1, 0])
+			Assert Equals(multiselector.itemlist[0]['tail'], [0, 1, 4, 0])
+			Assert Equals(multiselector.itemlist[0]['type'], 'char')
+			Assert Equals(multiselector.itemlist[1]['head'], [0, 2, 3, 0])
+			Assert Equals(multiselector.itemlist[1]['tail'], [0, 2, 5, 0])
+			Assert Equals(multiselector.itemlist[1]['type'], 'char')
+			Assert Equals(multiselector.itemlist[2]['head'], [0, 3, 2, 0])
+			Assert Equals(multiselector.itemlist[2]['tail'], [0, 3, 7, 0])
+			Assert Equals(multiselector.itemlist[2]['type'], 'char')
+			Assert Equals(multiselector._last.event, 'check')
+			Assert LengthOf(multiselector._last.itemlist, 3)
+		End
+	End
 End
 
 Describe utility functions

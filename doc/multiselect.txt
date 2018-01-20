@@ -351,6 +351,8 @@ List of contents~
 				|multiselect-Multiselector.keymap_uncheck()|
   Multiselector.keymap_uncheckall()
 			       |multiselect-Multiselector.keymap_uncheckall()|
+  Multiselector.keymap_broadcast()
+				|multiselect-Multiselector.keymap_broadcast()|
 
   - low-level interfaces
   Multiselector.extend()	|multiselect-Multiselector.extend()|
@@ -1082,6 +1084,30 @@ Multiselector.keymap_multiselect({mode})    [method]
 <
 	|multiselect#import()|
 	|multiselect-Multiselect.Multiselector()|
+
+
+				*multiselect-Multiselector.keymap_broadcast()*
+Multiselector.keymap_broadcast({cmd})   [method]
+	{cmd} is a {motion} command or a kind of |text-objects|. This method
+	works as a {cmd} if it is used in |characterwise| or
+	|blockwise-visual| mode. In case it is used in |linewise-visual| mode,
+	this method tries the {cmd} in each lines at the cursor column to
+	select texts. For example, given that the buffer is now: >
+		fooo
+		  bar
+		 bazzzz
+<
+	Visual-select |linewise| the three lines and put the cursor at the 3rd
+	or 4th column, and then use this method with |iw| as {cmd} to
+	multiselect "fooo", "bar" and "bazzzz". >
+		let s:Multiselect = multiselect#import()
+		let s:private_ms = s:Multiselect.Multiselector()
+		function! s:broadcast(cmd) abort
+		  call s:private_ms.keymap_broadcast(a:cmd)
+		endfunction
+		xnoremap <Plug>(broadcast) <Esc>:call <SID>broadcast('iw')<CR>
+<
+	This method is only for visual mode.
 
 
   - low-level interfaces

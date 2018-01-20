@@ -28,6 +28,11 @@ endfunction "}}}
 function! multiselect#keymap#multiselect(mode) abort "{{{
 	call s:multiselector.keymap_multiselect(a:mode)
 endfunction "}}}
+function! multiselect#keymap#broadcast(cmd, ...) abort "{{{
+	let options = get(a:000, 0, {})
+	call extend(options, {'openfold': g:multiselect#keymap#openfold})
+	call s:multiselector.keymap_broadcast(a:cmd, options)
+endfunction "}}}
 
 " vim:set foldmethod=marker:
 " vim:set commentstring="%s:

@@ -292,6 +292,75 @@ function! s:Multiselector.keymap_multiselect(mode) abort "{{{
 		endif
 	endif
 endfunction "}}}
+function! s:Multiselector.keymap_broadcast(cmd, ...) abort "{{{
+	let options = get(a:000, 0, {})
+	let noremap = !!get(options, 'noremap', s:TRUE)
+	let openfold = !!get(options, 'openfold', s:FALSE)
+	let countstr = s:countstr(v:prevcount)
+	let visualcmd = visualmode()
+	if visualcmd !=# 'V'
+		let flag = noremap ? 'in' : 'im'
+		call feedkeys(printf('gv%s%s', countstr, a:cmd), flag)
+		return
+	endif
+
+	let view = winsaveview()
+	let vhead = getpos("'<")
+	let vtail = getpos("'>")
+	let startlnum = vhead[1]
+	let endlnum = vtail[1]
+	let column = virtcol('.')
+	let command = s:selector_buildcommand(noremap, countstr, a:cmd)
+	let itemlist = []
+	for lnum in range(startlnum, endlnum)
+		let item = s:try(lnum, column, command)
+		if !empty(item)
+			if openfold
+				call s:Buffer.foldopen(lnum)
+			endif
+			call add(itemlist, item)
+		endif
+	endfor
+	call self.extend(itemlist)
+
+	normal! V
+	execute "normal! \<Esc>"
+	call setpos("'<", vhead)
+	call setpos("'>", vtail)
+	call winrestview(view)
+endfunction "}}}
+function! s:selector_buildcommand(noremap, countstr, cmd) abort "{{{
+	if a:noremap is s:TRUE
+		let bang = '!'
+	else
+		let bang = ''
+	endif
+	return printf('noautocmd normal%s v%s%s', bang, a:countstr, a:cmd)
+endfunction "}}}
+function! s:try(lnum, column, command) abort "{{{
+	let line = getline(a:lnum)
+	if empty(line) || strdisplaywidth(line) < a:column
+		return {}
+	endif
+
+	execute printf('normal! %dG%d|', a:lnum, a:column)
+	let curpos = getpos('.')
+	execute a:command
+	execute "normal! \<Esc>"
+	let vhead = getpos("'<")
+	let vtail = getpos("'>")
+	if vhead[1] != curpos[1] || vtail[1] != curpos[1] ||
+			\ (vhead[2] == curpos[2] && vtail[2] == curpos[2])
+		return {}
+	endif
+	if virtcol(vtail[1:2]) <= indent(vtail[1])
+		return {}
+	endif
+	return s:Multiselect.Item(vhead, vtail, 'char')
+endfunction "}}}
+function! s:countstr(count) abort "{{{
+	return a:count ? string(a:count) : ''
+endfunction "}}}
 
 " low-level interfaces
 function! s:Multiselector.extend(itemlist) abort "{{{
