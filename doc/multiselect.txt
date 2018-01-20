@@ -1,5 +1,5 @@
 *multiselect.txt*	A library for multiple selection
-						Last change:19-Jan-2018.
+						Last change:20-Jan-2018.
 
 Author  : machakann <https://github.com/machakann>
 License : MIT license
@@ -580,6 +580,20 @@ Multiselect.percolate({expr}, {Filterexpr})    [function]
 	filters the items that {Filterexpr} is |TRUE| and returns the filtered
 	items.
 
+
+					*multiselect-Multiselect.enumerate()*
+Multiselect.enumerate({list}[, {start}])    [function]
+	This method returns a list of lists of indexes and items. >
+		let s:enumerate = s:Multiselect.enumerate
+		let list = ['foo', 'bar', 'baz']
+		let newlist s:enumerate(list)
+		" newlist == [[0, 'foo'], [1, 'bar'], [2, 'baz']]
+<
+	If {start} is assigned, the indexes start from the number. >
+		let list = ['foo', 'bar', 'baz']
+		let newlist s:enumerate(list, 1)
+		" newlist == [[1, 'foo'], [2, 'bar'], [3, 'baz']]
+<
 
 
 ------------------------------------------------------------------------------

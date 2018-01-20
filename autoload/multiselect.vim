@@ -419,8 +419,9 @@ function! s:percolate(iter, Filterexpr) abort "{{{
 	endif
 	echoerr s:Errors.InvalidArgument('percolate')
 endfunction "}}}
-function! s:enumerate(list) abort "{{{
-	return map(copy(a:list), {i, item -> [i, item]})
+function! s:enumerate(list, ...) abort "{{{
+	let start = get(a:000, 0, 0)
+	return map(copy(a:list), {i, item -> [start + i, item]})
 endfunction "}}}
 
 " private methods

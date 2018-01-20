@@ -1545,6 +1545,7 @@ End
 Describe utility functions
 	Before
 		let Percolate = g:MS.percolate
+		let Enumerate = g:MS.enumerate
 	End
 
 	Context percolate({expr}, {Filterexpr})
@@ -1570,6 +1571,19 @@ Describe utility functions
 			let filtered = Percolate(dict, {key, val -> val == 1})
 			Assert Equals(dict, {'bar': 2, 'baz': 3})
 			Assert Equals(filtered, {'foo': 1})
+		End
+	End
+
+	Context enumerate({list})
+		It returns a list of lists of indexes and items
+			Assert Equals(Enumerate(['foo', 'bar', 'baz']), [[0, 'foo'], [1, 'bar'], [2, 'baz']])
+		End
+	End
+
+	Context enumerate({list}, {start})
+		It returns a list of lists of indexes and items
+			Assert Equals(Enumerate(['foo', 'bar', 'baz'], 1), [[1, 'foo'], [2, 'bar'], [3, 'baz']])
+			Assert Equals(Enumerate(['foo', 'bar', 'baz'], 2), [[2, 'foo'], [3, 'bar'], [4, 'baz']])
 		End
 	End
 End
