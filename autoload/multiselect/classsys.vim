@@ -6,7 +6,7 @@ function! s:inherit(sub, super) abort "{{{
 	call extend(a:sub, a:super, 'keep')
 	let a:sub.__SUPER__ = {}
 	for [key, l:Val] in items(a:super)
-		if type(l:Val) == v:t_func || key ==# '__SUPER__'
+		if type(l:Val) is v:t_func || key is# '__SUPER__'
 			let a:sub.__SUPER__[key] = l:Val
 		endif
 	endfor
@@ -25,7 +25,7 @@ function! s:super(sub, ...) abort "{{{
 
 	let super = {}
 	for [key, l:Val] in items(supermethods)
-		if type(l:Val) == v:t_func
+		if type(l:Val) is v:t_func
 			let super[key] = function('s:supercall', [a:sub, l:Val])
 		endif
 	endfor

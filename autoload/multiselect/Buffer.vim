@@ -23,12 +23,12 @@ function! s:Region(expr, ...) abort "{{{
 	let tail = s:NULLPOS
 	let t_expr = type(a:expr)
 	if a:0 == 0
-		if t_expr == v:t_number
+		if t_expr is v:t_number
 			let lnum = a:expr
 			let head = [0, lnum, 1, 0]
 			let tail = [0, lnum, s:MAXCOL, 0]
 			let type = 'line'
-		elseif t_expr == v:t_list
+		elseif t_expr is v:t_list
 			let pos = a:expr
 			let head = copy(pos)
 			let tail = copy(pos)
@@ -37,17 +37,17 @@ function! s:Region(expr, ...) abort "{{{
 			echoerr s:Errors.InvalidArgument('Region', [a:expr] + a:000)
 		endif
 	else
-		if t_expr == v:t_number && type(a:1) == v:t_number
+		if t_expr is v:t_number && type(a:1) is v:t_number
 			let lnum1 = a:expr
 			let lnum2 = a:1
 			let head = [0, lnum1, 1, 0]
 			let tail = [0, lnum2, s:MAXCOL, 0]
 			let type = 'line'
-		elseif t_expr == v:t_list && type(a:1) == v:t_list
+		elseif t_expr is v:t_list && type(a:1) is v:t_list
 			let pos1 = a:expr
 			let pos2 = a:1
 			let type = s:str2type(get(a:000, 1, 'char'))
-			if type ==# 'line'
+			if type is# 'line'
 				let head = [0, pos1[1], 1, 0]
 				let tail = [0, pos2[1], s:MAXCOL, 0]
 			else
@@ -66,7 +66,7 @@ function! s:Region(expr, ...) abort "{{{
 	let region.head = head
 	let region.tail = tail
 	let region.type = type
-	if region.type ==# 'block'
+	if region.type is# 'block'
 		let region.extended = !!get(a:000, 2, s:FALSE)
 	endif
 	return region
@@ -98,7 +98,7 @@ function! s:Region.yank() abort "{{{
 	return text
 endfunction "}}}
 function! s:Region.includes(expr, ...) abort "{{{
-	if a:0 == 0 && type(a:expr) == v:t_dict
+	if a:0 == 0 && type(a:expr) is v:t_dict
 		let region = a:expr
 		if region.head == s:NULLPOS || region.tail == s:NULLPOS
 			return s:FALSE
@@ -115,7 +115,7 @@ function! s:Region.includes(expr, ...) abort "{{{
 	return self.includes(region)
 endfunction "}}}
 function! s:Region.isinside(expr, ...) abort  "{{{
-	if a:0 == 0 && type(a:expr) == v:t_dict
+	if a:0 == 0 && type(a:expr) is v:t_dict
 		let region = a:expr
 		if region.head == s:NULLPOS || region.tail == s:NULLPOS
 			return s:FALSE
@@ -132,7 +132,7 @@ function! s:Region.isinside(expr, ...) abort  "{{{
 	return self.isinside(region)
 endfunction "}}}
 function! s:Region.touches(expr, ...) abort "{{{
-	if a:0 == 0 && type(a:expr) == v:t_dict
+	if a:0 == 0 && type(a:expr) is v:t_dict
 		let region = a:expr
 		if region.head == s:NULLPOS || region.tail == s:NULLPOS
 			return s:FALSE
@@ -323,7 +323,7 @@ function! s:Change() abort "{{{
 	return deepcopy(s:Change)
 endfunction "}}}
 function! s:Change.beforedelete(expr, ...) abort "{{{
-	if a:0 == 0 && type(a:expr) == v:t_dict
+	if a:0 == 0 && type(a:expr) is v:t_dict
 		let deletion = deepcopy(a:expr)
 	else
 		let args = [a:expr] + a:000
@@ -334,17 +334,17 @@ function! s:Change.beforedelete(expr, ...) abort "{{{
 		endtry
 	endif
 
-	if deletion.type ==# 'char'
+	if deletion.type is# 'char'
 		if deletion.tail[2] == col([deletion.tail[1], '$'])
 			let deletion.tail[1] += 1
 			let deletion.tail[2] = 0
 		endif
 		call add(self._changelist, ['delete', deletion])
-	elseif deletion.type ==# 'line'
+	elseif deletion.type is# 'line'
 		let deletion.head[2] = 1
 		let deletion.tail[2] = col([deletion.tail[1], '$'])
 		call add(self._changelist, ['delete', deletion])
-	elseif deletion.type ==# 'block'
+	elseif deletion.type is# 'block'
 		for item in s:splitblock(deletion)
 			call add(self._changelist, ['delete', item])
 		endfor
@@ -352,7 +352,7 @@ function! s:Change.beforedelete(expr, ...) abort "{{{
 	return self
 endfunction "}}}
 function! s:Change.afterinsert(expr, ...) abort "{{{
-	if a:0 == 0 && type(a:expr) == v:t_dict
+	if a:0 == 0 && type(a:expr) is v:t_dict
 		let insertion = deepcopy(a:expr)
 	else
 		let args = [a:expr] + a:000
@@ -363,13 +363,13 @@ function! s:Change.afterinsert(expr, ...) abort "{{{
 		endtry
 	endif
 
-	if insertion.type ==# 'char'
+	if insertion.type is# 'char'
 		call add(self._changelist, ['insert', insertion])
-	elseif insertion.type ==# 'line'
+	elseif insertion.type is# 'line'
 		let insertion.head[2] = 1
 		let insertion.tail[2] = col([insertion.tail[1], '$'])
 		call add(self._changelist, ['insert', insertion])
-	elseif insertion.type ==# 'block'
+	elseif insertion.type is# 'block'
 		for item in s:splitblock(insertion)
 			call add(self._changelist, ['insert', item])
 		endfor
@@ -377,16 +377,16 @@ function! s:Change.afterinsert(expr, ...) abort "{{{
 	return self
 endfunction "}}}
 function! s:Change.apply(expr) abort "{{{
-	if type(a:expr) == v:t_list
+	if type(a:expr) is v:t_list
 		let pos = a:expr
 		for [change, item] in self._changelist
-			if change ==# 'delete'
-				call s:pull(pos, item.head, item.tail, item.type ==# 'line')
-			elseif change ==# 'insert'
-				call s:push(pos, item.head, item.tail, item.type ==# 'line')
+			if change is# 'delete'
+				call s:pull(pos, item.head, item.tail, item.type is# 'line')
+			elseif change is# 'insert'
+				call s:push(pos, item.head, item.tail, item.type is# 'line')
 			endif
 		endfor
-	elseif type(a:expr) == v:t_dict
+	elseif type(a:expr) is v:t_dict
 		let region = a:expr
 		call self.apply(region.head)
 		call self.apply(region.tail)
@@ -520,17 +520,17 @@ endfunction "}}}
 "}}}
 
 function! s:str2type(str) abort "{{{
-	if a:str ==# 'line' || a:str ==# 'V'
+	if a:str is# 'line' || a:str is# 'V'
 		return 'line'
-	elseif a:str ==# 'block' || a:str[0] ==# "\<C-v>"
+	elseif a:str is# 'block' || a:str[0] is# "\<C-v>"
 		return 'block'
 	endif
 	return 'char'
 endfunction "}}}
 function! s:str2visualcmd(str) abort "{{{
-	if a:str ==# 'line' || a:str ==# 'V'
+	if a:str is# 'line' || a:str is# 'V'
 		return 'V'
-	elseif a:str ==# 'block' || a:str[0] ==# "\<C-v>"
+	elseif a:str is# 'block' || a:str[0] is# "\<C-v>"
 		return "\<C-v>"
 	endif
 	return 'v'

@@ -55,9 +55,9 @@ function! s:Event.trigger() abort "{{{
 	endif
 
 	for [_, type, l:Expr] in self._orderlist
-		if type == v:t_string
+		if type is v:t_string
 			execute l:Expr
-		elseif type == v:t_func
+		elseif type is v:t_func
 			call call(l:Expr, [self.name])
 		endif
 	endfor

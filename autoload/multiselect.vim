@@ -156,15 +156,15 @@ function! s:sort_items(i1, i2) abort "{{{
 	if a:i1.head == a:i2.head
 		return 0
 	endif
-	if a:i1.type ==# 'block' && a:i2.type ==# 'char'
+	if a:i1.type is# 'block' && a:i2.type is# 'char'
 		if a:i1.head[1] <= a:i2.head[1] && a:i2.tail[1] <= a:i1.tail[1]
 			return virtcol(a:i1.head[1:2]) - virtcol(a:i2.head[1:2])
 		endif
-	elseif a:i1.type ==# 'char' && a:i2.type ==# 'block'
+	elseif a:i1.type is# 'char' && a:i2.type is# 'block'
 		if a:i2.head[1] <= a:i1.head[1] && a:i1.tail[1] <= a:i2.tail[1]
 			return virtcol(a:i1.head[1:2]) - virtcol(a:i2.head[1:2])
 		endif
-	elseif a:i1.type ==# 'block' && a:i2.type ==# 'block'
+	elseif a:i1.type is# 'block' && a:i2.type is# 'block'
 		if (a:i1.head[1] <= a:i2.head[1] && a:i2.head[1] <= a:i1.tail[1]) ||
 			\ (a:i2.head[1] <= a:i1.head[1] && a:i1.head[1] <= a:i2.tail[1])
 			return virtcol(a:i1.head[1:2]) - virtcol(a:i2.head[1:2])
@@ -175,7 +175,7 @@ endfunction "}}}
 
 " keymap interfaces
 function! s:Multiselector.keymap_check(mode) abort "{{{
-	if a:mode ==# 'n'
+	if a:mode is# 'n'
 		if foldclosed(line('.')) != -1
 			normal! zO
 		endif
@@ -185,7 +185,7 @@ function! s:Multiselector.keymap_check(mode) abort "{{{
 	let head = getpos("'<")
 	let tail = getpos("'>")
 	let type = visualmode()
-	if a:mode ==# 'x' && type ==# "\<C-v>"
+	if a:mode is# 'x' && type is# "\<C-v>"
 		let extended = s:Buffer.isextended()
 	else
 		let extended = s:FALSE
@@ -203,7 +203,7 @@ function! s:Multiselector.keymap_checkpattern(mode, pat, ...) abort "{{{
 	let options = get(a:000, 0, {})
 	let openfold = get(options, 'openfold', s:FALSE)
 	let view = winsaveview()
-	if a:mode ==# 'x'
+	if a:mode is# 'x'
 		let start = getpos("'<")
 		let end = getpos("'>")
 	else
@@ -240,7 +240,7 @@ function! s:Multiselector.keymap_checkpattern(mode, pat, ...) abort "{{{
 	return itemlist
 endfunction "}}}
 function! s:Multiselector.keymap_uncheck(mode) abort "{{{
-	if a:mode ==# 'x'
+	if a:mode is# 'x'
 		return self.uncheck(getpos("'<"), getpos("'>"))
 	endif
 	return self.uncheck(getpos('.'))
@@ -250,7 +250,7 @@ function! s:Multiselector.keymap_uncheckall() abort "{{{
 endfunction "}}}
 function! s:Multiselector.keymap_undo() abort "{{{
 	let last = self.lastevent()
-	if last.event ==# 'check'
+	if last.event is# 'check'
 		let removing = []
 		for checked in last.itemlist
 			let i = self.search(checked)
@@ -259,19 +259,19 @@ function! s:Multiselector.keymap_undo() abort "{{{
 			endif
 		endfor
 		call self.remove(removing)
-	elseif last.event ==# 'uncheck'
+	elseif last.event is# 'uncheck'
 		call self.extend(last.itemlist)
 	endif
 endfunction "}}}
 function! s:Multiselector.keymap_multiselect(mode) abort "{{{
 	let itemlist = []
-	if a:mode ==# 'x'
+	if a:mode is# 'x'
 		let type = s:Buffer.str2type(visualmode())
-		let extended = type ==# 'block' ? s:Buffer.isextended() : s:FALSE
+		let extended = type is# 'block' ? s:Buffer.isextended() : s:FALSE
 		let region = s:Buffer.Region(getpos("'<"), getpos("'>"), type, extended)
 		let item_in_visual = self.itemnum({_, item -> item.isinside(region)})
 		if item_in_visual == 0
-			if type ==# 'char'
+			if type is# 'char'
 				let pat = s:Buffer.patternofselection(region)
 				call self.keymap_checkpattern('n', pat)
 			else
@@ -326,11 +326,11 @@ function! s:Multiselector.remove(...) abort "{{{
 	let removed = []
 	if a:0 == 1
 		let type_arg = type(a:1)
-		if type_arg == v:t_number
+		if type_arg is v:t_number
 			let removed = remove(self.itemlist, a:1)
 			call self._uncheckpost([removed])
 			return removed
-		elseif type_arg == v:t_list
+		elseif type_arg is v:t_list
 			for i in reverse(sort(copy(a:1), 'n'))
 				call add(removed, remove(self.itemlist, i))
 			endfor
@@ -400,7 +400,7 @@ function! s:Multiselector.quench(...) abort "{{{
 endfunction "}}}
 function! s:percolate(iter, Filterexpr) abort "{{{
 	let t_iter = type(a:iter)
-	if t_iter == v:t_list
+	if t_iter is v:t_list
 		let filtered = []
 		let i = len(a:iter) - 1
 		while i >= 0
@@ -410,7 +410,7 @@ function! s:percolate(iter, Filterexpr) abort "{{{
 			let i -= 1
 		endwhile
 		return reverse(filtered)
-	elseif t_iter == v:t_dict
+	elseif t_iter is v:t_dict
 		let filtered = {}
 		for [key, val] in items(a:iter)
 			if call(a:Filterexpr, [key, val])
