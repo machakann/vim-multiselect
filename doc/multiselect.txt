@@ -665,6 +665,12 @@ Multiselect.inorderof({pos1}, {pos2})    [function]
 >
 		let s:inorderof = s:Multiselect.inorderof
 
+		let bool = s:inorderof([0, 2, 3, 0], [0, 2, 4, 0])
+		" bool is TRUE
+
+		let bool = s:inorderof([0, 2, 3, 0], [0, 3, 1, 0])
+		" bool is TRUE
+
 		let bool = s:inorderof([0, 2, 3, 0], [0, 1, 1, 0])
 		" bool is FALSE
 
@@ -673,12 +679,35 @@ Multiselect.inorderof({pos1}, {pos2})    [function]
 
 		let bool = s:inorderof([0, 2, 3, 0], [0, 2, 3, 0])
 		" bool is FALSE
+<
 
-		let bool = s:inorderof([0, 2, 3, 0], [0, 2, 4, 0])
+					*multiselect-Multiselect.inbetween()*
+Multiselect.inbetween({pos}, {head}, {tail})    [function]
+	This function returns |TRUE| is {pos} is in between {head} and {tail}.
+>
+		let s:inbetween = s:Multiselect.inbetween
+		let pos = [0, 2, 3, 0]
+
+		let bool = s:inbetween(pos, [0, 2, 2, 0], [0, 2, 4, 0])
 		" bool is TRUE
 
-		let bool = s:inorderof([0, 2, 3, 0], [0, 3, 1, 0])
+		let bool = s:inbetween(pos, [0, 2, 3, 0], [0, 2, 4, 0])
 		" bool is TRUE
+
+		let bool = s:inbetween(pos, [0, 2, 2, 0], [0, 2, 3, 0])
+		" bool is TRUE
+
+		let bool = s:inbetween(pos, [0, 2, 3, 0], [0, 2, 3, 0])
+		" bool is TRUE
+
+		let bool = s:inbetween(pos, [0, 1, 1, 0], [0, 3, 1, 0])
+		" bool is TRUE
+
+		let bool = s:inbetween(pos, [0, 2, 1, 0], [0, 2, 2, 0])
+		" bool is FALSE
+
+		let bool = s:inbetween(pos, [0, 2, 4, 0], [0, 2, 5, 0])
+		" bool is FALSE
 <
 
 

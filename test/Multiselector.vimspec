@@ -1549,6 +1549,7 @@ Describe utility functions
 		let Str2type = g:MS.str2type
 		let Str2visualcmd = g:MS.str2visualcmd
 		let Inorderof = g:MS.inorderof
+		let Inbetween = g:MS.inbetween
 	End
 
 	Context percolate({expr}, {Filterexpr})
@@ -1632,13 +1633,26 @@ Describe utility functions
 		It returns TRUE if {pos1} is located former than {pos2}
 			Assert True(Inorderof([0, 2, 3, 0], [0, 2, 4, 0]))
 			Assert True(Inorderof([0, 2, 3, 0], [0, 3, 1, 0]))
-		End
-
-		It returns FALSE if {pos1} is located later than {pos2}
 			Assert False(Inorderof([0, 2, 3, 0], [0, 1, 1, 0]))
 			Assert False(Inorderof([0, 2, 3, 0], [0, 1, 4, 0]))
 			Assert False(Inorderof([0, 2, 3, 0], [0, 2, 2, 0]))
 			Assert False(Inorderof([0, 2, 3, 0], [0, 2, 3, 0]))
+		End
+	End
+
+	Context inbetween({pos}, {head}, {tail})
+		It returns TRUE if {pos} is in between {head} and {tail}
+			Assert True(Inbetween([0, 2, 3, 0], [0, 2, 2, 0], [0, 2, 4, 0]))
+			Assert True(Inbetween([0, 2, 3, 0], [0, 2, 3, 0], [0, 2, 4, 0]))
+			Assert True(Inbetween([0, 2, 3, 0], [0, 2, 2, 0], [0, 2, 3, 0]))
+			Assert True(Inbetween([0, 2, 3, 0], [0, 2, 3, 0], [0, 2, 3, 0]))
+			Assert True(Inbetween([0, 2, 3, 0], [0, 1, 4, 0], [0, 2, 4, 0]))
+			Assert True(Inbetween([0, 2, 3, 0], [0, 2, 2, 0], [0, 4, 2, 0]))
+
+			Assert False(Inbetween([0, 2, 3, 0], [0, 2, 1, 0], [0, 2, 2, 0]))
+			Assert False(Inbetween([0, 2, 3, 0], [0, 2, 4, 0], [0, 2, 5, 0]))
+			Assert False(Inbetween([0, 2, 3, 0], [0, 1, 2, 0], [0, 1, 4, 0]))
+			Assert False(Inbetween([0, 2, 3, 0], [0, 3, 2, 0], [0, 3, 4, 0]))
 		End
 	End
 End
