@@ -344,13 +344,18 @@ List of contents~
   Multiselector.sort()		|multiselect-Multiselector.sort()|
 
   - keymap interfaces
-  Multiselector.keymap_check()	|multiselect-Multiselector.keymap_check()|
+  Multiselector.keymap_check()
+				|multiselect-Multiselector.keymap_check()|
   Multiselector.keymap_checkpattern()
 			     |multiselect-Multiselector.keymap_checkpattern()|
   Multiselector.keymap_uncheck()
 				|multiselect-Multiselector.keymap_uncheck()|
   Multiselector.keymap_uncheckall()
 			       |multiselect-Multiselector.keymap_uncheckall()|
+  Multiselector.keymap_undo()
+				|multiselect-Multiselector.keymap_undo()|
+  Multiselector.keymap_multiselect()
+			      |multiselect-Multiselector.keymap_multiselect()|
   Multiselector.keymap_broadcast()
 				|multiselect-Multiselector.keymap_broadcast()|
 
@@ -1076,11 +1081,11 @@ Multiselector.keymap_multiselect({mode})    [method]
 	mode, 'x' for |Visual| mode. >
 		let s:Multiselect = multiselect#import()
 		let s:private_ms = s:Multiselect.Multiselector()
-		function! s:toggle(mode) abort
+		function! s:multiselect(mode) abort
 		  call s:private_ms.keymap_toggle(a:mode)
 		endfunction
-		nnoremap <Plug>(toggle) :<C-u>call <SID>toggle('n')<CR>
-		xnoremap <Plug>(toggle) <Esc>:call <SID>toggle('x')<CR>
+		nnoremap <Plug>(multisel) :<C-u>call <SID>multisel('n')<CR>
+		xnoremap <Plug>(multisel) <Esc>:call <SID>multisel('x')<CR>
 <
 	|multiselect#import()|
 	|multiselect-Multiselect.Multiselector()|
