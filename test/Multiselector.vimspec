@@ -1548,6 +1548,7 @@ Describe utility functions
 		let Enumerate = g:MS.enumerate
 		let Str2type = g:MS.str2type
 		let Str2visualcmd = g:MS.str2visualcmd
+		let Inorderof = g:MS.inorderof
 	End
 
 	Context percolate({expr}, {Filterexpr})
@@ -1624,6 +1625,20 @@ Describe utility functions
 			Assert Equals(Str2visualcmd("\<C-v>"), "\<C-v>")
 			Assert Equals(Str2visualcmd("\<C-v>1"), "\<C-v>")
 			Assert Equals(Str2visualcmd("\<C-v>10"), "\<C-v>")
+		End
+	End
+
+	Context inorderof({pos1}, {pos2})
+		It returns TRUE if {pos1} is located former than {pos2}
+			Assert True(Inorderof([0, 2, 3, 0], [0, 2, 4, 0]))
+			Assert True(Inorderof([0, 2, 3, 0], [0, 3, 1, 0]))
+		End
+
+		It returns FALSE if {pos1} is located later than {pos2}
+			Assert False(Inorderof([0, 2, 3, 0], [0, 1, 1, 0]))
+			Assert False(Inorderof([0, 2, 3, 0], [0, 1, 4, 0]))
+			Assert False(Inorderof([0, 2, 3, 0], [0, 2, 2, 0]))
+			Assert False(Inorderof([0, 2, 3, 0], [0, 2, 3, 0]))
 		End
 	End
 End

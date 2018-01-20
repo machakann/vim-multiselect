@@ -659,6 +659,28 @@ Multiselect.str2visualcmd({str})    [function]
 		" type ==# "\<C-v>"
 <
 
+					*multiselect-Multiselect.inorderof()*
+Multiselect.inorderof({pos1}, {pos2})    [function]
+	This function returns |TRUE| if {pos1} is located former than {pos2}.
+>
+		let s:inorderof = s:Multiselect.inorderof
+
+		let bool = s:inorderof([0, 2, 3, 0], [0, 1, 1, 0])
+		" bool is FALSE
+
+		let bool = s:inorderof([0, 2, 3, 0], [0, 2, 2, 0])
+		" bool is FALSE
+
+		let bool = s:inorderof([0, 2, 3, 0], [0, 2, 3, 0])
+		" bool is FALSE
+
+		let bool = s:inorderof([0, 2, 3, 0], [0, 2, 4, 0])
+		" bool is TRUE
+
+		let bool = s:inorderof([0, 2, 3, 0], [0, 3, 1, 0])
+		" bool is TRUE
+<
+
 
 ------------------------------------------------------------------------------
 Multiselector class~
