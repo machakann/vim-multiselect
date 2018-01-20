@@ -1547,6 +1547,7 @@ Describe utility functions
 		let Percolate = g:MS.percolate
 		let Enumerate = g:MS.enumerate
 		let Str2type = g:MS.str2type
+		let Str2visualcmd = g:MS.str2visualcmd
 	End
 
 	Context percolate({expr}, {Filterexpr})
@@ -1604,6 +1605,25 @@ Describe utility functions
 			Assert Equals(Str2type("\<C-v>"), 'block')
 			Assert Equals(Str2type("\<C-v>1"), 'block')
 			Assert Equals(Str2type("\<C-v>10"), 'block')
+		End
+	End
+
+	Context str2visualcmd({str})
+		It returns 'v' if {str} is 'char' or 'v'
+			Assert Equals(Str2visualcmd('char'), 'v')
+			Assert Equals(Str2visualcmd('v'), 'v')
+		End
+
+		It returns 'V' if {str} is 'line' or 'V'
+			Assert Equals(Str2visualcmd('line'), 'V')
+			Assert Equals(Str2visualcmd('V'), 'V')
+		End
+
+		It returns "\<C-v>" if {str} is 'block' or "\<C-v>"
+			Assert Equals(Str2visualcmd('block'), "\<C-v>")
+			Assert Equals(Str2visualcmd("\<C-v>"), "\<C-v>")
+			Assert Equals(Str2visualcmd("\<C-v>1"), "\<C-v>")
+			Assert Equals(Str2visualcmd("\<C-v>10"), "\<C-v>")
 		End
 	End
 End
