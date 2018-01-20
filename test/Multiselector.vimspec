@@ -62,21 +62,19 @@ Describe Multiselector
 
 		It turns on the highlight of accepted items
 			let multiselector = MS.Multiselector(DEFAULTS)
-			let ON = g:TRUE
-			let OFF = g:FALSE
 			let item1 = Item([0, 1, 1, 0], [0, 1, 1, 0], 'v')
 			let item2 = Item([0, 2, 1, 0], [0, 2, 1, 0], 'v')
 			let item3 = Item([0, 3, 1, 0], [0, 3, 1, 0], 'v')
 
 			let added = [item1]
 			call multiselector.extend(added)
-			Assert Equals(multiselector.itemlist[0]['_histatus'](win_getid()), ON)
+			Assert True(multiselector.itemlist[0]['isshownin'](win_getid()))
 
 			let added = [item2, item3]
 			call multiselector.extend(added)
-			Assert Equals(multiselector.itemlist[0]['_histatus'](win_getid()), ON)
-			Assert Equals(multiselector.itemlist[1]['_histatus'](win_getid()), ON)
-			Assert Equals(multiselector.itemlist[2]['_histatus'](win_getid()), ON)
+			Assert True(multiselector.itemlist[0]['isshownin'](win_getid()))
+			Assert True(multiselector.itemlist[1]['isshownin'](win_getid()))
+			Assert True(multiselector.itemlist[2]['isshownin'](win_getid()))
 
 			call filter(multiselector, 0)
 		End
@@ -116,8 +114,6 @@ Describe Multiselector
 	Context .add(item)
 		It appends a:item into self.itemlist
 			let multiselector = MS.Multiselector(DEFAULTS)
-			let ON = g:TRUE
-			let OFF = g:FALSE
 			Assert LengthOf(multiselector.itemlist, 0)
 
 			let item1 = Item([0, 1, 1, 0], [0, 1, 1, 0], 'v')
@@ -150,23 +146,21 @@ Describe Multiselector
 
 		It turns on the highlight of accepted items
 			let multiselector = MS.Multiselector(DEFAULTS)
-			let ON = g:TRUE
-			let OFF = g:FALSE
 			let item1 = Item([0, 1, 1, 0], [0, 1, 1, 0], 'v')
 			let item2 = Item([0, 2, 1, 0], [0, 2, 1, 0], 'v')
 			let item3 = Item([0, 3, 1, 0], [0, 3, 1, 0], 'v')
 
 			call multiselector.add(item1)
-			Assert Equals(multiselector.itemlist[0]['_histatus'](win_getid()), ON)
+			Assert True(multiselector.itemlist[0]['isshownin'](win_getid()))
 
 			call multiselector.add(item2)
-			Assert Equals(multiselector.itemlist[0]['_histatus'](win_getid()), ON)
-			Assert Equals(multiselector.itemlist[1]['_histatus'](win_getid()), ON)
+			Assert True(multiselector.itemlist[0]['isshownin'](win_getid()))
+			Assert True(multiselector.itemlist[1]['isshownin'](win_getid()))
 
 			call multiselector.add(item3)
-			Assert Equals(multiselector.itemlist[0]['_histatus'](win_getid()), ON)
-			Assert Equals(multiselector.itemlist[1]['_histatus'](win_getid()), ON)
-			Assert Equals(multiselector.itemlist[2]['_histatus'](win_getid()), ON)
+			Assert True(multiselector.itemlist[0]['isshownin'](win_getid()))
+			Assert True(multiselector.itemlist[1]['isshownin'](win_getid()))
+			Assert True(multiselector.itemlist[2]['isshownin'](win_getid()))
 
 			call filter(multiselector, 0)
 		End
@@ -239,8 +233,6 @@ Describe Multiselector
 
 		It turns off the highlight of removed item
 			let multiselector = MS.Multiselector(DEFAULTS)
-			let ON = g:TRUE
-			let OFF = g:FALSE
 			let item1 = Item([0, 1, 1, 0], [0, 1, 1, 0], 'v')
 			let item2 = Item([0, 2, 1, 0], [0, 2, 1, 0], 'v')
 			let item3 = Item([0, 3, 1, 0], [0, 3, 1, 0], 'v')
@@ -248,16 +240,16 @@ Describe Multiselector
 			call multiselector.extend(added)
 
 			let removed = multiselector.remove(1)
-			Assert Equals(removed._histatus(win_getid()), OFF)
-			Assert Equals(multiselector.itemlist[0]['_histatus'](win_getid()), ON)
-			Assert Equals(multiselector.itemlist[1]['_histatus'](win_getid()), ON)
+			Assert False(removed.isshownin(win_getid()))
+			Assert True(multiselector.itemlist[0]['isshownin'](win_getid()))
+			Assert True(multiselector.itemlist[1]['isshownin'](win_getid()))
 
 			let removed = multiselector.remove(0)
-			Assert Equals(removed._histatus(win_getid()), OFF)
-			Assert Equals(multiselector.itemlist[0]['_histatus'](win_getid()), ON)
+			Assert False(removed.isshownin(win_getid()))
+			Assert True(multiselector.itemlist[0]['isshownin'](win_getid()))
 
 			let removed = multiselector.remove(0)
-			Assert Equals(removed._histatus(win_getid()), OFF)
+			Assert False(removed.isshownin(win_getid()))
 
 			call filter(multiselector, 0)
 		End
@@ -362,8 +354,6 @@ Describe Multiselector
 
 		It turns off the highlight of removed items
 			let multiselector = MS.Multiselector(DEFAULTS)
-			let ON = g:TRUE
-			let OFF = g:FALSE
 			let item1 = Item([0, 1, 1, 0], [0, 1, 1, 0], 'v')
 			let item2 = Item([0, 2, 1, 0], [0, 2, 1, 0], 'v')
 			let item3 = Item([0, 3, 1, 0], [0, 3, 1, 0], 'v')
@@ -371,33 +361,33 @@ Describe Multiselector
 			call multiselector.extend(added)
 
 			let removed = multiselector.remove(0, 0)
-			Assert Equals(removed[0]['_histatus'](win_getid()), OFF)
-			Assert Equals(multiselector.itemlist[0]._histatus(win_getid()), ON)
-			Assert Equals(multiselector.itemlist[1]._histatus(win_getid()), ON)
+			Assert False(removed[0]['isshownin'](win_getid()))
+			Assert True(multiselector.itemlist[0].isshownin(win_getid()))
+			Assert True(multiselector.itemlist[1].isshownin(win_getid()))
 
 			call multiselector.uncheckall()
 			call multiselector.extend(added)
 
 			let removed = multiselector.remove(1, 2)
-			Assert Equals(removed[0]['_histatus'](win_getid()), OFF)
-			Assert Equals(removed[1]['_histatus'](win_getid()), OFF)
-			Assert Equals(multiselector.itemlist[0]._histatus(win_getid()), ON)
+			Assert False(removed[0]['isshownin'](win_getid()))
+			Assert False(removed[1]['isshownin'](win_getid()))
+			Assert True(multiselector.itemlist[0].isshownin(win_getid()))
 
 			call multiselector.uncheckall()
 			call multiselector.extend(added)
 
 			let removed = multiselector.remove(0, 2)
-			Assert Equals(removed[0]['_histatus'](win_getid()), OFF)
-			Assert Equals(removed[1]['_histatus'](win_getid()), OFF)
-			Assert Equals(removed[2]['_histatus'](win_getid()), OFF)
+			Assert False(removed[0]['isshownin'](win_getid()))
+			Assert False(removed[1]['isshownin'](win_getid()))
+			Assert False(removed[2]['isshownin'](win_getid()))
 
 			call multiselector.uncheckall()
 			call multiselector.extend(added)
 
 			let removed = multiselector.remove(0, -1)
-			Assert Equals(removed[0]['_histatus'](win_getid()), OFF)
-			Assert Equals(removed[1]['_histatus'](win_getid()), OFF)
-			Assert Equals(removed[2]['_histatus'](win_getid()), OFF)
+			Assert False(removed[0]['isshownin'](win_getid()))
+			Assert False(removed[1]['isshownin'](win_getid()))
+			Assert False(removed[2]['isshownin'](win_getid()))
 
 			call filter(multiselector, 0)
 		End
@@ -506,8 +496,6 @@ Describe Multiselector
 
 		It turns off the highlight of removed item
 			let multiselector = MS.Multiselector(DEFAULTS)
-			let ON = g:TRUE
-			let OFF = g:FALSE
 			let item1 = Item([0, 1, 1, 0], [0, 1, 1, 0], 'v')
 			let item2 = Item([0, 2, 1, 0], [0, 2, 1, 0], 'v')
 			let item3 = Item([0, 3, 1, 0], [0, 3, 1, 0], 'v')
@@ -515,16 +503,16 @@ Describe Multiselector
 			call multiselector.extend(added)
 
 			let removed = multiselector.remove(1)
-			Assert Equals(removed._histatus(win_getid()), OFF)
-			Assert Equals(multiselector.itemlist[0]['_histatus'](win_getid()), ON)
-			Assert Equals(multiselector.itemlist[1]['_histatus'](win_getid()), ON)
+			Assert False(removed.isshownin(win_getid()))
+			Assert True(multiselector.itemlist[0]['isshownin'](win_getid()))
+			Assert True(multiselector.itemlist[1]['isshownin'](win_getid()))
 
 			let removed = multiselector.remove(0)
-			Assert Equals(removed._histatus(win_getid()), OFF)
-			Assert Equals(multiselector.itemlist[0]['_histatus'](win_getid()), ON)
+			Assert False(removed.isshownin(win_getid()))
+			Assert True(multiselector.itemlist[0]['isshownin'](win_getid()))
 
 			let removed = multiselector.remove(0)
-			Assert Equals(removed._histatus(win_getid()), OFF)
+			Assert False(removed.isshownin(win_getid()))
 
 			call filter(multiselector, 0)
 		End
@@ -588,8 +576,6 @@ Describe Multiselector
 
 		It turns off the highlight of emitted item
 			let multiselector = MS.Multiselector(DEFAULTS)
-			let ON = g:TRUE
-			let OFF = g:FALSE
 			let item1 = Item([0, 1, 1, 0], [0, 1, 1, 0], 'v')
 			let item2 = Item([0, 2, 1, 0], [0, 2, 1, 0], 'v')
 			let item3 = Item([0, 3, 1, 0], [0, 3, 1, 0], 'v')
@@ -597,9 +583,9 @@ Describe Multiselector
 			call multiselector.extend(added)
 
 			let emitted = multiselector.emit()
-			Assert Equals(emitted[0]._histatus(win_getid()), OFF)
-			Assert Equals(emitted[1]._histatus(win_getid()), OFF)
-			Assert Equals(emitted[2]._histatus(win_getid()), OFF)
+			Assert False(emitted[0].isshownin(win_getid()))
+			Assert False(emitted[1].isshownin(win_getid()))
+			Assert False(emitted[2].isshownin(win_getid()))
 
 			call filter(multiselector, 0)
 		End
@@ -655,8 +641,6 @@ Describe Multiselector
 
 		It turns off the highlight of emitted items
 			let multiselector = MS.Multiselector(DEFAULTS)
-			let ON = g:TRUE
-			let OFF = g:FALSE
 			let item1 = Item([0, 1, 1, 0], [0, 1, 1, 0], 'v')
 			let item2 = Item([0, 2, 1, 0], [0, 2, 1, 0], 'v')
 			let item3 = Item([0, 3, 1, 0], [0, 3, 1, 0], 'v')
@@ -664,9 +648,9 @@ Describe Multiselector
 			call multiselector.extend(added)
 
 			let emitted = multiselector.emit({i, item -> item.head[1] == 2})
-			Assert Equals(emitted[0]._histatus(win_getid()), OFF)
-			Assert Equals(multiselector.itemlist[0]['_histatus'](win_getid()), ON)
-			Assert Equals(multiselector.itemlist[1]['_histatus'](win_getid()), ON)
+			Assert False(emitted[0].isshownin(win_getid()))
+			Assert True(multiselector.itemlist[0]['isshownin'](win_getid()))
+			Assert True(multiselector.itemlist[1]['isshownin'](win_getid()))
 
 			call filter(multiselector, 0)
 		End
@@ -854,8 +838,6 @@ Describe Multiselector
 
 		It  turns off the highlight of filtered items
 			let multiselector = MS.Multiselector(DEFAULTS)
-			let ON = g:TRUE
-			let OFF = g:FALSE
 			let item1 = Item([0, 1, 1, 0], [0, 1, 1, 0], 'v')
 			let item2 = Item([0, 2, 1, 0], [0, 2, 1, 0], 'v')
 			let item3 = Item([0, 3, 1, 0], [0, 3, 1, 0], 'v')
@@ -863,17 +845,17 @@ Describe Multiselector
 			call multiselector.extend(added)
 
 			let remained = multiselector.filter({i, item -> item.head[1] == 2})
-			Assert Equals(item1._histatus(win_getid()), OFF)
-			Assert Equals(item2._histatus(win_getid()), ON)
-			Assert Equals(item3._histatus(win_getid()), OFF)
+			Assert False(item1.isshownin(win_getid()))
+			Assert True(item2.isshownin(win_getid()))
+			Assert False(item3.isshownin(win_getid()))
 
 			call multiselector.uncheckall()
 			call multiselector.extend(added)
 
 			let remained = multiselector.filter({i, item -> item.head[1] != 2})
-			Assert Equals(item1._histatus(win_getid()), ON)
-			Assert Equals(item2._histatus(win_getid()), OFF)
-			Assert Equals(item3._histatus(win_getid()), ON)
+			Assert True(item1.isshownin(win_getid()))
+			Assert False(item2.isshownin(win_getid()))
+			Assert True(item3.isshownin(win_getid()))
 
 			call filter(multiselector, 0)
 		End

@@ -284,6 +284,10 @@ endfunction "}}}
 function! s:Item.quench() abort "{{{
 	call self._highlight.quench()
 endfunction "}}}
+function! s:Item.isshownin(...) abort "{{{
+	let winid = get(a:000, 0, win_getid())
+	return self._highlight.status(winid) is s:Highlights.ON
+endfunction "}}}
 function! s:Item._showlocal(higroup) abort "{{{
 	if self._highlight.initialize(a:higroup, self)
 		call self._highlight.quench()
@@ -294,9 +298,6 @@ function! s:Item._showlocal(higroup) abort "{{{
 endfunction "}}}
 function! s:Item._quenchlocal() abort "{{{
 	call self._highlight.quenchlocal()
-endfunction "}}}
-function! s:Item._histatus(winid) abort "{{{
-	return self._highlight.status(a:winid)
 endfunction "}}}
 lockvar! s:Item
 

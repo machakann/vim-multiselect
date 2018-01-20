@@ -417,6 +417,7 @@ List of contents~
   Item.bufnr			|multiselect-Item.bufnr|
   Item.show()			|multiselect-Item.show()|
   Item.quench()			|multiselect-Item.quench()|
+  Item.isshownin()		|multiselect-Item.isshownin()|
 
 * Change class~
   Change			|multiselect-class-Change|
@@ -1597,6 +1598,13 @@ Item.show()    [method]
 					*multiselect-Item.quench()*
 Item.quench()    [method]
 	This is a method to turn off the highlight of the item.
+
+
+					*multiselect-Item.isshownin()*
+Item.isshownin([{winid}])    [method]
+	This method returns |TRUE| if the item is highlighted in the window
+	pointed by {winid}. {winid} is a return value of |win_getid()|. If it
+	is omitted, it returns the status of the current window.
 
 
 
