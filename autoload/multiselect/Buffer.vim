@@ -543,8 +543,8 @@ function! s:isextended() abort "{{{
 	return extended
 endfunction
 "}}}
-function! s:searchpos(pat, flag) abort "{{{
-	return [0] + searchpos(a:pat, a:flag) + [0]
+function! s:searchpos(pat, ...) abort "{{{
+	return [0] + call('searchpos', [a:pat] + a:000) + [0]
 endfunction "}}}
 function! s:foldopen(lnum) abort "{{{
 	if foldclosed(a:lnum) == -1
