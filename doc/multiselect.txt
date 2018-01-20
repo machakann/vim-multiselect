@@ -583,7 +583,7 @@ Multiselect.percolate({expr}, {Filterexpr})    [function]
 
 					*multiselect-Multiselect.enumerate()*
 Multiselect.enumerate({list}[, {start}])    [function]
-	This method returns a list of lists of indexes and items. >
+	This function returns a list of lists of indexes and items. >
 		let s:enumerate = s:Multiselect.enumerate
 		let list = ['foo', 'bar', 'baz']
 		let newlist s:enumerate(list)
@@ -593,6 +593,38 @@ Multiselect.enumerate({list}[, {start}])    [function]
 		let list = ['foo', 'bar', 'baz']
 		let newlist s:enumerate(list, 1)
 		" newlist == [[1, 'foo'], [2, 'bar'], [3, 'baz']]
+<
+
+					*multiselect-Multiselect.str2type()*
+Multiselect.str2type({str})    [function]
+	This function returns a string representing a type of region.
+	This function returns "char" if {str} is "char" or "v".
+	This function returns "line" if {str} is "line" or "V".
+	This function returns "block" if {str} is "block" or "<C-v>"
+	(a single CTRL-V character). See |visualmode()|. >
+		let s:str2type = s:Multiselect.str2type
+
+		let type = str2type('char')
+		" type ==# 'char'
+
+		let type = str2type('v')
+		" type ==# 'char'
+
+		let type = str2type('line')
+		" type ==# 'line'
+
+		let type = str2type('V')
+		" type ==# 'line'
+
+		let type = str2type('block')
+		" type ==# 'block'
+
+		let type = str2type("\<C-v>")
+		" type ==# 'block'
+<
+	This function ignores a number after "<C-v>". See |getregtype()|. >
+		let type = str2type("\<C-v>10")
+		" type ==# 'block'
 <
 
 

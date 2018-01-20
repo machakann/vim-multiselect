@@ -1546,6 +1546,7 @@ Describe utility functions
 	Before
 		let Percolate = g:MS.percolate
 		let Enumerate = g:MS.enumerate
+		let Str2type = g:MS.str2type
 	End
 
 	Context percolate({expr}, {Filterexpr})
@@ -1584,6 +1585,25 @@ Describe utility functions
 		It returns a list of lists of indexes and items
 			Assert Equals(Enumerate(['foo', 'bar', 'baz'], 1), [[1, 'foo'], [2, 'bar'], [3, 'baz']])
 			Assert Equals(Enumerate(['foo', 'bar', 'baz'], 2), [[2, 'foo'], [3, 'bar'], [4, 'baz']])
+		End
+	End
+
+	Context str2type({str})
+		It returns 'char' if {str} is 'char' or 'v'
+			Assert Equals(Str2type('char'), 'char')
+			Assert Equals(Str2type('v'), 'char')
+		End
+
+		It returns 'line' if {str} is 'line' or 'V'
+			Assert Equals(Str2type('line'), 'line')
+			Assert Equals(Str2type('V'), 'line')
+		End
+
+		It returns 'block' if {str} is 'block' or "\<C-v>"
+			Assert Equals(Str2type('block'), 'block')
+			Assert Equals(Str2type("\<C-v>"), 'block')
+			Assert Equals(Str2type("\<C-v>1"), 'block')
+			Assert Equals(Str2type("\<C-v>10"), 'block')
 		End
 	End
 End
