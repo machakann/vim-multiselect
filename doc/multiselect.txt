@@ -337,14 +337,25 @@ API					*multiselect-api*
 List of contents~
 
 * Multiselect module~
-  multiselect#import()		|multiselect#import()|
   Multiselect			|multiselect-module-Multiselect|
+  multiselect#import()		|multiselect#import()|
 
   Multiselect.DEFAULTHIGROUP	|multiselect-Multiselect.DEFAULTHIGROUP|
   Multiselect.load()		|multiselect-Multiselect.load()|
+
+  - class constructors
   Multiselect.Multiselector()	|multiselect-Multiselect.Multiselector()|
   Multiselect.Region()		|multiselect-Multiselect.Region()|
   Multiselect.Item()		|multiselect-Multiselect.Item()|
+
+  - utility functions
+  Multiselect.percolate()	|multiselect-Multiselect.percolate()|
+  Multiselect.enumerate()	|multiselect-Multiselect.enumerate()|
+  Multiselect.str2type()	|multiselect-Multiselect.str2type()|
+  Multiselect.str2visualcmd()	|multiselect-Multiselect.str2visualcmd()|
+  Multiselect.inorderof()	|multiselect-Multiselect.inorderof()|
+  Multiselect.inbetween()	|multiselect-Multiselect.inbetween()|
+  Multiselect.isextended()	|multiselect-Multiselect.isextended()|
 
 * Multiselector class~
   Multiselector			|multiselect-class-Multiselector|
@@ -457,6 +468,7 @@ Multiselect.load()    [function]
 	keymappings |multiselect-keymappings|.
 
 
+  - class constructors
 				*multiselect-Multiselect.Multiselector()*
 Multiselect.Multiselector([{options}])    [function]
 	This is a constructor of `Multiselector` class. A plugin developer can
@@ -562,6 +574,7 @@ Multiselect.Item({startlnum}, {endlnum})
 		let item = s:Multiselect.Item(head, tail, 'block', 1)
 <
 
+  - utility functions
 					*multiselect-Multiselect.percolate()*
 Multiselect.percolate({expr}, {Filterexpr})    [function]
 	This function removes items in |List| or |Dictionary| based on
