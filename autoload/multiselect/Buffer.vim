@@ -545,6 +545,10 @@ function! s:inbetween(pos, head, tail) abort  "{{{
 		\ && ((a:pos[1] < a:tail[1]) || ((a:pos[1] == a:tail[1]) && (a:pos[2] + a:pos[3] <= a:tail[2] + a:tail[3])))
 endfunction "}}}
 function! s:isextended() abort "{{{
+	if visualmode() isnot# "\<C-v>"
+		return
+	endif
+
 	let view = winsaveview()
 	normal! gv
 	let extended = winsaveview().curswant == s:MAXCOL
