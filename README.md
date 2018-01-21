@@ -20,24 +20,24 @@ This plugin does not define default keymappings. Thus you should make your keyma
 runtime macros/multiselect/keymap/example1.vim
 ```
 
-## check
-Use `<Plug>(multiselect)`, `<Plug>(multiselect-check)`, `<Plug>(multiselect-checksearched)` to select regions on a buffer.
+## Check
+Use **\<Plug\>(multiselect)**, **\<Plug\>(multiselect-check)**, **\<Plug\>(multiselect-checksearched)** to select regions on a buffer.
 
-**<Plug>(multiselect)** selects a word under the cursor over the current buffer.
+**\<Plug\>(multiselect)** selects a word under the cursor over the current buffer.
 
 ```vim
 nmap <Space>v <Plug>(multiselect)
 xmap <Space>v <Plug>(multiselect)
 ```
 
-**<Plug>(multiselect-check)** selects a word under the cursor.
+**\<Plug\>(multiselect-check)** selects a word under the cursor.
 
 ```vim
 nmap <Space>v <Plug>(multiselect-check)
 xmap <Space>v <Plug>(multiselect-check)
 ```
 
-**<Plug>(multiselect-checksearched)** selects texts matching with the last searched pattern.
+**\<Plug\>(multiselect-checksearched)** selects texts matching with the last searched pattern.
 
 ```vim
 nmap <Space>v <Plug>(multiselect-checksearched)
@@ -65,25 +65,25 @@ Another way is to use a series of wrapped textobjects, **broadcasting textobject
 - `<Plug>(multiselect-at)`
 
 ```vim
-xmap iw <Plug>(multiselect-iw)`
-xmap i( <Plug>(multiselect-i()`
-xmap i' <Plug>(multiselect-i')`
+xmap iw <Plug>(multiselect-iw)
+xmap i( <Plug>(multiselect-i()
+xmap i' <Plug>(multiselect-i')
 ```
 
 ![demo:broadcasting textobjects](https://imgur.com/0HDDUE9.gif)
 
 
-## uncheck
-Use **<Plug>(multiselect-uncheck)** or `<Plug>(multiselect-uncheckall)` to unselect the selections.
+## Uncheck
+Use **\<Plug\>(multiselect-uncheck)** or `<Plug>(multiselect-uncheckall)` to unselect the selections.
 
-**<Plug>(multiselect-uncheck)** unselects a selection under the cursor.
+**\<Plug\>(multiselect-uncheck)** unselects a selection under the cursor.
 
 ```vim
 nmap <Space>V <Plug>(multiselect-uncheck)
 xmap <Space>V <Plug>(multiselect-uncheck)
 ```
 
-**<Plug>(multiselect-uncheckall)** unselects all selections.
+**\<Plug\>(multiselect-uncheckall)** unselects all selections.
 
 ```vim
 nmap <Space>V <Plug>(multiselect-uncheckall)
