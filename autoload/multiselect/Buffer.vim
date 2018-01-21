@@ -6,7 +6,7 @@ let s:FALSE = 0
 let s:MAXCOL = 2147483647
 let s:NULLPOS = [0, 0, 0, 0]
 
-function! multiselect#Buffer#_impor() abort "{{{
+function! multiselect#Buffer#_import() abort "{{{
 	return s:Buffer
 endfunction "}}}
 

@@ -1,6 +1,6 @@
 " multiselect.vim : A library for multiple selection
 let s:Errors = multiselect#Errors#_import()
-let s:Buffer = multiselect#Buffer#_impor()
+let s:Buffer = multiselect#Buffer#_import()
 let s:Highlights = multiselect#Highlights#_import()
 let s:Events = multiselect#Events#_import()
 let s:TRUE = 1
