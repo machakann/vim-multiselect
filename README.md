@@ -6,7 +6,7 @@ A library plugin to handle multiple visual selections
 
 # Mission
 
-To explore the new ability of Vim to edit texts, here is a conceptual implementation to handle multiple selections. This plugin itself just provides basic functions to select and unselect regions on a buffer, and the further editing operations would be supplied by other external plugins. Its Application Programming Interfaces are opened. Hope it would spawn fresh ideas!
+To explore the new ability of Vim to edit texts, here is a conceptual implementation to handle multiple selections. This plugin itself just provides basic functions to select and unselect regions on a buffer, and the further editing operations would be supplied by other external plugins. Its Application Programming Interfaces are [opened](https://github.com/machakann/vim-multiselect/blob/master/doc/multiselect.txt). Hope it would spawn fresh ideas!
 
 # Dependency
 
