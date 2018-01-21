@@ -1,0 +1,5 @@
+nmap <Space>v <Plug>(multiselect)
+xmap <Space>v <Plug>(multiselect)
+nmap <Space>V <Plug>(multiselect-uncheckall)
+xmap <Space>V <Plug>(multiselect-uncheck)
+nmap @/ <Plug>(multiselect-checksearched)
