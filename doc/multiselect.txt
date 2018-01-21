@@ -1,5 +1,5 @@
 *multiselect.txt*	A library for multiple selection
-						Last change:20-Jan-2018.
+						Last change:21-Jan-2018.
 
 Author  : machakann <https://github.com/machakann>
 License : MIT license
@@ -1622,8 +1622,9 @@ Item.bufnr    [number]
 
 
 					*multiselect-Item.show()*
-Item.show()    [method]
-	This is a method to highlight the item region on a buffer.
+Item.show({higroup})    [method]
+	This is a method to highlight the item region on a buffer. It will be
+	highlighted by {higroup}. |highlight-groups|
 
 
 					*multiselect-Item.quench()*
