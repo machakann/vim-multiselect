@@ -3,15 +3,17 @@ function! multiselect#Errors#_import() abort "{{{
 endfunction "}}}
 
 function! s:InvalidArgument(name, args) abort "{{{
+	let template = 'multiselect: Invalid argument: %s(%s)'
+	let len = (&columns - 5) - (strlen(template) + 4) - strlen(a:name)
 	let argstr = join(map(copy(a:args), 'string(v:val)'), ', ')
-	let argstr = s:trimLR(argstr)
-	return printf('multiselect: Invalid argument: %s(%s)', a:name, argstr)
+	return printf(template, a:name, s:trimmiddle(argstr, len))
 endfunction "}}}
-function! s:trimLR(str) abort "{{{
-	if strlen(a:str) <= 30
+function! s:trimmiddle(str, len) abort "{{{
+	if strlen(a:str) <= a:len
 		return a:str
 	endif
-	return a:str[:19] . ' ... ' a:str[-5:-1]
+	let len = a:len - 10
+	return a:str[: len - 1] . ' ... ' . a:str[-5:-1]
 endfunction "}}}
 
 " Errors module {{{
