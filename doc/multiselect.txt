@@ -103,7 +103,7 @@ HIGHLIGHT GROUPS			*multiselect-higroups*
 The multiselect items on a buffer will be highlighted like |Visual| selection.
 The color of the highlight can be customized through the highlight groups.
 
-MultiselectItem			*hl-MultiselectItem*
+MultiselectItem				*hl-MultiselectItem*
 	The highlight group for a region of multiselect item. It is linked to
 	|hl-VisualNOS| in default. >
 		highlight default link MultiselectItem VisualNOS
