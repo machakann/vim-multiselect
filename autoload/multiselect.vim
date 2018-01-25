@@ -71,7 +71,7 @@ function! s:Multiselector.check(expr, ...) abort  "{{{
 	catch /^Vim(echoerr):multiselect: Invalid argument: /
 		echoerr s:Errors.InvalidArgument('Multiselector.check', args)
 	endtry
-	call self.add(newitem)
+	call self.append(newitem)
 	return newitem
 endfunction "}}}
 function! s:Multiselector.uncheck(expr, ...) abort  "{{{
@@ -244,7 +244,7 @@ function! s:Multiselector.keymap_undo() abort "{{{
 		endfor
 		call self.remove(removing)
 	elseif last.event is# 'uncheck'
-		call self.extend(last.itemlist)
+		call self.append(last.itemlist)
 	endif
 endfunction "}}}
 function! s:Multiselector.keymap_multiselect(mode) abort "{{{
@@ -305,7 +305,7 @@ function! s:Multiselector.keymap_broadcast(cmd, ...) abort "{{{
 			call add(itemlist, item)
 		endif
 	endfor
-	call self.extend(itemlist)
+	call self.append(itemlist)
 
 	normal! V
 	execute "normal! \<Esc>"
@@ -347,8 +347,8 @@ function! s:countstr(count) abort "{{{
 endfunction "}}}
 
 " low-level interfaces
-function! s:Multiselector.extend(itemlist) abort "{{{
-	if empty(a:itemlist)
+function! s:Multiselector.append(item) abort "{{{
+	if empty(a:item)
 		return self.itemlist
 	endif
 
@@ -356,8 +356,17 @@ function! s:Multiselector.extend(itemlist) abort "{{{
 		let self.bufnr = bufnr('%')
 	endif
 
+	let t_item = type(a:item)
+	if t_item is v:t_dict
+		let itemlist = [a:item]
+	elseif t_item is v:t_list
+		let itemlist = a:item
+	else
+		call s:Errors.InvalidArgument('Multiselector.append', [a:item])
+	endif
+
 	let added = []
-	for newitem in a:itemlist
+	for newitem in itemlist
 		if empty(newitem) || newitem.bufnr != self.bufnr
 			continue
 		endif
@@ -367,9 +376,6 @@ function! s:Multiselector.extend(itemlist) abort "{{{
 	endfor
 	call self._checkpost(added)
 	return self.itemlist
-endfunction "}}}
-function! s:Multiselector.add(item) abort "{{{
-	return self.extend([a:item])
 endfunction "}}}
 function! s:Multiselector.remove(...) abort "{{{
 	if self.itemnum() == 0

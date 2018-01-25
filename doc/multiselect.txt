@@ -363,8 +363,7 @@ List of contents~
 				|multiselect-Multiselector.keymap_broadcast()|
 
   - low-level interfaces
-  Multiselector.extend()	|multiselect-Multiselector.extend()|
-  Multiselector.add()		|multiselect-Multiselector.add()|
+  Multiselector.append()	|multiselect-Multiselector.append()|
   Multiselector.remove()	|multiselect-Multiselector.remove()|
   Multiselector.enumerate()	|multiselect-Multiselector.enumerate()|
   Multiselector.itemnum()	|multiselect-Multiselector.itemnum()|
@@ -1174,11 +1173,12 @@ Multiselector.keymap_broadcast({cmd})   [method]
 
 
   - low-level interfaces
-					*multiselect-Multiselector.extend()*
-Multiselector.extend({itemlist})    [method]
-	This method extends `Multiselector.itemlist` to append items in
-	{itemlist}. The items in {itemlist} should be instances of `Item`
-	class. The items are appended at the end of `Multiselector.itemlist`.
+					*multiselect-Multiselector.append()*
+Multiselector.append({item})    [method]
+	This method append items in {item} into `Multiselector.itemlist`.
+	The {item} should be an instance of `Item` class or a list of the
+	instances.
+	The items are appended at the end of `Multiselector.itemlist`.
 	This method returns `Multiselector.itemlist`.
 	|multiselect-Multiselector.itemlist|
 >
@@ -1188,25 +1188,8 @@ Multiselector.extend({itemlist})    [method]
 		let item3 = s:Multiselect.Item([0, 1, 3, 0], [0, 1, 3, 0])
 		let itemlist = [item1, item2, item3]
 
-		call s:multiselector.extend(itemlist)
+		call s:multiselector.append(itemlist)
 		" s:multiselector.itemlist == [item1, item2, item3]
-<
-	|multiselect-Multiselector.uncheckall()|
-	|multiselect-Multiselect.Item()|
-
-
-					*multiselect-Multiselector.add()*
-Multiselector.add({item})    [method]
-	This method add an {item} to `Multiselector.itemlist`. The {item}
-	should be an instance of `Item` class. The item is appended at the
-	end of `Multiselector.itemlist`. This method returns
-	`Multiselector.itemlist`. |multiselect-Multiselector.itemlist|
- >
-		call s:multiselector.uncheckall()
-		let item = s:Multiselect.Item([0, 1, 1, 0], [0, 1, 1, 0])
-
-		call s:multiselector.add(item)
-		" s:multiselector.itemlist == [item]
 <
 	|multiselect-Multiselector.uncheckall()|
 	|multiselect-Multiselect.Item()|
@@ -1225,14 +1208,14 @@ Multiselector.remove({indexlist})
 		let item2 = s:Multiselect.Item([0, 1, 2, 0], [0, 1, 2, 0])
 		let item3 = s:Multiselect.Item([0, 1, 3, 0], [0, 1, 3, 0])
 		let itemlist = [item1, item2, item3]
-		call s:multiselector.extend(itemlist)
+		call s:multiselector.append(itemlist)
 
 		let lastitem = s:multiselector.remove(-1)
 		" lastitem is item3
 <
 	|multiselect-Multiselector.uncheckall()|
 	|multiselect-Multiselect.Item()|
-	|multiselect-Multiselector.extend()|
+	|multiselect-Multiselector.append()|
 
 	With {end}: Remove items from {idx} to {end} and return a |List| of
 	these items. >
@@ -1241,7 +1224,7 @@ Multiselector.remove({indexlist})
 		let item2 = s:Multiselect.Item([0, 1, 2, 0], [0, 1, 2, 0])
 		let item3 = s:Multiselect.Item([0, 1, 3, 0], [0, 1, 3, 0])
 		let itemlist = [item1, item2, item3]
-		call s:multiselector.extend(itemlist)
+		call s:multiselector.append(itemlist)
 
 		let removeditems = s:multiselector.remove(0, 1)
 		" removeditems == [item1, item2]
@@ -1252,14 +1235,14 @@ Multiselector.remove({indexlist})
 		let item2 = s:Multiselect.Item([0, 1, 2, 0], [0, 1, 2, 0])
 		let item3 = s:Multiselect.Item([0, 1, 3, 0], [0, 1, 3, 0])
 		let itemlist = [item1, item2, item3]
-		call s:multiselector.extend(itemlist)
+		call s:multiselector.append(itemlist)
 
 		let removed = s:multiselector.remove([0, 2])
 		" removed is [item1, item3]
 <
 	|multiselect-Multiselector.uncheckall()|
 	|multiselect-Multiselect.Item()|
-	|multiselect-Multiselector.extend()|
+	|multiselect-Multiselector.append()|
 
 
 				*multiselect-Multiselector.enumerate()*
@@ -1273,7 +1256,7 @@ Multiselector.enumerate([{Filterexpr}])    [method]
 		let item2 = s:Multiselect.Item([0, 1, 2, 0], [0, 1, 2, 0])
 		let item3 = s:Multiselect.Item([0, 1, 3, 0], [0, 1, 3, 0])
 		let itemlist = [item1, item2, item3]
-		call s:multiselector.extend(itemlist)
+		call s:multiselector.append(itemlist)
 
 		let list = s:multiselector.enumerate()
 		" list == [[0, item1], [1, item2], [2, item3]]
@@ -1296,7 +1279,7 @@ Multiselector.itemnum([{Filterexpr}])    [method]
 		let item2 = s:Multiselect.Item([0, 1, 2, 0], [0, 1, 2, 0])
 		let item3 = s:Multiselect.Item([0, 1, 3, 0], [0, 1, 3, 0])
 		let itemlist = [item1, item2, item3]
-		call s:multiselector.extend(itemlist)
+		call s:multiselector.append(itemlist)
 
 		let nr = s:multiselector.itemnum()
 		" nr == 3
@@ -1322,7 +1305,7 @@ Multiselector.isempty()    [method]
 		let item2 = s:Multiselect.Item([0, 1, 2, 0], [0, 1, 2, 0])
 		let item3 = s:Multiselect.Item([0, 1, 3, 0], [0, 1, 3, 0])
 		let itemlist = [item1, item2, item3]
-		call s:multiselector.extend(itemlist)
+		call s:multiselector.append(itemlist)
 
 		let bool = s:multiselector.isempty()
 		" bool is 0
@@ -1340,7 +1323,7 @@ Multiselector.lastevent()    [method]
 		let item2 = s:Multiselect.Item([0, 1, 2, 0], [0, 1, 2, 0])
 		let item3 = s:Multiselect.Item([0, 1, 3, 0], [0, 1, 3, 0])
 		let itemlist = [item1, item2, item3]
-		call s:multiselector.extend(itemlist)
+		call s:multiselector.append(itemlist)
 
 		let last = s:multiselector.lastevent()
 		" last.event ==# 'check'
@@ -1354,7 +1337,7 @@ Multiselector.lastevent()    [method]
 <
 	|multiselect-Multiselector.uncheckall()|
 	|multiselect-Multiselect.Item()|
-	|multiselect-Multiselector.extend()|
+	|multiselect-Multiselector.append()|
 	|multiselect-Multiselector.remove()|
 
 
