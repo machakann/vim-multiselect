@@ -314,6 +314,7 @@ List of contents~
   Multiselect.Multiselector()	|multiselect-Multiselect.Multiselector()|
   Multiselect.Region()		|multiselect-Multiselect.Region()|
   Multiselect.Item()		|multiselect-Multiselect.Item()|
+  Multiselect.Change()		|multiselect-Multiselect.Change()|
 
   - utility functions
   Multiselect.percolate()	|multiselect-Multiselect.percolate()|
@@ -548,6 +549,12 @@ Multiselect.Item({startlnum}, {endlnum})
 		let tail = [0, 3, 1, 0]
 		let item = s:Multiselect.Item(head, tail, 'block', 1)
 <
+
+					*multiselect-Multiselect.Change()*
+Multiselect.Change()    [function]
+	This is a constructor of `Change` class. It is employed to track a
+	position after some edits. See |multiselect-class-Change|.
+
 
   - utility functions
 					*multiselect-Multiselect.shiftenv()*
