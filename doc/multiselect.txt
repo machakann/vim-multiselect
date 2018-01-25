@@ -406,7 +406,7 @@ List of contents~
   Event.name			|multiselect-Event.name|
   Event.call()			|multiselect-Event.call()|
   Event.execute()		|multiselect-Event.execute()|
-  Event.add()			|multiselect-Event.add()|
+  Event.append()		|multiselect-Event.append()|
   Event.trigger()		|multiselect-Event.trigger()|
   Event.on()			|multiselect-Event.on()|
   Event.off()			|multiselect-Event.off()|
@@ -1786,13 +1786,13 @@ Event.execute({cmd})    [method]
 		call task.finish()
 <
 
-					*multiselect-Event.add()*
-Event.add({task})    [method]
+					*multiselect-Event.append()*
+Event.append({task})    [method]
 	This method register tasks for the event. {task} should be an instance
 	of `EventTask` class or a list of the instances. >
 		let task = s:Multiselect.EventTask()
 		call task.execute('echo "foo"')
-		call s:multiselector.Event('TextChanged').add(task)
+		call s:multiselector.Event('TextChanged').append(task)
 <
 	This method returns the added task.
 
@@ -1841,8 +1841,8 @@ use |multiselect-EventTask.finish()| to abandon the task.
 An `EventTask` instance itself is not bound to an event, thus a same
 `EventTask` can be registered to different events. >
 	let task = s:Multiselect.EventTask().execute('echo "foo"')
-	call s:multiselector.Event('TextChanged').add(task)
-	call s:multiselector.Event('InsertEnter').add(task)
+	call s:multiselector.Event('TextChanged').append(task)
+	call s:multiselector.Event('InsertEnter').append(task)
 <
 If |multiselect-EventTask.finish()| is called for the task, the task will be
 abondoned from those two events.

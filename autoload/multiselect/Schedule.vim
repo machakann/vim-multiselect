@@ -179,23 +179,23 @@ endfunction "}}}
 function! s:TaskGroup.call(func, args, ...) abort "{{{
 	let task = self.__taskgroup__.Constructor()
 	call call(task.call, [a:func, a:args] + a:000, task)
-	call self.add(task)
+	call self.append(task)
 	return task
 endfunction "}}}
 function! s:TaskGroup.execute(cmd) abort "{{{
 	let task = self.__taskgroup__.Constructor()
 	call call(task.execute, [a:cmd], task)
-	call self.add(task)
+	call self.append(task)
 	return task
 endfunction "}}}
-function! s:TaskGroup.add(task) abort "{{{
+function! s:TaskGroup.append(task) abort "{{{
 	let t_task = type(a:task)
 	if t_task is v:t_dict
 		call add(self._orderlist, a:task)
 	elseif t_task is v:t_list
 		call extend(self._orderlist, a:task)
 	else
-		call s:Errors.InvalidArgument('TaskGroup.add', [a:task])
+		call s:Errors.InvalidArgument('TaskGroup.append', [a:task])
 	endif
 	return a:task
 endfunction "}}}
@@ -333,9 +333,9 @@ function! s:Event.trigger() abort "{{{
 	call s:ClassSys.super(self, 'TaskGroup').trigger()
 	return self
 endfunction "}}}
-function! s:Event.add(task) abort "{{{
+function! s:Event.append(task) abort "{{{
 	call self.sweep()
-	call s:ClassSys.super(self, 'TaskGroup').add(a:task)
+	call s:ClassSys.super(self, 'TaskGroup').append(a:task)
 endfunction "}}}
 function! s:Event.sweep() abort "{{{
 	call filter(self._orderlist, {_, task -> !task.hasdone()})

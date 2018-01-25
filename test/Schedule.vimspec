@@ -178,7 +178,7 @@ Describe TaskGroup class
 		let task1 = taskgroup.call({n -> execute('let g:count1 += 1')}, [1])
 		let task2 = taskgroup.execute('let g:count2 += 1')
 		let task3 = Task().execute('let g:count3 += 1')
-		call taskgroup.add(task3)
+		call taskgroup.append(task3)
 
 		call taskgroup.trigger()
 		Assert Equals(g:count1, 1)
