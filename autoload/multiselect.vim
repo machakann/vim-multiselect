@@ -567,6 +567,12 @@ function! s:Multiselector._uncheckpost(removed) abort "{{{
 	let self._last.itemlist = a:removed
 	call self.event.UncheckPost.trigger()
 endfunction "}}}
+function! s:Multiselector._abandon() abort "{{{
+	for event in values(self._event)
+		call event.clear()
+	endfor
+	call filter(self, 0)
+endfunction "}}}
 lockvar! s:Multiselector
 "}}}
 function! s:shiftenv() abort "{{{
