@@ -64,6 +64,7 @@ The following keymappings are available with |:nmap| and |:xmap|.
 	multiple selection area. In normal mode, it registers a |word| under
 	the cursor.
 
+
 <Plug>(multiselect-checksearched)	*<Plug>(multiselect-checksearched)*
 	This keymapping registers the texts matching with the last searched
 	patten |@/|. In normal mode, it registers all the matched texts in the
@@ -75,22 +76,28 @@ The following keymappings are available with |:nmap| and |:xmap|.
 >
 	nmap <Space>v *N<Plug>(multiselect-checksearched)
 <
+
 <Plug>(multiselect-uncheck)		*<Plug>(multiselect-uncheck)*
 	This keymapping deletes registered multipleselet items. In normal
 	mode, it deletes an item under the cursor. In visual mode, it deletes
 	registered items in the current visual-selected range.
 
+
 <Plug>(multiselect-uncheckall)		*<Plug>(multiselect-uncheckall)*
 	This keymapping deletes all registered items.
+
 
 <Plug>(multiselect-undo)		*<Plug>(multiselect-undo)*
 	This keymapping rollback the last action.
 
+
 [count]<Plug>(multiselect-next)		*<Plug>(multiselect-next)*
 	This keymapping move cursor to the next multiselect item.
 
+
 [count]<Plug>(multiselect-previous)	*<Plug>(multiselect-previous)*
 	This keymapping move cursor to the previous multiselect item.
+
 
 <Plug>(multiselect)			*<Plug>(multiselect)*
 	|Normal| mode: This keymapping removes an item under the cursor if
@@ -102,6 +109,7 @@ The following keymappings are available with |:nmap| and |:xmap|.
 	keymapping selects the selection region. If in character-wise visual
 	mode, this keymapping selects all texts matching with the selected
 	string over the current buffer.
+
 
 ==============================================================================
 HIGHLIGHT GROUPS			*multiselect-higroups*
