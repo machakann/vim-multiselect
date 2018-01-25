@@ -16,6 +16,12 @@ nnoremap <silent> <Plug>(multiselect-uncheckall) :<C-u>call multiselect#keymap#u
 xnoremap <silent> <Plug>(multiselect-uncheckall) <Esc>:call multiselect#keymap#uncheckall()<CR>
 nnoremap <silent> <Plug>(multiselect-undo) :<C-u>call multiselect#keymap#undo()<CR>
 xnoremap <silent> <Plug>(multiselect-undo) <Esc>:call multiselect#keymap#undo()<CR>
+nnoremap <silent> <Plug>(multiselect-next) :<C-u>call multiselect#keymap#next('n')<CR>
+xnoremap <silent> <Plug>(multiselect-next) :<C-u>call multiselect#keymap#next('x')<CR>
+onoremap <silent> <Plug>(multiselect-next) :<C-u>call multiselect#keymap#next('o')<CR>
+nnoremap <silent> <Plug>(multiselect-previous) :<C-u>call multiselect#keymap#previous('n')<CR>
+xnoremap <silent> <Plug>(multiselect-previous) :<C-u>call multiselect#keymap#previous('x')<CR>
+onoremap <silent> <Plug>(multiselect-previous) :<C-u>call multiselect#keymap#previous('o')<CR>
 nnoremap <silent> <Plug>(multiselect) :<C-u>call multiselect#keymap#multiselect('n')<CR>
 xnoremap <silent> <Plug>(multiselect) <Esc>:call multiselect#keymap#multiselect('x')<CR>
 

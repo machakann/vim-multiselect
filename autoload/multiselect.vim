@@ -247,6 +247,36 @@ function! s:Multiselector.keymap_undo() abort "{{{
 		call self.append(last.itemlist)
 	endif
 endfunction "}}}
+function! s:Multiselector.keymap_next(mode) abort "{{{
+	let l:count = v:count1
+	let curpos = getpos('.')
+	let itemlist = self.enumerate(
+		\	{_, item -> s:Buffer.inorderof(curpos, item.head)})
+	if empty(itemlist)
+		return copy(s:NULLPOS)
+	endif
+	call map(itemlist, 'v:val[1]')
+	call self.sort(itemlist)
+	let idx = min([l:count - 1, len(itemlist) - 1])
+	let dest = itemlist[idx]
+	call setpos('.', dest.head)
+	return dest.head
+endfunction "}}}
+function! s:Multiselector.keymap_previous(mode) abort "{{{
+	let l:count = v:count1
+	let curpos = getpos('.')
+	let itemlist = self.enumerate(
+		\	{_, item -> s:Buffer.inorderof(item.head, curpos)})
+	if empty(itemlist)
+		return copy(s:NULLPOS)
+	endif
+	call map(itemlist, 'v:val[1]')
+	call self.sort(itemlist)
+	let idx = max([-l:count, -len(itemlist)])
+	let dest = itemlist[idx]
+	call setpos('.', dest.head)
+	return dest.head
+endfunction "}}}
 function! s:Multiselector.keymap_multiselect(mode) abort "{{{
 	let itemlist = []
 	if a:mode is# 'x'

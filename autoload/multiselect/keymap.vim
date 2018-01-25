@@ -25,6 +25,12 @@ endfunction "}}}
 function! multiselect#keymap#undo() abort "{{{
 	call s:multiselector.keymap_undo()
 endfunction "}}}
+function! multiselect#keymap#next(mode) abort "{{{
+	call s:multiselector.keymap_next(a:mode)
+endfunction "}}}
+function! multiselect#keymap#previous(mode) abort "{{{
+	call s:multiselector.keymap_previous(a:mode)
+endfunction "}}}
 function! multiselect#keymap#multiselect(mode) abort "{{{
 	call s:multiselector.keymap_multiselect(a:mode)
 endfunction "}}}
