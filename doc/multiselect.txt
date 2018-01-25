@@ -1,5 +1,5 @@
 *multiselect.txt*	A library for multiple selection
-						Last change:25-Jan-2018.
+						Last change:26-Jan-2018.
 
 Author  : machakann <https://github.com/machakann>
 License : MIT license
@@ -1812,7 +1812,7 @@ Event.append({task})    [method]
 
 					*multiselect-Event.trigger()*
 Event.trigger()    [method]
-	This method execute all the registered tasks.
+	This method execute all the registered tasks forcibly.
 	This method returns the `Event` itself.
 
 
@@ -1905,8 +1905,8 @@ EventTask.finish()    [method]
 
 					*multiselect-EventTask.trigger()*
 EventTask.trigger()    [method]
-	This method execute all the registered tasks. This method returns the
-	`EventTask` itself.
+	This method execute all the registered tasks forcibly.
+	This method returns the `EventTask` itself.
 
 
 					*multiselect-EventTask.clear()*
@@ -2035,7 +2035,7 @@ TimerTask.stop()    [method]
 
 					*multiselect-TimerTask.trigger()*
 TimerTask.trigger()    [method]
-	This method execute all the registered tasks.
+	This method execute all the registered tasks forcibly.
 	This method returns the task itself.
 
 
@@ -2049,7 +2049,7 @@ TimerTask.clear()    [method]
 TimerTask.repeat([{count}])    [method]
 	This method sets the number of execution. If {count} is negative, the
 	`TimerTask` will be persistent. An `TimerTask` instance is produced as
-	it is -1 in default. If {count} is omitted, it will reset the number
+	it is 1 in default. If {count} is omitted, it will reset the number
 	of execution to the last set one. Note that this method should be
 	called before |multiselect-TimerTask.start()|. >
 		" 'foo' will be displayed three times every one second
