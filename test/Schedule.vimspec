@@ -1,0 +1,321 @@
+Describe Switch
+	Before
+		let Schedule = multiselect#Schedule#_import()
+		let Switch = Schedule.Switch
+	End
+
+	Context .on()/off()
+		It controls the state of switch
+			Assert True(Switch().on().isactive())
+			Assert False(Switch().off().isactive())
+			Assert True(Switch().on().off().on().isactive())
+		End
+	End
+
+	Context .skip()
+		It controls temporal off state of a switch
+			let switch = Switch()
+
+			call switch.on().skip(1)
+			Assert False(switch.isactive())
+
+			Assert True(switch._skipsthistime())
+
+			Assert True(switch.isactive())
+			Assert False(switch._skipsthistime())
+
+			call switch.skip(2)
+			Assert False(switch.isactive())
+
+			Assert True(switch._skipsthistime())
+			Assert True(switch._skipsthistime())
+
+			Assert True(switch.isactive())
+			Assert False(switch._skipsthistime())
+		End
+	End
+End
+
+Describe Counter
+	Before
+		let Schedule = multiselect#Schedule#_import()
+		let Counter = Schedule.Counter
+	End
+
+	Context .leftcount()
+		It returns the left count
+			Assert Equals(Counter(2).leftcount(), 2)
+			Assert Equals(Counter(3).leftcount(), 3)
+			Assert Equals(Counter(1).leftcount(), 1)
+			Assert Equals(Counter(-1).leftcount(), -1)
+		End
+	End
+
+	Context .repeat(count)
+		It sets its left count
+			Assert Equals(Counter(1).repeat(1).leftcount(), 1)
+			Assert Equals(Counter(1).repeat(2).leftcount(), 2)
+			Assert Equals(Counter(1).repeat(2).repeat(1).leftcount(), 1)
+
+			let counter = Counter(3)
+			call counter._tick() " first
+			Assert Equals(counter.leftcount(), 2)
+
+			call counter._tick() " second
+			Assert Equals(counter.leftcount(), 1)
+
+			call counter._tick() " third
+			Assert Equals(counter.leftcount(), 0)
+		End
+	End
+
+	Context .hasdone()
+		It returns TRUE if the count down has finished
+			let counter = Counter(3)
+			Assert False(counter.hasdone())
+
+			call counter._tick() " first
+			Assert False(counter.hasdone())
+
+			call counter._tick() " second
+			Assert False(counter.hasdone())
+
+			call counter._tick() " third
+			Assert True(counter.hasdone())
+
+
+			" never done
+			let counter = Counter(-1)
+			Assert False(counter.hasdone())
+
+			call counter._tick() " first
+			Assert False(counter.hasdone())
+
+			call counter._tick() " second
+			Assert False(counter.hasdone())
+
+			call counter._tick() " third
+			Assert False(counter.hasdone())
+		End
+	End
+End
+
+Describe Task
+	Before
+		let Schedule = multiselect#Schedule#_import()
+		let Task = Schedule.Task
+	End
+
+	Context .call(func, args, ...)
+		It registers a function to be called later
+			let g:count = 0
+			let task = Task()
+			call task.call({n -> execute('let g:count += n')}, [1])
+			Assert Equals(g:count, 0)
+
+			call task.trigger()
+			Assert Equals(g:count, 1)
+
+			call task.call({n -> execute('let g:count += 2*n')}, [1])
+			Assert Equals(g:count, 1)
+
+			call task.trigger()
+			Assert Equals(g:count, 4)
+
+			unlet! g:count
+		End
+	End
+
+	Context .execute(cmd)
+		It registers a command to be executed later
+			let g:count = 0
+			let task = Task()
+			call task.execute('let g:count += 1')
+			Assert Equals(g:count, 0)
+
+			call task.trigger()
+			Assert Equals(g:count, 1)
+
+			call task.execute('let g:count += 2')
+			Assert Equals(g:count, 1)
+
+			call task.trigger()
+			Assert Equals(g:count, 4)
+
+			unlet! g:count
+		End
+	End
+
+	Context .clear()
+		It clears all functions and commands registerd
+			let g:count = 0
+			let task = Task()
+			call task.execute('let g:count += 1')
+			call task.trigger()
+			call task.execute('let g:count += 2')
+			call task.trigger()
+			Assert Equals(g:count, 4)
+
+			call task.clear()
+			Assert Equals(g:count, 4)
+			call task.trigger()
+			Assert Equals(g:count, 4)
+
+			unlet! g:count
+		End
+	End
+End
+
+Describe TaskGroup class
+	It makes up tasks into a task
+		let g:count1 = 0
+		let g:count2 = 0
+		let g:count3 = 0
+		let Schedule = multiselect#Schedule#_import()
+		let Task = Schedule.Task
+		let TaskGroup = Schedule.TaskGroup
+		let taskgroup = TaskGroup()
+		let task1 = taskgroup.call({n -> execute('let g:count1 += 1')}, [1])
+		let task2 = taskgroup.execute('let g:count2 += 1')
+		let task3 = Task().execute('let g:count3 += 1')
+		call taskgroup.add(task3)
+
+		call taskgroup.trigger()
+		Assert Equals(g:count1, 1)
+		Assert Equals(g:count2, 1)
+		Assert Equals(g:count3, 1)
+
+		call taskgroup.trigger()
+		Assert Equals(g:count1, 2)
+		Assert Equals(g:count2, 2)
+		Assert Equals(g:count3, 2)
+
+		call taskgroup.clear()
+		call taskgroup.trigger()
+		Assert Equals(g:count1, 2)
+		Assert Equals(g:count2, 2)
+		Assert Equals(g:count3, 2)
+
+		unlet! g:count1 g:count2 g:count3
+	End
+End
+
+Describe EventTask
+	Before
+		let Schedule = multiselect#Schedule#_import()
+		let EventTask = Schedule.EventTask
+	End
+
+	Context .trigger()
+		It triggers all registered functions and commands
+			let g:count = 0
+			let eventtask = EventTask()
+
+			call eventtask.execute('let g:count += 1').trigger()
+			Assert Equals(g:count, 1)
+
+			call eventtask.execute('let g:count += 2').trigger()
+			Assert Equals(g:count, 4)
+
+			unlet! g:count
+		End
+
+		It is skipped if skipcount is set
+			let g:count = 0
+			let eventtask = EventTask()
+			call eventtask.execute('let g:count += 1')
+
+			call eventtask.trigger()
+			Assert Equals(g:count, 1)
+
+			call eventtask.skip(1)
+			call eventtask.trigger()
+			Assert Equals(g:count, 1)
+			call eventtask.trigger()
+			Assert Equals(g:count, 2)
+
+			unlet! g:count
+		End
+
+		It is repeated n-times given by .repeat()
+			let g:count = 0
+			let eventtask = EventTask()
+			call eventtask.execute('let g:count += 1')
+
+			call eventtask.repeat(1)
+			Assert Equals(eventtask.leftcount(), 1)
+			Assert False(eventtask.hasdone())
+			call eventtask.trigger()
+			Assert Equals(eventtask.leftcount(), 0)
+			Assert True(eventtask.hasdone())
+
+			call eventtask.repeat(3)
+			Assert Equals(eventtask.leftcount(), 3)
+			Assert False(eventtask.hasdone())
+			call eventtask.trigger() " first
+			Assert Equals(eventtask.leftcount(), 2)
+			Assert False(eventtask.hasdone())
+			call eventtask.trigger() " second
+			Assert Equals(eventtask.leftcount(), 1)
+			Assert False(eventtask.hasdone())
+			call eventtask.trigger() " third
+			Assert Equals(eventtask.leftcount(), 0)
+			Assert True(eventtask.hasdone())
+
+			unlet! g:count
+		End
+	End
+
+	Context .finish()
+		It finishes the execution of the task
+			let g:count = 0
+			let eventtask = EventTask()
+
+			call eventtask.execute('let g:count += 1').repeat(3)
+			Assert Equals(eventtask.leftcount(), 3)
+			call eventtask.trigger()
+			Assert Equals(eventtask.leftcount(), 2)
+			call eventtask.finish()
+			Assert Equals(eventtask.leftcount(), 0)
+			Assert True(eventtask.hasdone())
+
+			unlet! g:count
+		End
+	End
+End
+
+Describe Event class
+	It controls an autocmd event
+		let g:count = 0
+		let Schedule = multiselect#Schedule#_import()
+		let Event = Schedule.Event
+		let event = Event('TextChanged')
+		call event.execute('let g:count += 1').repeat(3).skip(1)
+
+		doautocmd <nomodeline> multiselect TextChanged
+		Assert Equals(g:count, 0)
+
+		doautocmd <nomodeline> multiselect TextChanged
+		Assert Equals(g:count, 1)
+
+		call event.off()
+		doautocmd <nomodeline> multiselect TextChanged
+		Assert Equals(g:count, 1)
+
+		call event.on()
+		doautocmd <nomodeline> multiselect TextChanged
+		Assert Equals(g:count, 2)
+
+		doautocmd <nomodeline> multiselect TextChanged
+		Assert Equals(g:count, 3)
+
+		doautocmd <nomodeline> multiselect TextChanged
+		Assert Equals(g:count, 3)
+
+		unlet! g:count
+		augroup multiselect
+			autocmd!
+		augroup End
+	End
+End
+" vim:set noet ts=4 sw=4 sts=-1:

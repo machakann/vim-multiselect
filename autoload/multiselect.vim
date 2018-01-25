@@ -2,7 +2,7 @@
 let s:Errors = multiselect#Errors#_import()
 let s:Buffer = multiselect#Buffer#_import()
 let s:Highlights = multiselect#Highlights#_import()
-let s:Events = multiselect#Events#_import()
+let s:Schedule = multiselect#Schedule#_import()
 let s:TRUE = 1
 let s:FALSE = 0
 let s:NULLPOS = [0, 0, 0, 0]
@@ -12,10 +12,6 @@ function! multiselect#import() abort "{{{
 endfunction "}}}
 
 let s:table = []
-function! multiselect#_gettable() abort "{{{
-	return s:table
-endfunction "}}}
-
 " Multiselector class "{{{
 unlockvar! s:Multiselector
 let s:Multiselector = {
@@ -24,18 +20,10 @@ let s:Multiselector = {
 	\	'bufnr': -1,
 	\	'itemlist': [],
 	\	'higroup': '',
-	\	'event': {
-	\		'BufLeave': s:Events.Event('BufLeave'),
-	\		'TabLeave': s:Events.Event('TabLeave'),
-	\		'CmdwinEnter': s:Events.Event('CmdwinEnter'),
-	\		'CmdwinLeave': s:Events.Event('CmdwinLeave'),
-	\		'TextChanged': s:Events.Event('TextChanged'),
-	\		'InsertEnter': s:Events.Event('InsertEnter'),
-	\		'WinNew': s:Events.Event('WinNew'),
-	\		'Init': {},
-	\		'CheckPost': {},
-	\		'UncheckPost': {},
-	\		},
+	\	'EVENTINIT': '',
+	\	'EVENTCHECKPOST': '',
+	\	'EVENTUNCHECKPOST': '',
+	\	'_event': {},
 	\	'_last':{
 	\		'event': '',
 	\		'itemlist': [],
@@ -55,41 +43,24 @@ function! s:Multiselector(...) abort "{{{
 	let EVENTINIT = get(options, 'eventinit', '')
 	let EVENTCHECKPOST = get(options, 'eventcheckpost', '')
 	let EVENTUNCHECKPOST = get(options, 'eventuncheckpost', '')
-	let multiselector.event.Init = s:Events.Event(EVENTINIT)
-	let multiselector.event.CheckPost = s:Events.Event(EVENTCHECKPOST)
-	let multiselector.event.UncheckPost = s:Events.Event(EVENTUNCHECKPOST)
-
-	let l:Initializefunc = function(multiselector._initialize, [], multiselector)
-	let l:Suspendfunc = function(multiselector._suspend, [], multiselector)
-	let l:Resumefunc = function(multiselector._resume, [], multiselector)
-	let l:Uncheckallfunc = function(multiselector._uncheckall, [], multiselector)
-	let l:Showfunc = function(multiselector._show, [], multiselector)
-	call multiselector.event.BufLeave.set(l:Initializefunc)
-	call multiselector.event.TabLeave.set(l:Initializefunc)
-	call multiselector.event.CmdwinEnter.set(l:Suspendfunc)
-	call multiselector.event.CmdwinLeave.set(l:Initializefunc)
-	call multiselector.event.CmdwinLeave.set(l:Resumefunc)
-	call multiselector.event.TextChanged.set(l:Uncheckallfunc)
-	call multiselector.event.InsertEnter.set(l:Uncheckallfunc)
-	call multiselector.event.WinNew.set(l:Showfunc)
-	call multiselector.event.Init.set(function('s:douserautocmd'))
-	call multiselector.event.CheckPost.set(function('s:douserautocmd'))
-	call multiselector.event.UncheckPost.set(function('s:douserautocmd'))
-	for event in values(multiselector.event)
-		if !empty(event.name)
-			call event.on()
-		endif
-	endfor
+	let multiselector.EVENTINIT = EVENTINIT
+	let multiselector.EVENTCHECKPOST = EVENTCHECKPOST
+	let multiselector.EVENTUNCHECKPOST = EVENTUNCHECKPOST
+	call multiselector.Event(EVENTINIT)
+	call multiselector.Event(EVENTCHECKPOST)
+	call multiselector.Event(EVENTUNCHECKPOST)
+	call multiselector.Event('BufLeave').call(multiselector._initialize, [], multiselector)
+	call multiselector.Event('TabLeave').call(multiselector._initialize, [], multiselector)
+	call multiselector.Event('CmdwinEnter').call(multiselector._suspend, [], multiselector)
+	call multiselector.Event('CmdwinLeave').call(multiselector._initialize, [], multiselector)
+	call multiselector.Event('CmdwinLeave').call(multiselector._resume, [], multiselector)
+	call multiselector.Event('TextChanged').call(multiselector.uncheckall, [], multiselector)
+	call multiselector.Event('InsertEnter').call(multiselector.uncheckall, [], multiselector)
+	call multiselector.Event('WinNew').call(multiselector._show, [], multiselector)
 
 	call add(s:table, multiselector)
 	call multiselector._initialize()
 	return multiselector
-endfunction "}}}
-function! s:douserautocmd(name) abort "{{{
-	if !exists('#User#' . a:name)
-		return
-	endif
-	execute 'doautocmd <nomodeline> User ' . a:name
 endfunction "}}}
 
 " main interfaces
@@ -508,13 +479,31 @@ function! s:enumerate(list, ...) abort "{{{
 	return map(copy(a:list), {i, item -> [start + i, item]})
 endfunction "}}}
 
+" event control
+function! s:Multiselector.Event(name) abort "{{{
+	let t_name = type(a:name)
+	if t_name is v:t_string
+		let eventlist = [a:name]
+	elseif t_name is v:t_list
+		let eventlist = a:name
+	else
+		echoerr s:Errors.InvalidArgument('Multiselector.Event', a:name)
+	endif
+	for eventname in eventlist
+		if !has_key(self._event, a:name)
+			let self._event[a:name] = s:Schedule.Event(a:name)
+		endif
+	endfor
+	return self._event[a:name]
+endfunction "}}}
+
 " private methods
-function! s:Multiselector._initialize(...) abort "{{{
+function! s:Multiselector._initialize() abort "{{{
 	let self.bufnr = -1
 	call self.uncheckall()
-	call self.event.Init.trigger()
+	call self.Event(self.EVENTINIT).trigger()
 endfunction "}}}
-function! s:Multiselector._suspend(...) abort "{{{
+function! s:Multiselector._suspend() abort "{{{
 	let self._pending.bufnr = self.bufnr
 	let self._pending.itemlist = self.itemlist
 	let self._pending._last = self._last
@@ -524,7 +513,7 @@ function! s:Multiselector._suspend(...) abort "{{{
 	let self._last.event = ''
 	let self._last.itemlist = []
 endfunction "}}}
-function! s:Multiselector._resume(...) abort "{{{
+function! s:Multiselector._resume() abort "{{{
 	let self.bufnr = self._pending.bufnr
 	let self.itemlist = self._pending.itemlist
 	let self._last = self._pending._last
@@ -534,10 +523,7 @@ function! s:Multiselector._resume(...) abort "{{{
 	let self._pending._last.event = ''
 	let self._pending._last.itemlist = []
 endfunction "}}}
-function! s:Multiselector._uncheckall(...) abort "{{{
-	call self.uncheckall()
-endfunction "}}}
-function! s:Multiselector._show(...) abort "{{{
+function! s:Multiselector._show() abort "{{{
 	let winid = win_getid()
 	for item in self.itemlist
 		if item.isshownin(winid)
@@ -554,7 +540,7 @@ function! s:Multiselector._checkpost(added) abort "{{{
 	endfor
 	let self._last.event = 'check'
 	let self._last.itemlist = a:added
-	call self.event.CheckPost.trigger()
+	call self.Event(self.EVENTCHECKPOST).trigger()
 endfunction "}}}
 function! s:Multiselector._uncheckpost(removed) abort "{{{
 	if empty(a:removed)
@@ -565,7 +551,7 @@ function! s:Multiselector._uncheckpost(removed) abort "{{{
 	endfor
 	let self._last.event = 'uncheck'
 	let self._last.itemlist = a:removed
-	call self.event.UncheckPost.trigger()
+	call self.Event(self.EVENTUNCHECKPOST).trigger()
 endfunction "}}}
 function! s:Multiselector._abandon() abort "{{{
 	for event in values(self._event)
@@ -611,6 +597,8 @@ let s:Multiselect = {
 	\	'Region': s:Buffer.Region,
 	\	'Item': s:Buffer.Item,
 	\	'Change': s:Buffer.Change,
+	\	'EventTask': s:Schedule.EventTask,
+	\	'TimerTask': s:Schedule.TimerTask,
 	\	'shiftenv': function('s:shiftenv'),
 	\	'restoreenv': function('s:restoreenv'),
 	\	'percolate': function('s:percolate'),

@@ -11,6 +11,7 @@ let g:TRUE = 1
 let g:FALSE = 0
 let g:DEFAULTS = {
 	\	'higroup': 'MultiselectItem',
+	\	'eventinit': 'MultiselectInit',
 	\	'eventcheckpost': 'MultiselectCheckPost',
 	\	'eventuncheckpost': 'MultiselectUncheckPost',
 	\	}
