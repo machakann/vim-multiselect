@@ -86,6 +86,12 @@ The following keymappings are available with |:nmap| and |:xmap|.
 <Plug>(multiselect-undo)		*<Plug>(multiselect-undo)*
 	This keymapping rollback the last action.
 
+[count]<Plug>(multiselect-next)		*<Plug>(multiselect-next)*
+	This keymapping move cursor to the next multiselect item.
+
+[count]<Plug>(multiselect-previous)	*<Plug>(multiselect-previous)*
+	This keymapping move cursor to the previous multiselect item.
+
 <Plug>(multiselect)			*<Plug>(multiselect)*
 	|Normal| mode: This keymapping removes an item under the cursor if
 	the text is selected. Otherwise this keymapping selects the |word|
