@@ -377,7 +377,8 @@ function! s:Change.afterinsert(expr, ...) abort "{{{
 	return self
 endfunction "}}}
 function! s:Change.apply(expr) abort "{{{
-	if type(a:expr) is v:t_list
+	let t_expr = type(a:expr)
+	if t_expr is v:t_list
 		let pos = a:expr
 		for [change, item] in self._changelist
 			if change is# 'delete'
@@ -386,7 +387,7 @@ function! s:Change.apply(expr) abort "{{{
 				call s:push(pos, item.head, item.tail, item.type is# 'line')
 			endif
 		endfor
-	elseif type(a:expr) is v:t_dict
+	elseif t_expr is v:t_dict
 		let region = a:expr
 		call self.apply(region.head)
 		call self.apply(region.tail)
@@ -399,25 +400,20 @@ function! s:push(shiftedpos, head, tail, linewise) abort  "{{{
 	endif
 
 	let shift = [0, 0, 0, 0]
-	if a:linewise[0] && a:shiftedpos[1] >= a:head[1]
-		" lnum
-		let shift[1] += 1
-	endif
-
-	if !s:inorderof(a:shiftedpos, a:head) || (a:linewise && a:shiftedpos[1] == a:head[1])
-		" lnum
-		let shift[1] += a:tail[1] - a:head[1]
-		" column
-		if !a:linewise && a:head[1] == a:shiftedpos[1]
-			if a:head[1] == a:tail[1]
-				let shift[2] += a:tail[2] - a:head[2]
-			else
-				if a:head[2] < a:shiftedpos[2]
-					let shift[2] += a:tail[2] - a:head[2]
-				else
-					let shift[2] += a:tail[2] - a:shiftedpos[2]
-				endif
-			endif
+	if a:linewise
+		if a:shiftedpos[1] < a:head[1]
+			return a:shiftedpos
+		endif
+		let shift[1] += a:tail[1] - a:head[1] + 1
+	else
+		if s:inorderof(a:shiftedpos, a:head)
+			return a:shiftedpos
+		endif
+		if a:head[1] != a:tail[1]
+			let shift[1] += a:tail[1] - a:head[1]
+		endif
+		if a:head[1] == a:shiftedpos[1]
+			let shift[2] += a:tail[2] - a:head[2]
 		endif
 	endif
 	let a:shiftedpos[1:2] += shift[1:2]
@@ -428,49 +424,40 @@ function! s:pull(shiftedpos, head, tail, linewise) abort "{{{
 		return a:shiftedpos
 	endif
 
-	let shift = [0, 0, 0, 0]
-	" lnum
-	if a:shiftedpos[1] > a:head[1]
-		if a:shiftedpos[1] <= a:tail[1]
-			let shift[1] -= a:shiftedpos[1] - a:head[1]
-		else
-			let shift[1] -= a:tail[1] - a:head[1]
-		endif
-	endif
-	" column
-	if s:inorderof(a:head, a:shiftedpos) && a:shiftedpos[1] <= a:tail[1]
-		if s:inorderof(a:tail, a:shiftedpos)
-			if a:head[1] == a:shiftedpos[1]
-				let shift[2] -= a:tail[2] - a:head[2] + 1
-			else
-				let shift[2] -= a:tail[2]
-			endif
-		else
-			let shift[2] -= a:shiftedpos[2] - a:head[2]
-		endif
-	endif
-
-	let a:shiftedpos[1] += shift[1]
-
-	" the case for linewise action
 	if a:linewise
-		if a:shiftedpos[1] == a:head[1]
-			" col
-			let a:shiftedpos[2] = 0
+		if a:shiftedpos[1] < a:head[1]
+			return a:shiftedpos
+		elseif a:tail[1] < a:shiftedpos[1]
+			let a:shiftedpos[1] -= a:tail[1] - a:head[1] + 1
+		else
+			let a:shiftedpos[1] = a:head[1]
+			let a:shiftedpos[2] = 1
 		endif
-		if a:shiftedpos[1] > a:head[1]
-			" lnum
-			let a:shiftedpos[1] -= 1
-		endif
-	endif
-
-	if a:shiftedpos[2] == 0
-		let a:shiftedpos[2] = 1
-	elseif a:shiftedpos[2] == s:MAXCOL
-		let a:shiftedpos[2] = col([a:shiftedpos[1], '$']) - 1
-		let a:shiftedpos[2] += shift[2]
 	else
-		let a:shiftedpos[2] += shift[2]
+		let shift = [0, 0, 0, 0]
+
+		" lnum
+		if a:head[1] != a:tail[1] && a:shiftedpos[1] > a:head[1]
+			if a:shiftedpos[1] <= a:tail[1]
+				let shift[1] -= a:shiftedpos[1] - a:head[1]
+			else
+				let shift[1] -= a:tail[1] - a:head[1]
+			endif
+		endif
+
+		" column
+		if a:shiftedpos[1] <= a:tail[1] && s:inorderof(a:head, a:shiftedpos)
+			if s:inorderof(a:tail, a:shiftedpos)
+				if a:head[1] == a:shiftedpos[1]
+					let shift[2] -= a:tail[2] - a:head[2] + 1
+				else
+					let shift[2] -= a:tail[2]
+				endif
+			else
+				let shift[2] -= a:shiftedpos[2] - a:head[2]
+			endif
+		endif
+		let a:shiftedpos[1:2] += shift[1:2]
 	endif
 	return a:shiftedpos
 endfunction "}}}
