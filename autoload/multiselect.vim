@@ -11,7 +11,6 @@ function! multiselect#import() abort "{{{
 	return s:Multiselect
 endfunction "}}}
 
-let s:table = []
 " Multiselector class "{{{
 unlockvar! s:Multiselector
 let s:Multiselector = {
@@ -58,7 +57,6 @@ function! s:Multiselector(...) abort "{{{
 	call multiselector.Event('InsertEnter').call(multiselector.uncheckall, [], multiselector)
 	call multiselector.Event('WinNew').call(multiselector._show, [], multiselector)
 
-	call add(s:table, multiselector)
 	call multiselector._initialize()
 	return multiselector
 endfunction "}}}
