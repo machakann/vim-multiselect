@@ -414,6 +414,7 @@ List of contents~
   Change.beforedelete()		|multiselect-Change.beforedelete()|
   Change.afterinsert()		|multiselect-Change.afterinsert()|
   Change.apply()		|multiselect-Change.apply()|
+  Change.mapapply()		|multiselect-Change.mapapply()|
 
 * Event class~
   Event				|multiselect-class-Event|
@@ -1707,11 +1708,20 @@ Change.afterinsert({region})
 
 
 					*multiselect-Change.apply()*
-Change.apply(pos)    [method]
-Change.apply(region)
+Change.apply({pos})    [method]
+Change.apply({region})
 	This method calculates the position after a series of editings.
 	This method updates the position (or a `Region` instance) in-place and
 	returns it.
+
+
+					*multiselect-Change.mapapply()*
+Change.mapapply({itemlist})    [method]
+	This method returns the same result with: >
+		call map({itemlist}, 'change.apply(v:val)')
+<
+	but faster if the number of items in {itemlist} is larger. {itemlist}
+	should be a list of positions or `Region` class instances.
 
 
   - Usage
