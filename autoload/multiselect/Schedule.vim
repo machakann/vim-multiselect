@@ -175,7 +175,11 @@ function! s:TimerTask() abort "{{{
 	let super = s:ClassSys.inherit(task, counter)
 	return s:ClassSys.inherit(timertask, super)
 endfunction "}}}
-function! s:TimerTask.trigger() abort "{{{
+function! s:TimerTask.trigger(...) abort "{{{
+	let forcibly = get(a:000, 0, s:FALSE)
+	if !forcibly && self.hasdone()
+		return self
+	endif
 	call s:ClassSys.super(self, 'Task').trigger()
 	call self._tick()
 	if self.hasdone()
@@ -255,8 +259,12 @@ function! s:EventTask(name) abort "{{{
 	endif
 	return eventtask
 endfunction "}}}
-function! s:EventTask.trigger() abort "{{{
+function! s:EventTask.trigger(...) abort "{{{
 	if self._skipsthistime()
+		return self
+	endif
+	let forcibly = get(a:000, 0, s:FALSE)
+	if !forcibly && self.hasdone()
 		return self
 	endif
 	call s:ClassSys.super(self, 'Task').trigger()

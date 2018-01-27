@@ -1811,9 +1811,12 @@ EventTask.finish()    [method]
 
 
 					*multiselect-EventTask.trigger()*
-EventTask.trigger()    [method]
+EventTask.trigger([{forcibly}])    [method]
 	This method execute all the registered tasks forcibly.
 	This method returns the `EventTask` itself.
+	If {forcibly} is given and it is |TRUE|, this method triggers the
+	registered task even if the task has already done.
+	|multiselect-EventTask.hasdone()|
 
 
 					*multiselect-EventTask.clear()*
