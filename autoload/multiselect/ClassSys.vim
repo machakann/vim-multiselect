@@ -31,12 +31,29 @@ function! s:super(sub, ...) abort "{{{
 	let super = {}
 	for [key, l:Val] in items(supermethods)
 		if type(l:Val) is v:t_func
-			let super[key] = function('s:supercall', [a:sub, l:Val])
+			let super[key] = function('s:_supercall', [a:sub, l:Val])
 		endif
 	endfor
 	return super
 endfunction "}}}
-function! s:supercall(sub, Funcref, ...) abort "{{{
+function! s:supercall(sub, supername, funcname) abort "{{{
+	if !has_key(a:sub, '__SUPER__')
+		return
+	endif
+
+	let supermethods = a:sub
+	try
+		while supermethods.__CLASS__ isnot# a:supername
+			let supermethods = supermethods.__SUPER__
+		endwhile
+	catch /^Vim\%((\a\+)\)\=:E716/
+		echoerr printf('%s class does not have the super class named %s', a:sub.__CLASS__, supername)
+	endtry
+
+	let args = get(a:000, 0, [])
+	return s:_supercall(supermethods[a:funcname], args, a:sub)
+endfunction "}}}
+function! s:_supercall(sub, Funcref, ...) abort "{{{
 	return call(a:Funcref, a:000, a:sub)
 endfunction "}}}
 
