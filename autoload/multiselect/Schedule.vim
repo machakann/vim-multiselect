@@ -190,11 +190,6 @@ function! s:TimerTask.clone() abort "{{{
 	let clone._orderlist = copy(self._orderlist)
 	return clone
 endfunction "}}}
-function! s:TimerTask.initialize() abort "{{{
-	call self.stop().clear()
-	call self.repeat()
-	return self
-endfunction "}}}
 function! s:TimerTask.start(time, ...) abort "{{{
 	let options = get(a:000, 0, {})
 	if !has_key(options, 'repeat')
