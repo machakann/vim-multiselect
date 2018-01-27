@@ -115,46 +115,6 @@ function! s:Counter._finish() abort "{{{
 endfunction "}}}
 lockvar! s:Counter
 "}}}
-" Timer class {{{
-let s:Timer = {
-	\	'__CLASS__': 'Timer',
-	\	'__timer__': {
-	\		'id': -1,
-	\		},
-	\	}
-function! s:Timer() abort "{{{
-	return deepcopy(s:Timer)
-endfunction "}}}
-function! s:Timer.start(time, ...) abort "{{{
-	call self.stop()
-	let options = get(a:000, 0, {})
-	let id = timer_start(a:time, function('s:timercall'), options)
-	let self.__timer__.id = id
-	let s:timertable[string(id)] = self
-	return self
-endfunction "}}}
-function! s:Timer.stop() abort "{{{
-	if self.__timer__.id < 0
-		return self
-	endif
-	let idstr = string(self.__timer__.id)
-	if has_key(s:timertable, idstr)
-		call remove(s:timertable, idstr)
-	endif
-	if !empty(timer_info(self.__timer__.id))
-		call timer_stop(self.__timer__.id)
-		let self.__timer__.id = -1
-	endif
-	return self
-endfunction "}}}
-function! s:timercall(id) abort "{{{
-	if !has_key(s:timertable, string(a:id))
-		return
-	endif
-	let timertask = s:timertable[string(a:id)]
-	call timertask.trigger()
-endfunction "}}}
-"}}}
 " Task class {{{
 unlockvar! s:Task
 let s:Task = {
@@ -202,18 +162,17 @@ function! s:Task.clone() abort "{{{
 endfunction "}}}
 lockvar! s:Task
 "}}}
-" TimerTask class (inherits Counter, Timer and Task classes) {{{
+" TimerTask class (inherits Counter and Task classes) {{{
 unlockvar! s:TimerTask
 let s:TimerTask = {
 	\	'__CLASS__': 'TimerTask',
+	\	'_id': -1,
 	\	}
 function! s:TimerTask() abort "{{{
 	let counter = s:Counter(1)
-	let timer = s:Timer()
 	let task = s:Task()
 	let timertask = deepcopy(s:TimerTask)
-	let super = s:ClassSys.inherit(timer, counter)
-	let super = s:ClassSys.inherit(task, super)
+	let super = s:ClassSys.inherit(task, counter)
 	return s:ClassSys.inherit(timertask, super)
 endfunction "}}}
 function! s:TimerTask.trigger() abort "{{{
@@ -241,9 +200,33 @@ function! s:TimerTask.start(time, ...) abort "{{{
 	if !has_key(options, 'repeat')
 		let options.repeat = self.leftcount()
 	endif
-	call s:ClassSys.super(self, 'Timer').start(a:time, options)
+	call self.stop()
+	let id = timer_start(a:time, function('s:timercall'), options)
+	let self._id = id
+	let s:timertable[string(id)] = self
 	call self.repeat(options.repeat)
 	return self
+endfunction "}}}
+function! s:TimerTask.stop() abort "{{{
+	if self._id < 0
+		return self
+	endif
+	let idstr = string(self._id)
+	if has_key(s:timertable, idstr)
+		call remove(s:timertable, idstr)
+	endif
+	if !empty(timer_info(self._id))
+		call timer_stop(self._id)
+		let self._id = -1
+	endif
+	return self
+endfunction "}}}
+function! s:timercall(id) abort "{{{
+	if !has_key(s:timertable, string(a:id))
+		return
+	endif
+	let timertask = s:timertable[string(a:id)]
+	call timertask.trigger()
 endfunction "}}}
 lockvar! s:TimerTask
 "}}}
@@ -327,7 +310,6 @@ let s:Schedule = {
 	\	'__MODULE__': 'Schedule',
 	\	'Switch': function('s:Switch'),
 	\	'Counter': function('s:Counter'),
-	\	'Timer': function('s:Timer'),
 	\	'Task': function('s:Task'),
 	\	'TimerTask': function('s:TimerTask'),
 	\	'EventTask': function('s:EventTask'),
