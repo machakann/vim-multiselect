@@ -1424,8 +1424,7 @@ Multiselector.event({event})    [method]
 
 	This plugin prepares `EventTask` class instances for |BufLeave|,
 	|TabLeave|, |CmdwinEnter|, |CmdwinLeave|, |TextChanged|,
-	|InsertEnter|, |WinNew|, |MultiselectInit|, |MultiselectCheckPost| and
-	|MultiselectUncheckPost|.
+	|InsertEnter| and |WinNew|.
 
 	An initialization process is executed in |BufLeave|; all the items are
 	unchecked and clear |multiselect-Multiselector.bufnr|.
@@ -1446,6 +1445,9 @@ Multiselector.event({event})    [method]
 
 	All the multiselect items in the current buffer are unchecked in
 	|InsertEnter|.
+
+	When a new window is opened and if it displays the same buffer,
+	the current multiselect items are highlighted in |WinNew| event.
 
 
 

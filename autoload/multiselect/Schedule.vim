@@ -244,19 +244,21 @@ function! s:EventTask(name) abort "{{{
 	let super = s:ClassSys.inherit(task, super)
 	let eventtask = s:ClassSys.inherit(eventtask, super)
 	let eventtask.name = a:name
-	if count(s:BUILTINEVENTS, a:name) != 0
-		" Built-in autocmd
-		if !has_key(s:eventtable, a:name)
-			let s:eventtable[a:name] = []
-			augroup multiselect
-				execute printf('autocmd %s * call s:doautocmd("%s")', a:name, a:name)
-			augroup END
-		endif
-		call add(s:eventtable[a:name], eventtask)
-	else
-		" User autocmd
-		call eventtask.call(function('s:douserautocmd'), [a:name])
+	if !has_key(s:eventtable, a:name)
+		let s:eventtable[a:name] = []
+		augroup multiselect
+			if count(s:BUILTINEVENTS, a:name) != 0
+				" Built-in autocmd
+				execute printf('autocmd %s * call s:doautocmd("%s")',
+								\ a:name, a:name)
+			else
+				" User autocmd
+				execute printf('autocmd User %s call s:doautocmd("%s")',
+								\ a:name, a:name)
+			endif
+		augroup END
 	endif
+	call add(s:eventtable[a:name], eventtask)
 	return eventtask
 endfunction "}}}
 function! s:EventTask.trigger(...) abort "{{{
@@ -297,12 +299,6 @@ function! s:doautocmd(name) abort "{{{
 		augroup END
 		call remove(s:eventtable, a:name)
 	endif
-endfunction "}}}
-function! s:douserautocmd(name) abort "{{{
-	if !exists('#User#' . a:name)
-		return
-	endif
-	execute 'doautocmd <nomodeline> User ' . a:name
 endfunction "}}}
 lockvar! s:EventTask
 "}}}

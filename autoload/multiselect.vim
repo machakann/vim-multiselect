@@ -45,9 +45,6 @@ function! s:Multiselector(...) abort "{{{
 	let multiselector.EVENTINIT = EVENTINIT
 	let multiselector.EVENTCHECKPOST = EVENTCHECKPOST
 	let multiselector.EVENTUNCHECKPOST = EVENTUNCHECKPOST
-	call multiselector.event(EVENTINIT)
-	call multiselector.event(EVENTCHECKPOST)
-	call multiselector.event(EVENTUNCHECKPOST)
 	call multiselector.event('BufLeave').call(multiselector._initialize, [], multiselector)
 	call multiselector.event('TabLeave').call(multiselector._initialize, [], multiselector)
 	call multiselector.event('CmdwinEnter').call(multiselector._suspend, [], multiselector)
@@ -525,7 +522,7 @@ endfunction "}}}
 function! s:Multiselector._initialize() abort "{{{
 	let self.bufnr = -1
 	call self.uncheckall()
-	call self.event(self.EVENTINIT).trigger()
+	call s:douserautocmd(self.EVENTINIT)
 endfunction "}}}
 function! s:Multiselector._suspend() abort "{{{
 	let self._pending.bufnr = self.bufnr
@@ -564,7 +561,7 @@ function! s:Multiselector._checkpost(added) abort "{{{
 	endfor
 	let self._last.event = 'check'
 	let self._last.itemlist = a:added
-	call self.event(self.EVENTCHECKPOST).trigger()
+	call s:douserautocmd(self.EVENTCHECKPOST)
 endfunction "}}}
 function! s:Multiselector._uncheckpost(removed) abort "{{{
 	if empty(a:removed)
@@ -575,13 +572,19 @@ function! s:Multiselector._uncheckpost(removed) abort "{{{
 	endfor
 	let self._last.event = 'uncheck'
 	let self._last.itemlist = a:removed
-	call self.event(self.EVENTUNCHECKPOST).trigger()
+	call s:douserautocmd(self.EVENTUNCHECKPOST)
 endfunction "}}}
 function! s:Multiselector._abandon() abort "{{{
 	for event in values(self._event)
 		call event.clear()
 	endfor
 	call filter(self, 0)
+endfunction "}}}
+function! s:douserautocmd(name) abort "{{{
+	if !exists('#User#' . a:name)
+		return
+	endif
+	execute 'doautocmd <nomodeline> User ' . a:name
 endfunction "}}}
 lockvar! s:Multiselector
 "}}}
