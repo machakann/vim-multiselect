@@ -97,7 +97,6 @@ Describe Multiselector
 
 			let added = [item1]
 			call multiselector.append(added)
-			Assert False(empty(multiselector._event.MultiselectCheckPost._orderlist))
 			Assert Equals(g:autocmdcount, 1)
 
 			let added = [item2, item3]
