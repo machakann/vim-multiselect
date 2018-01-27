@@ -313,9 +313,7 @@ Describe Event class
 		Assert Equals(g:count, 3)
 
 		unlet! g:count
-		augroup multiselect
-			autocmd!
-		augroup End
+		call event.finish()
 	End
 End
 " vim:set noet ts=4 sw=4 sts=-1:

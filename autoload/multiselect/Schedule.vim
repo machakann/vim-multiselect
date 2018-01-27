@@ -335,17 +335,21 @@ function! s:Event.trigger() abort "{{{
 endfunction "}}}
 function! s:Event.append(task) abort "{{{
 	call self.sweep()
-	call s:ClassSys.super(self, 'TaskGroup').append(a:task)
+	return s:ClassSys.super(self, 'TaskGroup').append(a:task)
+endfunction "}}}
+function! s:Event.finish() abort "{{{
+	call filter(s:eventtable, 'v:val isnot self')
+	return self
 endfunction "}}}
 function! s:Event.sweep() abort "{{{
 	call filter(self._orderlist, {_, task -> !task.hasdone()})
 	return self
 endfunction "}}}
 function! s:doautocmd(name) abort "{{{
-	let event = s:eventtable[a:name]
 	for event in s:eventtable[a:name]
-		call event.trigger()
+		call event.trigger().sweep()
 	endfor
+	call filter(s:eventtable[a:name], '!empty(v:val._orderlist)')
 endfunction "}}}
 function! s:douserautocmd(name) abort "{{{
 	if !exists('#User#' . a:name)

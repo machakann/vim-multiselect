@@ -631,6 +631,7 @@ let s:Multiselect = {
 	\	'Region': s:Buffer.Region,
 	\	'Item': s:Buffer.Item,
 	\	'Change': s:Buffer.Change,
+	\	'Event': s:Schedule.Event,
 	\	'EventTask': s:Schedule.EventTask,
 	\	'TimerTask': s:Schedule.TimerTask,
 	\	'shiftenv': function('s:shiftenv'),
