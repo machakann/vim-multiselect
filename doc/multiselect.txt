@@ -462,6 +462,23 @@ List of contents~
   TimerTask.leftcount()		|multiselect-TimerTask.leftcount()|
   TimerTask.hasdone()		|multiselect-TimerTask.hasdone()|
 
+* EitherTask class~
+  EitherTask			|multiselect-class-EitherTask|
+  EitherTask.event()		|multiselect-EitherTask.event()|
+  EitherTask.timer()		|multiselect-EitherTask.timer()|
+  EitherTask.call()		|multiselect-EitherTask.call()|
+  EitherTask.execute()		|multiselect-EitherTask.execute()|
+  EitherTask.finish()		|multiselect-EitherTask.finish()|
+  EitherTask.trigger()		|multiselect-EitherTask.trigger()|
+  EitherTask.clear()		|multiselect-EitherTask.clear()|
+  EitherTask.on()		|multiselect-EitherTask.on()|
+  EitherTask.off()		|multiselect-EitherTask.off()|
+  EitherTask.isactive()		|multiselect-EitherTask.isactive()|
+  EitherTask.skip()		|multiselect-EitherTask.skip()|
+  EitherTask.repeat()		|multiselect-EitherTask.repeat()|
+  EitherTask.leftcount()	|multiselect-EitherTask.leftcount()|
+  EitherTask.hasdone()		|multiselect-EitherTask.hasdone()|
+
 ------------------------------------------------------------------------------
 Multiselect module~
 					*multiselect-module-Multiselect*
@@ -2150,6 +2167,157 @@ TimerTask.leftcount()    [method]
 TimerTask.hasdone()    [method]
 	This method returns |TRUE| if the task has done {count} times
 	specified by |multiselect-TimerTask.repeat()|, otherwise |FALSE|.
+
+
+
+------------------------------------------------------------------------------
+EitherTask class~
+					*multiselect-class-EitherTask*
+
+EitherTask class is a subclass of `Task` class which can have multiple
+automatic triggers, autocmd events and a delay time.
+See also |multiselect-class-Task|
+	 |multiselect-class-EventTask|
+	 |multiselect-class-TimerTask|.
+
+EitherTask will be executed once by either one of registered auto-triggers in
+default. The number of execution can be changed by
+|multiselect-EitherTask.repeat()|.
+
+
+					*multiselect-EitherTask.event()*
+EitherTask.event({name})    [method]
+	This method registers an event trigger for the `EitherTask` instance.
+	{name} should be a name of autocmd event. >
+		" The EitherTask instance will be triggered by
+		" TextChanged or InsertEnter events
+		let either = s:Multiselect.EitherTask().execute('echo "foo"')
+		call either.event('TextChanged')
+		call either.event('InsertEnter')
+<
+
+					*multiselect-EitherTask.timer()*
+EitherTask.timer({time})    [method]
+	This method registers a delay time for the `EitherTask` instance.
+	{time} should be a delay time duration. >
+		" The EitherTask instance will be triggered 100 milliseconds
+		" later
+		let either = s:Multiselect.EitherTask().execute('echo "foo"')
+		call either.timer(100)
+<
+
+					*multiselect-EitherTask.call()*
+EitherTask.call({Funcref}, {args}[, {dict}])    [method]
+	This method registers a task to call a |Funcref| with a |List| of
+	{args} as arguments and set it for the event. This method returns the
+	task itself. {dict} is for functions with the "dict" attribute. It
+	will be used to set the local variable "self". |Dictionary-function|
+>
+		function! s:sayfoo() abort
+		    echo 'foo'
+		endfunction
+
+		" set a new task to 'TextChanged' event or a delay
+		let task = s:Multiselect.EitherTask()
+					\.call(function('s:sayfoo'), [])
+		call task.event('TextChanged')
+		call task.timer(100)
+<
+
+					*multiselect-EitherTask.execute()*
+EitherTask.execute({cmd})    [method]
+	This method registers a task to execute an Ex command. This method
+	returns the task itself.
+>
+		" set a new task to 'TextChanged' event
+		let task = s:Multiselect.EitherTask().execute('echo "foo"')
+		call task.event('TextChanged')
+		call task.timer(100)
+<
+
+					*multiselect-EitherTask.append()*
+EitherTask.append({task})    [method]
+	This method registers a task to trigger other tasks. {task} should be
+	an instance of `Task` class or its subclasses. This method returns the
+	task itself. See |multiselect-Task.append()|
+
+
+					*multiselect-EitherTask.finish()*
+EitherTask.finish()    [method]
+	This method is used to abandon the task.
+
+
+					*multiselect-EitherTask.trigger()*
+EitherTask.trigger([{forcibly}])    [method]
+	This method executes all the registered tasks.
+	This method returns the `EitherTask` itself.
+	If {forcibly} is given and it is |TRUE|, this method triggers the
+	registered task even if the task has already done.
+	|multiselect-EitherTask.hasdone()|
+
+
+					*multiselect-EitherTask.clear()*
+EitherTask.clear()    [method]
+	This method clears all registered tasks. This method returns the
+	`EitherTask` itself.
+
+
+					*multiselect-EitherTask.on()*
+EitherTask.on()    [method]
+	This method activates the `EitherTask` tasks. This method returns the
+	`EitherTask` itself.
+
+
+					*multiselect-EitherTask.off()*
+EitherTask.off()    [method]
+	This method deactivates the `EitherTask` tasks. This method returns
+	the `EitherTask` itself.
+
+
+					*multiselect-EitherTask.isactive()*
+EitherTask.isactive()    [method]
+	This method returns |TRUE| if the `EitherTask` is activated, |FALSE|
+	if it is deactivated.
+
+
+					*multiselect-EitherTask.skip()*
+EitherTask.skip([{count}])    [method]
+	If this method is called, the following `EitherTask` is skipped
+	(not executed) {count} times. {count} is 1 if omitted. >
+		" 'foo' will be displayed after twice edits
+		call s:Multiselect.EitherTask()
+				 \.event('TextChanged')
+				 \.execute('echo "foo"')
+				 \.skip(1)
+<
+	This method returns the `EitherTask` itself.
+
+
+					*multiselect-EitherTask.repeat()*
+EitherTask.repeat([{count}])    [method]
+	This method sets the number of execution. If {count} is negative, the
+	`EitherTask` will be persistent. An `EitherTask` instance is produced
+	as it is -1 in default. If {count} is omitted, it will reset the
+	number of execution to the last set one. >
+		" 'foo' will be displayed and the task is abandoned
+		call s:Multiselect.EitherTask()
+				 \.event('TextChanged')
+				 \.execute('echo "foo"')
+				 \.repeat(1)
+<
+	This method returns the `EitherTask` itself.
+
+
+					*multiselect-EitherTask.leftcount()*
+EitherTask.leftcount()    [method]
+	This method returns the left number of execution.
+	See |multiselect-EitherTask.repeat()|.
+
+
+					*multiselect-EitherTask.hasdone()*
+EitherTask.hasdone()    [method]
+	This method returns |TRUE| if the task has done {count} times
+	specified by |multiselect-EitherTask.repeat()|, otherwise |FALSE|.
 
 
 

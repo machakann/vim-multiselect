@@ -306,6 +306,71 @@ function! s:douserautocmd(name) abort "{{{
 endfunction "}}}
 lockvar! s:EventTask
 "}}}
+" EitherTask class (inherits Switch, Counter and Task classes) {{{
+let s:EitherTask = {
+	\	'__CLASS__': 'EitherTask',
+	\	'__eithertask__': {
+	\		'Event': {},
+	\		'Timer': {},
+	\		},
+	\	}
+function! s:EitherTask() abort "{{{
+	let switch = s:Switch()
+	let counter = s:Counter(1)
+	let task = s:Task()
+	let eithertask = deepcopy(s:EitherTask)
+	let super = s:ClassSys.inherit(counter, switch)
+	let super = s:ClassSys.inherit(task, super)
+	return s:ClassSys.inherit(eithertask, super)
+endfunction "}}}
+function! s:EitherTask.event(name) abort "{{{
+	if has_key(self.__eithertask__.Event, a:name)
+		return self
+	endif
+	let event = s:EventTask(a:name)
+	call event.call(self.trigger, [], self).repeat(-1)
+	let self.__eithertask__.Event[a:name] = event
+	return self
+endfunction "}}}
+function! s:EitherTask.timer(time, ...) abort "{{{
+	if empty(self.__eithertask__.Timer)
+		let self.__eithertask__.Timer = s:TimerTask()
+		call self.__eithertask__.Timer.repeat(-1)
+	endif
+	let timer = self.__eithertask__.Timer
+	call timer.call(self.trigger, [], self)
+	call call(timer.start, [a:time] + a:000, timer)
+	return self
+endfunction "}}}
+function! s:EitherTask.trigger(...) abort "{{{
+	if self._skipsthistime()
+		return self
+	endif
+	let forcibly = get(a:000, 0, s:FALSE)
+	if !forcibly && self.hasdone()
+		return self
+	endif
+	call s:ClassSys.super(self, 'Task').trigger()
+	call self._tick()
+	if self.hasdone()
+		call self.finish()
+	endif
+	return self
+endfunction "}}}
+function! s:EitherTask.finish() abort "{{{
+	if !empty(self.__eithertask__.Event)
+		for [name, event] in items(self.__eithertask__.Event)
+			call event.finish()
+			call remove(self.__eithertask__.Event, name)
+		endfor
+	endif
+	if !empty(self.__eithertask__.Timer)
+		let timer = self.__eithertask__.Timer
+		call timer.stop()
+	endif
+	return self
+endfunction "}}}
+"}}}
 
 " Schedule module {{{
 unlockvar! s:Schedule
@@ -316,6 +381,7 @@ let s:Schedule = {
 	\	'Task': function('s:Task'),
 	\	'TimerTask': function('s:TimerTask'),
 	\	'EventTask': function('s:EventTask'),
+	\	'EitherTask': function('s:EitherTask'),
 	\	}
 lockvar! s:Schedule
 "}}}

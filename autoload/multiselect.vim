@@ -624,6 +624,7 @@ let s:Multiselect = {
 	\	'Task': s:Schedule.Task,
 	\	'EventTask': s:Schedule.EventTask,
 	\	'TimerTask': s:Schedule.TimerTask,
+	\	'EitherTask': s:Schedule.EitherTask,
 	\	'shiftenv': function('s:shiftenv'),
 	\	'restoreenv': function('s:restoreenv'),
 	\	'percolate': function('s:percolate'),
