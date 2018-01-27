@@ -982,10 +982,10 @@ Multiselector.filter({Filterexpr})    [method]
 	This method filters the items in  `Multiselector.itemlist`.
 	|multiselect-Multiselector.itemlist|
 
-	{Filterexpr} is an |Funcref|. {Filterexpr} is evaluated for each item
-	in `Multiselector.itemlist`, and when the result is FALSE, this
-	function removes the item. The resulted `Multiselector.itemlist` is
-	returned.
+	{Filterexpr} is an |Funcref|. {Filterexpr} is evaluated with two
+	arguments, an index and an item, for each item in
+	`Multiselector.itemlist`, and when the result is FALSE, this function
+	removes the item. The resulted `Multiselector.itemlist` is returned.
 	  - Example1: filter items except in line 5 >
 		let pos = [0, 5, 1, 0]
 		let line5 = s:Multiselect.Region(pos, pos, 'V')
