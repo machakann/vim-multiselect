@@ -166,40 +166,6 @@ Describe Task
 	End
 End
 
-Describe TaskGroup class
-	It makes up tasks into a task
-		let g:count1 = 0
-		let g:count2 = 0
-		let g:count3 = 0
-		let Schedule = multiselect#Schedule#_import()
-		let Task = Schedule.Task
-		let TaskGroup = Schedule.TaskGroup
-		let taskgroup = TaskGroup()
-		let task1 = taskgroup.call({n -> execute('let g:count1 += 1')}, [1])
-		let task2 = taskgroup.execute('let g:count2 += 1')
-		let task3 = Task().execute('let g:count3 += 1')
-		call taskgroup.append(task3)
-
-		call taskgroup.trigger()
-		Assert Equals(g:count1, 1)
-		Assert Equals(g:count2, 1)
-		Assert Equals(g:count3, 1)
-
-		call taskgroup.trigger()
-		Assert Equals(g:count1, 2)
-		Assert Equals(g:count2, 2)
-		Assert Equals(g:count3, 2)
-
-		call taskgroup.clear()
-		call taskgroup.trigger()
-		Assert Equals(g:count1, 2)
-		Assert Equals(g:count2, 2)
-		Assert Equals(g:count3, 2)
-
-		unlet! g:count1 g:count2 g:count3
-	End
-End
-
 Describe EventTask
 	Before
 		let Schedule = multiselect#Schedule#_import()
@@ -209,7 +175,7 @@ Describe EventTask
 	Context .trigger()
 		It triggers all registered functions and commands
 			let g:count = 0
-			let eventtask = EventTask()
+			let eventtask = EventTask('TestEvent')
 
 			call eventtask.execute('let g:count += 1').trigger()
 			Assert Equals(g:count, 1)
@@ -218,11 +184,12 @@ Describe EventTask
 			Assert Equals(g:count, 4)
 
 			unlet! g:count
+			call eventtask.finish()
 		End
 
 		It is skipped if skipcount is set
 			let g:count = 0
-			let eventtask = EventTask()
+			let eventtask = EventTask('TestEvent')
 			call eventtask.execute('let g:count += 1')
 
 			call eventtask.trigger()
@@ -235,11 +202,12 @@ Describe EventTask
 			Assert Equals(g:count, 2)
 
 			unlet! g:count
+			call eventtask.finish()
 		End
 
 		It is repeated n-times given by .repeat()
 			let g:count = 0
-			let eventtask = EventTask()
+			let eventtask = EventTask('TestEvent')
 			call eventtask.execute('let g:count += 1')
 
 			call eventtask.repeat(1)
@@ -263,13 +231,14 @@ Describe EventTask
 			Assert True(eventtask.hasdone())
 
 			unlet! g:count
+			call eventtask.finish()
 		End
 	End
 
 	Context .finish()
 		It finishes the execution of the task
 			let g:count = 0
-			let eventtask = EventTask()
+			let eventtask = EventTask('TestEvent')
 
 			call eventtask.execute('let g:count += 1').repeat(3)
 			Assert Equals(eventtask.leftcount(), 3)
@@ -280,40 +249,40 @@ Describe EventTask
 			Assert True(eventtask.hasdone())
 
 			unlet! g:count
+			call eventtask.finish()
+		End
+	End
+
+	Context class
+		It is triggered by an autocmd event
+			let g:count = 0
+			let eventtask = EventTask('TextChanged')
+			call eventtask.execute('let g:count += 1').repeat(3).skip(1)
+
+			doautocmd <nomodeline> multiselect TextChanged
+			Assert Equals(g:count, 0)
+
+			doautocmd <nomodeline> multiselect TextChanged
+			Assert Equals(g:count, 1)
+
+			call eventtask.off()
+			doautocmd <nomodeline> multiselect TextChanged
+			Assert Equals(g:count, 1)
+
+			call eventtask.on()
+			doautocmd <nomodeline> multiselect TextChanged
+			Assert Equals(g:count, 2)
+
+			doautocmd <nomodeline> multiselect TextChanged
+			Assert Equals(g:count, 3)
+
+			doautocmd <nomodeline> multiselect TextChanged
+			Assert Equals(g:count, 3)
+
+			unlet! g:count
+			call eventtask.finish()
 		End
 	End
 End
 
-Describe Event class
-	It controls an autocmd event
-		let g:count = 0
-		let Schedule = multiselect#Schedule#_import()
-		let Event = Schedule.Event
-		let event = Event('TextChanged')
-		call event.execute('let g:count += 1').repeat(3).skip(1)
-
-		doautocmd <nomodeline> multiselect TextChanged
-		Assert Equals(g:count, 0)
-
-		doautocmd <nomodeline> multiselect TextChanged
-		Assert Equals(g:count, 1)
-
-		call event.off()
-		doautocmd <nomodeline> multiselect TextChanged
-		Assert Equals(g:count, 1)
-
-		call event.on()
-		doautocmd <nomodeline> multiselect TextChanged
-		Assert Equals(g:count, 2)
-
-		doautocmd <nomodeline> multiselect TextChanged
-		Assert Equals(g:count, 3)
-
-		doautocmd <nomodeline> multiselect TextChanged
-		Assert Equals(g:count, 3)
-
-		unlet! g:count
-		call event.finish()
-	End
-End
 " vim:set noet ts=4 sw=4 sts=-1:

@@ -170,6 +170,8 @@ function! s:Task.trigger() abort "{{{
 			call call('call', expr)
 		elseif kind is# 'execute'
 			execute expr
+		elseif kind is# 'task'
+			call expr.trigger()
 		endif
 	endfor
 	return self
@@ -184,65 +186,21 @@ function! s:Task.execute(cmd) abort "{{{
 	call add(self._orderlist, order)
 	return self
 endfunction "}}}
+function! s:Task.append(task) abort "{{{
+	let order = ['task', a:task]
+	call add(self._orderlist, order)
+	return self
+endfunction "}}}
 function! s:Task.clear() abort "{{{
 	call filter(self._orderlist, 0)
 	return self
 endfunction "}}}
 function! s:Task.clone() abort "{{{
-	let clone = deepcopy(self)
+	let clone = s:Task()
 	let clone._orderlist = copy(self._orderlist)
 	return clone
 endfunction "}}}
 lockvar! s:Task
-"}}}
-" TaskGroup class {{{
-let s:TaskGroup = {
-	\	'__CLASS__': 'TaskGroup',
-	\	'__taskgroup__': {
-	\		'Constructor': function('s:Task'),
-	\		},
-	\	'_orderlist': [],
-	\	}
-function! s:TaskGroup(...) abort "{{{
-	let taskgroup = deepcopy(s:TaskGroup)
-	if a:0 > 0
-		let taskgroup.__taskgroup__.Constructor = a:1
-	endif
-	return taskgroup
-endfunction "}}}
-function! s:TaskGroup.trigger() abort "{{{
-	for task in self._orderlist
-		call task.trigger()
-	endfor
-	return self
-endfunction "}}}
-function! s:TaskGroup.call(func, args, ...) abort "{{{
-	let task = self.__taskgroup__.Constructor()
-	call call(task.call, [a:func, a:args] + a:000, task)
-	call self.append(task)
-	return task
-endfunction "}}}
-function! s:TaskGroup.execute(cmd) abort "{{{
-	let task = self.__taskgroup__.Constructor()
-	call call(task.execute, [a:cmd], task)
-	call self.append(task)
-	return task
-endfunction "}}}
-function! s:TaskGroup.append(task) abort "{{{
-	let t_task = type(a:task)
-	if t_task is v:t_dict
-		call add(self._orderlist, a:task)
-	elseif t_task is v:t_list
-		call extend(self._orderlist, a:task)
-	else
-		call s:Errors.InvalidArgument('TaskGroup.append', [a:task])
-	endif
-	return a:task
-endfunction "}}}
-function! s:TaskGroup.clear() abort "{{{
-	call filter(self._orderlist, 0)
-	return self
-endfunction "}}}
 "}}}
 " TimerTask class (inherits Counter, Timer and Task classes) {{{
 unlockvar! s:TimerTask
@@ -267,8 +225,10 @@ function! s:TimerTask.trigger() abort "{{{
 	return self
 endfunction "}}}
 function! s:TimerTask.clone() abort "{{{
-	let clone = s:ClassSys.super(self, 'Task').clone()
+	let clone = s:TimerTask()
+	let clone.__counter__ = deepcopy(self.__counter__)
 	let clone.__timer__.id = -1
+	let clone._orderlist = copy(self._orderlist)
 	return clone
 endfunction "}}}
 function! s:TimerTask.initialize() abort "{{{
@@ -291,15 +251,31 @@ lockvar! s:TimerTask
 unlockvar! s:EventTask
 let s:EventTask = {
 	\	'__CLASS__': 'EventTask',
+	\	'name': '',
 	\	}
-function! s:EventTask() abort "{{{
+function! s:EventTask(name) abort "{{{
 	let switch = s:Switch()
 	let counter = s:Counter(-1)
 	let task = s:Task()
 	let eventtask = deepcopy(s:EventTask)
 	let super = s:ClassSys.inherit(counter, switch)
 	let super = s:ClassSys.inherit(task, super)
-	return s:ClassSys.inherit(eventtask, super)
+	let eventtask = s:ClassSys.inherit(eventtask, super)
+	let eventtask.name = a:name
+	if count(s:BUILTINEVENTS, a:name) != 0
+		" Built-in autocmd
+		if !has_key(s:eventtable, a:name)
+			let s:eventtable[a:name] = []
+			augroup multiselect
+				execute printf('autocmd %s * call s:doautocmd("%s")', a:name, a:name)
+			augroup END
+		endif
+		call add(s:eventtable[a:name], eventtask)
+	else
+		" User autocmd
+		call eventtask.call(function('s:douserautocmd'), [a:name])
+	endif
+	return eventtask
 endfunction "}}}
 function! s:EventTask.trigger() abort "{{{
 	if self._skipsthistime()
@@ -309,64 +285,32 @@ function! s:EventTask.trigger() abort "{{{
 	call self._tick()
 	return self
 endfunction "}}}
+function! s:EventTask.clone() abort "{{{
+	let clone = s:EventTask(self.name)
+	let clone.__switch__ = deepcopy(self.__switch__)
+	let clone.__counter__ = deepcopy(self.__counter__)
+	let clone._orderlist = copy(self._orderlist)
+	return clone
+endfunction "}}}
 function! s:EventTask.finish() abort "{{{
 	return self._finish()
-endfunction "}}}
-lockvar! s:EventTask
-"}}}
-" Event class (inherits Switch and TaskGroup classes) {{{
-unlockvar! s:Event
-let s:Event = {
-	\	'__CLASS__': 'Event',
-	\	'name': '',
-	\	}
-function! s:Event(name) abort "{{{
-	let switch = s:Switch()
-	let taskgroup = s:TaskGroup(function('s:EventTask'))
-	let event = deepcopy(s:Event)
-	let super = s:ClassSys.inherit(taskgroup, switch)
-	let event = s:ClassSys.inherit(event, super)
-	let event.name = a:name
-	if count(s:BUILTINEVENTS, a:name) != 0
-		" Built-in autocmd
-		if !has_key(s:eventtable, a:name)
-			let s:eventtable[a:name] = []
-			augroup multiselect
-				execute printf('autocmd %s * call s:doautocmd("%s")', a:name, a:name)
-			augroup END
-		endif
-		call add(s:eventtable[a:name], event)
-	else
-		" User autocmd
-		call event.call(function('s:douserautocmd'), [a:name])
+	if has_key(s:eventtable, self.name)
+		call filter(s:eventtable[self.name], 'v:val isnot self')
 	endif
-	return event
-endfunction "}}}
-function! s:Event.trigger() abort "{{{
-	call self.sweep()
-	if self._skipsthistime()
-		return self
-	endif
-	call s:ClassSys.super(self, 'TaskGroup').trigger()
-	return self
-endfunction "}}}
-function! s:Event.append(task) abort "{{{
-	call self.sweep()
-	return s:ClassSys.super(self, 'TaskGroup').append(a:task)
-endfunction "}}}
-function! s:Event.finish() abort "{{{
-	call filter(s:eventtable, 'v:val isnot self')
-	return self
-endfunction "}}}
-function! s:Event.sweep() abort "{{{
-	call filter(self._orderlist, {_, task -> !task.hasdone()})
 	return self
 endfunction "}}}
 function! s:doautocmd(name) abort "{{{
 	for event in s:eventtable[a:name]
-		call event.trigger().sweep()
+		call event.trigger()
 	endfor
-	call filter(s:eventtable[a:name], '!empty(v:val._orderlist)')
+	call filter(s:eventtable[a:name], '!v:val.hasdone()')
+
+	if empty(s:eventtable[a:name])
+		augroup multiselect
+			execute printf('autocmd! %s *', a:name)
+		augroup END
+		call remove(s:eventtable, a:name)
+	endif
 endfunction "}}}
 function! s:douserautocmd(name) abort "{{{
 	if !exists('#User#' . a:name)
@@ -374,7 +318,7 @@ function! s:douserautocmd(name) abort "{{{
 	endif
 	execute 'doautocmd <nomodeline> User ' . a:name
 endfunction "}}}
-lockvar! s:Event
+lockvar! s:EventTask
 "}}}
 
 " Schedule module {{{
@@ -385,10 +329,8 @@ let s:Schedule = {
 	\	'Counter': function('s:Counter'),
 	\	'Timer': function('s:Timer'),
 	\	'Task': function('s:Task'),
-	\	'TaskGroup': function('s:TaskGroup'),
 	\	'TimerTask': function('s:TimerTask'),
 	\	'EventTask': function('s:EventTask'),
-	\	'Event': function('s:Event'),
 	\	}
 lockvar! s:Schedule
 "}}}

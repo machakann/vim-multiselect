@@ -329,7 +329,6 @@ List of contents~
   Multiselect.Region()		|multiselect-Multiselect.Region()|
   Multiselect.Item()		|multiselect-Multiselect.Item()|
   Multiselect.Change()		|multiselect-Multiselect.Change()|
-  Multiselect.Event()		|multiselect-Multiselect.Event()|
   Multiselect.EventTask()	|multiselect-Multiselect.EventTask()|
   Multiselect.TimerTask()	|multiselect-Multiselect.TimerTask()|
 
@@ -388,7 +387,7 @@ List of contents~
   Multiselector.quench()	|multiselect-Multiselector.quench()|
 
   -event controls
-  Multiselector.Event()		|multiselect-Multiselector.Event()|
+  Multiselector.event()		|multiselect-Multiselector.event()|
 
 * Region class~
   Region			|multiselect-class-Region|
@@ -417,21 +416,9 @@ List of contents~
   Change.apply()		|multiselect-Change.apply()|
   Change.mapapply()		|multiselect-Change.mapapply()|
 
-* Event class~
-  Event				|multiselect-class-Event|
-  Event.name			|multiselect-Event.name|
-  Event.call()			|multiselect-Event.call()|
-  Event.execute()		|multiselect-Event.execute()|
-  Event.append()		|multiselect-Event.append()|
-  Event.finish()		|multiselect-Event.finish()|
-  Event.trigger()		|multiselect-Event.trigger()|
-  Event.on()			|multiselect-Event.on()|
-  Event.off()			|multiselect-Event.off()|
-  Event.isactive()		|multiselect-Event.isactive()|
-  Event.skip()			|multiselect-Event.skip()|
-
 * EventTask class~
   EventTask			|multiselect-class-EventTask|
+  EventTask.name		|multiselect-EventTask.name|
   EventTask.call()		|multiselect-EventTask.call()|
   EventTask.execute()		|multiselect-EventTask.execute()|
   EventTask.finish()		|multiselect-EventTask.finish()|
@@ -602,24 +589,10 @@ Multiselect.Change()    [function]
 	position after some edits. See |multiselect-class-Change|.
 
 
-					*multiselect-Multiselect.Event()*
-Multiselect.Event({event})    [function]
-	This is a constructor of `Event` class. Using the method of
-	`Event` and `EventTask` classes, developers can hook processes for
-	|autocmd-events|. {event} should be a name of |autocmd-events|, if
-	{event} is not in the list {event} will be regarded as a |User|
-	autocmd. This event will be triggered by |multiselect-Event.trigger()|
-	method. See |multiselect-class-Event|.
-
-
 					*multiselect-Multiselect.EventTask()*
 Multiselect.EventTask()    [function]
 	This is a constructor of `EventTask` class. It is employed to hook
 	processes for |autocmd-events|. See |multiselect-class-EventTask|.
-
-	Another way to get its instance is the use of
-	|multiselect-Event.call()| and |multiselect-Event.execute()| methods.
-	See |multiselect-class-Event| and |multiselect-Multiselector.Event()|.
 
 
 					*multiselect-Multiselect.TimerTask()*
@@ -1399,13 +1372,13 @@ Multiselector.quench()    [method]
 <
 
   - event controls
-					*multiselect-Multiselector.Event()*
-Multiselector.Event({event})    [method]
-	This method returns an `Event` class instance specified by {event} for
-	the control of the `Multiselector` instance itself.
-	See |multiselect-class-Event| and |multiselect-class-EventTask|.
+					*multiselect-Multiselector.event()*
+Multiselector.event({event})    [method]
+	This method returns an `EventTask` class instance specified by {event}
+	for the control of the `Multiselector` instance itself.
+	See |multiselect-class-EventTask|.
 
-	This plugin prepares `Event` class instances for |BufLeave|,
+	This plugin prepares `EventTask` class instances for |BufLeave|,
 	|TabLeave|, |CmdwinEnter|, |CmdwinLeave|, |TextChanged|,
 	|InsertEnter|, |WinNew|, |MultiselectInit|, |MultiselectCheckPost| and
 	|MultiselectUncheckPost|.
@@ -1771,122 +1744,6 @@ last edit. >
 
 
 ------------------------------------------------------------------------------
-Event class~
-					*multiselect-class-Event*
-
-This class is employed to hook tasks for a |autocmd-events|. An `Event` class
-instance can produce a task and set the task to itself by
-|multiselect-Event.call()| and |multiselect-Event.execute()|. >
-	function! s:sayfoo() abort
-		echo 'foo'
-	endfunction
-
-	let event = s:Multiselect.Event('TextChanged')
-	call event.call(function('s:sayfoo'), [])
-	call event.execute('echo "foo"')
-<
-Note that an `Event` class instance is volatile, if all the tasks are
-finished, it will be abandoned automatically. It is not valid to re-use the
-instance. If you want to finish earlier, use |multiselect-Event.finish()|. >
-	" finish the event hooks
-	call event.finish()
-<
-
-					*multiselect-Event.name*
-Event.name    [string]
-	The name of autocmd event responsible for.
-
-
-					*multiselect-Event.call()*
-Event.call({Funcref}, {args}[, {dict}])    [method]
-	This method makes a task to call a |Funcref| with a |List| of {args}
-	as arguments and set it for the event. {dict} is for functions with
-	the "dict" attribute. It will be used to set the local variable
-	"self". |Dictionary-function|
-	This method returns the produced task.
-
-	If you have achieved the purpose of the task, you can
-	abandon the task by calling |multiselect-EventTask.finish()|. >
-		function! s:sayfoo() abort
-		    echo 'foo'
-		endfunction
-
-		" make and set a new task to 'TextChanged' event
-		let task = s:Multiselect.Event('TextChanged')
-					\.call(function('s:sayfoo'), [])
-
-		" finish the task
-		call task.finish()
-<
-
-					*multiselect-Event.execute()*
-Event.execute({cmd})    [method]
-	This method makes a task to execute an Ex command. This method returns
-	the produced task.
-
-	If you have achieved the purpose of the task, you can
-	abandon the task by calling |multiselect-EventTask.finish()|. >
-		" make and set a new task to 'TextChanged' event
-		let task = s:Multiselect.Event('TextChanged')
-					\.execute('echo "foo"')
-
-		" finish the task
-		call task.finish()
-<
-
-					*multiselect-Event.append()*
-Event.append({task})    [method]
-	This method register tasks for the event. {task} should be an instance
-	of `EventTask` class or a list of the instances. >
-		let event = s:Multiselect.Event('TextChanged')
-		let task = s:Multiselect.EventTask()
-		call task.execute('echo "foo"')
-		call event.append(task)
-
-		" finish the task
-		call task.finish()
-<
-	This method returns the added task.
-
-
-					*multiselect-Event.finish()*
-Event.finish()    [method]
-	This method is used to abandon the event hooks.
-
-
-					*multiselect-Event.trigger()*
-Event.trigger()    [method]
-	This method execute all the registered tasks forcibly.
-	This method returns the `Event` itself.
-
-
-					*multiselect-Event.on()*
-Event.on()    [method]
-	This method activate the `Event` tasks.
-	This method returns the `Event` itself.
-
-
-					*multiselect-Event.off()*
-Event.off()    [method]
-	This method deactivate the `Event` tasks.
-	This method returns the `Event` itself.
-
-
-					*multiselect-Event.isactive()*
-Event.isactive()    [method]
-	This method returns |TRUE| if the `Event` is activated, |FALSE| if it
-	is deactivated.
-
-
-					*multiselect-Event.skip()*
-Event.skip([{count}])    [method]
-	If this method is called, the following `Event` tasks are skipped
-	(not executed) {count} times. {count} is 1 if omitted.
-	This method returns the `Event` itself.
-
-
-
-------------------------------------------------------------------------------
 EventTask class~
 					*multiselect-class-EventTask*
 
@@ -1894,19 +1751,23 @@ EventTask class~
 An `EventTask` instance can hold one or more tasks to execute, the tasks will
 be executed in the order of registration by |multiselect-EventTask.call()| and
 |multiselect-EventTask.execute()|. If the purpose of the task has achieved,
-use |multiselect-EventTask.finish()| to abandon the task.
+use |multiselect-EventTask.finish()| to abandon the task. >
+	function! s:sayfoo() abort
+		echo 'foo'
+	endfunction
 
-An `EventTask` instance itself is not bound to an event, thus a same
-`EventTask` can be registered to different events. >
-	let task = s:Multiselect.EventTask().execute('echo "foo"')
-	let textchanged = s:Multiselect.Event('TextChanged')
-	let insertenter = s:Multiselect.Event('InsertEnter')
-	call textchanged.append(task)
-	call insertenter.append(task)
+	let eventtask = s:Multiselect.EventTask('TextChanged')
+	call eventtask.call(function('s:sayfoo'), [])
+	call eventtask.execute('echo "foo"')
+
+	" finish the task
+	call eventtask.finish()
 <
-If |multiselect-EventTask.finish()| is called for the task, the task will be
-abondoned from those two events.
 
+					*multiselect-EventTask.name*
+EventTask.name    [string]
+	This is the name of autocmd event which is responsible for.
+	See |autocmd-events|.
 
 					*multiselect-EventTask.call()*
 EventTask.call({Funcref}, {args}[, {dict}])    [method]
@@ -1922,7 +1783,7 @@ EventTask.call({Funcref}, {args}[, {dict}])    [method]
 		endfunction
 
 		" make and set a new task to 'TextChanged' event
-		let task = s:Multiselect.Event('TextChanged')
+		let task = s:Multiselect.EventTask('TextChanged')
 					\.call(function('s:sayfoo'), [])
 
 		" finish the task
@@ -1937,7 +1798,7 @@ EventTask.execute({cmd})    [method]
 	If you have achieved the purpose of the task, you can
 	abandon the task by calling |multiselect-EventTask.finish()|. >
 		" make and set a new task to 'TextChanged' event
-		let task = s:Multiselect.Event('TextChanged')
+		let task = s:Multiselect.EventTask('TextChanged')
 					\.execute('echo "foo"')
 
 		" finish the task
@@ -1963,13 +1824,13 @@ EventTask.clear()    [method]
 
 					*multiselect-EventTask.on()*
 EventTask.on()    [method]
-	This method activate the `Event` tasks. This method returns the
+	This method activate the `EventTask` tasks. This method returns the
 	`EventTask` itself.
 
 
 					*multiselect-EventTask.off()*
 EventTask.off()    [method]
-	This method deactivate the `Event` tasks. This method returns the
+	This method deactivate the `EventTask` tasks. This method returns the
 	`EventTask` itself.
 
 
@@ -1984,7 +1845,7 @@ EventTask.skip([{count}])    [method]
 	If this method is called, the following `EventTask` is skipped
 	(not executed) {count} times. {count} is 1 if omitted. >
 		" 'foo' will be displayed after twice edits
-		call s:Multiselect.Event('TextChanged')
+		call s:Multiselect.EventTask('TextChanged')
 				 \.execute('echo "foo"')
 				 \.skip(1)
 <
@@ -1998,7 +1859,7 @@ EventTask.repeat([{count}])    [method]
 	it is -1 in default. If {count} is omitted, it will reset the number
 	of execution to the last set one. >
 		" 'foo' will be displayed and the task is abandoned
-		call s:Multiselect.Event('TextChanged')
+		call s:Multiselect.EventTask('TextChanged')
 				 \.execute('echo "foo"')
 				 \.repeat(1)
 <
