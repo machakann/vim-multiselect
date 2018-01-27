@@ -329,6 +329,7 @@ List of contents~
   Multiselect.Region()		|multiselect-Multiselect.Region()|
   Multiselect.Item()		|multiselect-Multiselect.Item()|
   Multiselect.Change()		|multiselect-Multiselect.Change()|
+  Multiselect.Task()		|multiselect-Multiselect.Task()|
   Multiselect.EventTask()	|multiselect-Multiselect.EventTask()|
   Multiselect.TimerTask()	|multiselect-Multiselect.TimerTask()|
 
@@ -415,6 +416,14 @@ List of contents~
   Change.afterinsert()		|multiselect-Change.afterinsert()|
   Change.apply()		|multiselect-Change.apply()|
   Change.mapapply()		|multiselect-Change.mapapply()|
+
+* Task class~
+  Task				|multiselect-class-Task|
+  Task.call()			|multiselect-Task.call()|
+  Task.execute()		|multiselect-Task.execute()|
+  Task.append()			|multiselect-Task.append()|
+  Task.trigger()		|multiselect-Task.trigger()|
+  Task.clear()			|multiselect-Task.clear()|
 
 * EventTask class~
   EventTask			|multiselect-class-EventTask|
@@ -587,6 +596,15 @@ Multiselect.Item({startlnum}, {endlnum})
 Multiselect.Change()    [function]
 	This is a constructor of `Change` class. It is employed to track a
 	position after some edits. See |multiselect-class-Change|.
+
+
+					*multiselect-Multiselect.Task()*
+Multiselect.Task()    [function]
+	This is a constructor of `Task` class. This class is used to assemble
+	several processes and trigger them all at onece, and is also a base
+	class of the following classes.
+	|multiselect-class-EventTask|
+	|multiselect-class-TimerTask|
 
 
 					*multiselect-Multiselect.EventTask()*
@@ -1744,10 +1762,89 @@ last edit. >
 
 
 ------------------------------------------------------------------------------
+Task class~
+					*multiselect-class-Task*
+
+`Task` class is used to assemble several processes and trigger them all at
+onece. The processes are registered via |multiselect-Task.call()|,
+|multiselect-Task.execute()| and |multiselect-Task.append()|. >
+	function! s:sayfoo() abort
+		echo 'foo'
+	endfunction
+
+	let task = s:Multiselect.Task()
+	call task.call(function('s:sayfoo'), [])
+	call task.execute('echo "foo"')
+<
+
+Those tasks are executed to call |multiselect-Task.trigger()|, it executes
+them in the order of registration. >
+	call task.trigger()
+<
+
+					*multiselect-Task.call()*
+Task.call({Funcref}, {args}[, {dict}])    [method]
+	This method registers a task to call a |Funcref| with a |List| of
+	{args} as arguments and set it for the event. {dict} is for functions
+	with the "dict" attribute. It will be used to set the local variable
+	"self". |Dictionary-function| This method returns the task itself.
+>
+		function! s:sayfoo() abort
+		    echo 'foo'
+		endfunction
+
+		" make a new task
+		let task = s:Multiselect.Task().call(function('s:sayfoo'), [])
+
+		" trigger the task
+		call task.trigger()
+<
+
+					*multiselect-Task.execute()*
+Task.execute({cmd})    [method]
+	This method registers a task to execute an Ex command. This method
+	returns the task itself.  >
+		" make a new task
+		let task = s:Multiselect.Task().execute('echo "foo"')
+
+		" trigger the task
+		call task.trigger()
+<
+
+					*multiselect-Task.append()*
+Task.append({task})    [method]
+	This method registers a task to trigger other tasks. {task} should be
+	an instance of `Task` class or its subclasses. This method returns the
+	task itself. >
+		" make new tasks
+		let task1 = s:Multiselect.Task().execute('echo "foo"')
+		let task2 = s:Multiselect.Task().append(task1)
+
+		" trigger the task
+		call task2.trigger()
+<
+
+					*multiselect-Task.trigger()*
+Task.trigger()    [method]
+	This method executes all the registered tasks forcibly.
+	This method returns the `EventTask` itself.
+
+
+					*multiselect-Task.clear()*
+Task.clear()    [method]
+	This method clears all registered tasks. This method returns the
+	`EventTask` itself.
+
+
+
+------------------------------------------------------------------------------
 EventTask class~
 					*multiselect-class-EventTask*
 
-`EventTask` class is used to hook processes for |autocmd-events|.
+`EventTask` class is used to hook processes for |autocmd-events|. It is a
+subclass of `Task` class and automatically triggered by an autocmd event.
+|multiselect-class-Task|
+
 An `EventTask` instance can hold one or more tasks to execute, the tasks will
 be executed in the order of registration by |multiselect-EventTask.call()| and
 |multiselect-EventTask.execute()|. If the purpose of the task has achieved,
@@ -1771,7 +1868,7 @@ EventTask.name    [string]
 
 					*multiselect-EventTask.call()*
 EventTask.call({Funcref}, {args}[, {dict}])    [method]
-	This method register a task to call a |Funcref| with a |List| of
+	This method registers a task to call a |Funcref| with a |List| of
 	{args} as arguments and set it for the event. This method returns the
 	task itself. {dict} is for functions with the "dict" attribute. It
 	will be used to set the local variable "self". |Dictionary-function|
@@ -1792,7 +1889,7 @@ EventTask.call({Funcref}, {args}[, {dict}])    [method]
 
 					*multiselect-EventTask.execute()*
 EventTask.execute({cmd})    [method]
-	This method register a task to execute an Ex command. This method
+	This method registers a task to execute an Ex command. This method
 	returns the task itself.
 
 	If you have achieved the purpose of the task, you can
@@ -1805,6 +1902,13 @@ EventTask.execute({cmd})    [method]
 		call task.finish()
 <
 
+					*multiselect-EventTask.append()*
+EventTask.append({task})    [method]
+	This method registers a task to trigger other tasks. {task} should be
+	an instance of `Task` class or its subclasses. This method returns the
+	task itself. See |multiselect-Task.append()|
+
+
 					*multiselect-EventTask.finish()*
 EventTask.finish()    [method]
 	This method is used to abandon the task.
@@ -1812,7 +1916,7 @@ EventTask.finish()    [method]
 
 					*multiselect-EventTask.trigger()*
 EventTask.trigger([{forcibly}])    [method]
-	This method execute all the registered tasks forcibly.
+	This method executes all the registered tasks.
 	This method returns the `EventTask` itself.
 	If {forcibly} is given and it is |TRUE|, this method triggers the
 	registered task even if the task has already done.
@@ -1827,13 +1931,13 @@ EventTask.clear()    [method]
 
 					*multiselect-EventTask.on()*
 EventTask.on()    [method]
-	This method activate the `EventTask` tasks. This method returns the
+	This method activates the `EventTask` tasks. This method returns the
 	`EventTask` itself.
 
 
 					*multiselect-EventTask.off()*
 EventTask.off()    [method]
-	This method deactivate the `EventTask` tasks. This method returns the
+	This method deactivates the `EventTask` tasks. This method returns the
 	`EventTask` itself.
 
 
@@ -1886,8 +1990,10 @@ EventTask.hasdone()    [method]
 TimerTask class~
 					*multiselect-class-TimerTask*
 
-`TimerTask` is used to delay the execution of tasks. The tasks will be
-registered by using |multiselect-TimerTask.call()| and
+`TimerTask` is used to delay the execution of tasks. It is a subclass of
+`Task` class and automatically triggered by a delay time.
+
+The tasks will be registered by using |multiselect-TimerTask.call()| and
 |multiselect-TimerTask.execute()| methods. |multiselect-TimerTask.start()|
 sets the delay time and start counting down, after the delay time the
 registered tasks are executed. If you want to stop a started `TimerTask`
@@ -1895,7 +2001,7 @@ before the execution, you can use |multiselect-TimerTask.stop()|.
 
 					*multiselect-TimerTask.call()*
 TimerTask.call({Funcref}, {args}[, {dict}])    [method]
-	This method register a task to call a |Funcref| with a |List| of
+	This method registers a task to call a |Funcref| with a |List| of
 	{args} as arguments and set it for the event. {dict} is for functions
 	with the "dict" attribute. It will be used to set the local variable
 	"self". |Dictionary-function| This method returns the task itself.
@@ -1917,7 +2023,7 @@ TimerTask.call({Funcref}, {args}[, {dict}])    [method]
 
 					*multiselect-TimerTask.execute()*
 TimerTask.execute({cmd})    [method]
-	This method register a task to execute an Ex command. This method
+	This method registers a task to execute an Ex command. This method
 	returns the task itself.
 
 	If you have achieved the purpose of the task, you can
@@ -1931,6 +2037,13 @@ TimerTask.execute({cmd})    [method]
 		call task.stop()
 <
 
+					*multiselect-TimerTask.append()*
+TimerTask.append({task})    [method]
+	This method registers a task to trigger other tasks. {task} should be
+	an instance of `Task` class or its subclasses. This method returns the
+	task itself. See |multiselect-Task.append()|
+
+
 					*multiselect-TimerTask.start()*
 TimerTask.start({time})    [method]
 	This method sets the delay time and start counting down.
@@ -1939,13 +2052,13 @@ TimerTask.start({time})    [method]
 
 					*multiselect-TimerTask.stop()*
 TimerTask.stop()    [method]
-	This method stop to cancell the delayed task.
+	This method stops to cancell the delayed task.
 	This method returns the task itself.
 
 
 					*multiselect-TimerTask.trigger()*
 TimerTask.trigger()    [method]
-	This method execute all the registered tasks forcibly.
+	This method executes all the registered tasks forcibly.
 	This method returns the task itself.
 
 
