@@ -346,9 +346,9 @@ List of contents~
   Multiselector			|multiselect-class-Multiselector|
 
   - members
-  Multiselector.name
-  Multiselector.bufnr
-  Multiselector.higroup
+  Multiselector.name		|multiselect-Multiselector.name|
+  Multiselector.bufnr		|multiselect-Multiselector.bufnr|
+  Multiselector.higroup		|multiselect-Multiselector.higroup|
   Multiselector.itemlist	|multiselect-Multiselector.itemlist|
 
   - main interfaces
@@ -406,6 +406,15 @@ List of contents~
   Item				|multiselect-class-Item|
   Item.id			|multiselect-Item.id|
   Item.bufnr			|multiselect-Item.bufnr|
+  Item.head			|multiselect-Item.head|
+  Item.tail			|multiselect-Item.tail|
+  Item.type			|multiselect-Item.type|
+  Item.extended			|multiselect-Item.extended|
+  Item.select()			|multiselect-Item.select()|
+  Item.yank()			|multiselect-Item.yank()|
+  Item.includes()		|multiselect-Item.includes()|
+  Item.isinside()		|multiselect-Item.isinside()|
+  Item.touches()		|multiselect-Item.touches()|
   Item.show()			|multiselect-Item.show()|
   Item.quench()			|multiselect-Item.quench()|
   Item.isshownin()		|multiselect-Item.isshownin()|
@@ -1650,6 +1659,51 @@ Item.bufnr    [number]
 	This is a buffer number of the item belonging to.
 
 
+					*multiselect-Item.head*
+Item.head    [list]
+	See |multiselect-Region.head|.
+
+
+					*multiselect-Item.tail*
+Item.tail    [list]
+	See |multiselect-Region.tail|.
+
+
+					*multiselect-Item.type*
+Item.type    [string]
+	See |multiselect-Region.type|.
+
+
+					*multiselect-Item.extended*
+Item.extended    [boolean]
+	See |multiselect-Region.extended|.
+
+
+					*multiselect-Item.select()*
+Item.select()    [method]
+	See |multiselect-Region.select()|.
+
+
+					*multiselect-Item.yank()*
+Item.yank()    [method]
+	See |multiselect-Region.yank()|.
+
+
+					*multiselect-Item.includes()*
+Item.includes()    [method]
+	See |multiselect-Region.includes()|.
+
+
+					*multiselect-Item.isinside()*
+Item.isinside()    [method]
+	See |multiselect-Region.isinside()|.
+
+
+					*multiselect-Item.touches()*
+Item.touches()    [method]
+	See |multiselect-Region.touches()|.
+
+
 					*multiselect-Item.show()*
 Item.show({higroup})    [method]
 	This is a method to highlight the item region on a buffer. It will be
@@ -1886,6 +1940,13 @@ EventTask.call({Funcref}, {args}[, {dict}])    [method]
 		" finish the task
 		call task.finish()
 <
+	Or use |multiselect-EventTask.repeat()| to finish after a certain
+	number of callings. >
+		" it will be abandoned after three times callings
+		let task = s:Multiselect.EventTask('TextChanged')
+					\.execute('echo "foo"')
+					\.repeat(3)
+<
 
 					*multiselect-EventTask.execute()*
 EventTask.execute({cmd})    [method]
@@ -1900,6 +1961,13 @@ EventTask.execute({cmd})    [method]
 
 		" finish the task
 		call task.finish()
+<
+	Or use |multiselect-EventTask.repeat()| to finish after a certain
+	number of callings. >
+		" it will be abandoned after three times callings
+		let task = s:Multiselect.EventTask('TextChanged')
+					\.execute('echo "foo"')
+					\.repeat(3)
 <
 
 					*multiselect-EventTask.append()*
@@ -2004,10 +2072,7 @@ TimerTask.call({Funcref}, {args}[, {dict}])    [method]
 	This method registers a task to call a |Funcref| with a |List| of
 	{args} as arguments and set it for the event. {dict} is for functions
 	with the "dict" attribute. It will be used to set the local variable
-	"self". |Dictionary-function| This method returns the task itself.
-
-	If you have achieved the purpose of the task, you can
-	abandon the task by calling |multiselect-TimerTask.stop()|. >
+	"self". |Dictionary-function| This method returns the task itself. >
 		function! s:sayfoo() abort
 			echo 'foo'
 		endfunction
@@ -2016,25 +2081,16 @@ TimerTask.call({Funcref}, {args}[, {dict}])    [method]
 		let task  = s:Multiselect.TimerTask()
 					\.call(function('s:sayfoo'), [])
 					\.start(100)
-
-		" stop the timer task
-		call task.stop()
 <
 
 					*multiselect-TimerTask.execute()*
 TimerTask.execute({cmd})    [method]
 	This method registers a task to execute an Ex command. This method
-	returns the task itself.
-
-	If you have achieved the purpose of the task, you can
-	abandon the task by calling |multiselect-TimerTask.stop()|. >
+	returns the task itself. >
 		" make and start a new task executed after 100 millisecond
 		let task  = s:Multiselect.TimerTask()
 					\.execute('echo "foo"')
 					\.start(100)
-
-		" finish the task
-		call task.stop()
 <
 
 					*multiselect-TimerTask.append()*
