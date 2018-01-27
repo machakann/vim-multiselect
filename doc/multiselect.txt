@@ -1735,6 +1735,10 @@ Change.apply({region})
 	This method updates the position (or a `Region` instance) in-place and
 	returns it.
 
+	NOTE: Change.apply() may not be effective with a lot of items.
+	      Use Change.mapapply() for the case.
+	      |multiselect-Change.mapapply()|
+
 
 					*multiselect-Change.mapapply()*
 Change.mapapply({itemlist})    [method]
