@@ -1,5 +1,5 @@
 *multiselect.txt*	A library for multiple selection
-						Last change:26-Jan-2018.
+						Last change:27-Jan-2018.
 
 Author  : machakann <https://github.com/machakann>
 License : MIT license
@@ -388,6 +388,7 @@ List of contents~
 
   -event controls
   Multiselector.Event()		|multiselect-Multiselector.Event()|
+  Multiselector.eventtask	|multiselect-Multiselector.eventtask|
 
 * Region class~
   Region			|multiselect-class-Region|
@@ -1422,6 +1423,26 @@ Multiselector.Event({event})    [method]
 
 	All the multiselect items in the current buffer are unchecked in
 	|InsertEnter|.
+
+	Multiselect items are highlighted when a new window is opened if the
+	current buffer is displayed in |WinNew|.
+
+
+					*multiselect-Multiselector.eventtask*
+Multiselector.eventtask    [dict]
+	The above eventtasks are kept here. The list of tasks are below.
+
+	Multiselector.eventtask.BufLeave.initialize       [EventTask-instance]
+	Multiselector.eventtask.TabLeave.initialize       [EventTask-instance]
+	Multiselector.eventtask.CmdwinEnter.suspend       [EventTask-instance]
+	Multiselector.eventtask.CmdwinLeave.initialize    [EventTask-instance]
+	Multiselector.eventtask.CmdwinLeave.resume        [EventTask-instance]
+	Multiselector.eventtask.TextChanged.uncheckall    [EventTask-instance]
+	Multiselector.eventtask.InsertEnter.uncheckall    [EventTask-instance]
+	Multiselector.eventtask.WinNew.show               [EventTask-instance]
+
+	|multiselect-Multiselector.Event()|
+	|multiselect-class-EventTask|
 
 
 

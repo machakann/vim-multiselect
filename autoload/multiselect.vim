@@ -23,6 +23,15 @@ let s:Multiselector = {
 	\	'EVENTCHECKPOST': '',
 	\	'EVENTUNCHECKPOST': '',
 	\	'_event': {},
+	\	'eventtask': {
+	\		'BufLeave': {},
+	\		'TabLeave': {},
+	\		'CmdwinEnter': {},
+	\		'CmdwinLeave': {},
+	\		'TextChanged': {},
+	\		'InsertEnter': {},
+	\		'WinNew': {},
+	\		},
 	\	'_last':{
 	\		'event': '',
 	\		'itemlist': [],
@@ -48,14 +57,30 @@ function! s:Multiselector(...) abort "{{{
 	call multiselector.Event(EVENTINIT)
 	call multiselector.Event(EVENTCHECKPOST)
 	call multiselector.Event(EVENTUNCHECKPOST)
-	call multiselector.Event('BufLeave').call(multiselector._initialize, [], multiselector)
-	call multiselector.Event('TabLeave').call(multiselector._initialize, [], multiselector)
-	call multiselector.Event('CmdwinEnter').call(multiselector._suspend, [], multiselector)
-	call multiselector.Event('CmdwinLeave').call(multiselector._initialize, [], multiselector)
-	call multiselector.Event('CmdwinLeave').call(multiselector._resume, [], multiselector)
-	call multiselector.Event('TextChanged').call(multiselector.uncheckall, [], multiselector)
-	call multiselector.Event('InsertEnter').call(multiselector.uncheckall, [], multiselector)
-	call multiselector.Event('WinNew').call(multiselector._show, [], multiselector)
+
+	let multiselector.eventtask.BufLeave.initialize = multiselector
+		\.Event('BufLeave').call(multiselector._initialize, [], multiselector)
+
+	let multiselector.eventtask.TabLeave.initialize = multiselector
+		\.Event('TabLeave').call(multiselector._initialize, [], multiselector)
+
+	let multiselector.eventtask.CmdwinEnter.suspend = multiselector
+		\.Event('CmdwinEnter').call(multiselector._suspend, [], multiselector)
+
+	let multiselector.eventtask.CmdwinLeave.initialize = multiselector
+		\.Event('CmdwinLeave').call(multiselector._initialize, [], multiselector)
+
+	let multiselector.eventtask.CmdwinLeave.resume = multiselector
+		\.Event('CmdwinLeave').call(multiselector._resume, [], multiselector)
+
+	let multiselector.eventtask.TextChanged.uncheckall = multiselector
+		\.Event('TextChanged').call(multiselector.uncheckall, [], multiselector)
+
+	let multiselector.eventtask.InsertEnter.uncheckall = multiselector
+		\.Event('InsertEnter').call(multiselector.uncheckall, [], multiselector)
+
+	let multiselector.eventtask.WinNew.show = multiselector
+		\.Event('WinNew').call(multiselector._show, [], multiselector)
 
 	call multiselector._initialize()
 	return multiselector
