@@ -172,8 +172,7 @@ function! s:TimerTask() abort "{{{
 	let counter = s:Counter(1)
 	let task = s:Task()
 	let timertask = deepcopy(s:TimerTask)
-	let super = s:ClassSys.inherit(task, counter)
-	return s:ClassSys.inherit(timertask, super)
+	return s:ClassSys.inherit(timertask, task, counter)
 endfunction "}}}
 function! s:TimerTask.trigger(...) abort "{{{
 	let forcibly = get(a:000, 0, s:FALSE)
@@ -240,9 +239,7 @@ function! s:EventTask(name) abort "{{{
 	let counter = s:Counter(-1)
 	let task = s:Task()
 	let eventtask = deepcopy(s:EventTask)
-	let super = s:ClassSys.inherit(counter, switch)
-	let super = s:ClassSys.inherit(task, super)
-	let eventtask = s:ClassSys.inherit(eventtask, super)
+	let eventtask = s:ClassSys.inherit(eventtask, task, counter, switch)
 	let eventtask.name = a:name
 	if !has_key(s:eventtable, a:name)
 		let s:eventtable[a:name] = []
@@ -315,9 +312,7 @@ function! s:EitherTask() abort "{{{
 	let counter = s:Counter(1)
 	let task = s:Task()
 	let eithertask = deepcopy(s:EitherTask)
-	let super = s:ClassSys.inherit(counter, switch)
-	let super = s:ClassSys.inherit(task, super)
-	return s:ClassSys.inherit(eithertask, super)
+	return s:ClassSys.inherit(eithertask, task, counter, switch)
 endfunction "}}}
 function! s:EitherTask.event(name) abort "{{{
 	if has_key(self.__eithertask__.Event, a:name)
