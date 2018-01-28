@@ -332,6 +332,7 @@ List of contents~
   Multiselect.Task()		|multiselect-Multiselect.Task()|
   Multiselect.EventTask()	|multiselect-Multiselect.EventTask()|
   Multiselect.TimerTask()	|multiselect-Multiselect.TimerTask()|
+  Multiselect.EitherTask()	|multiselect-Multiselect.EitherTask()|
 
   - utility functions
   Multiselect.percolate()	|multiselect-Multiselect.percolate()|
@@ -646,6 +647,13 @@ Multiselect.EventTask()    [function]
 Multiselect.TimerTask()    [function]
 	This is a constructor of `TimerTask` class. It is employed to delay
 	the execution of processes. See |multiselect-class-TimerTask|.
+
+
+					*multiselect-Multiselect.EitherTask()*
+Multiselect.EitherTask()    [function]
+	This is a constructor of `EitherTask` class. It is employed to obtain
+	a task executed by multiple triggers.
+	See |multiselect-class-EitherTask|.
 
 
   - utility functions
