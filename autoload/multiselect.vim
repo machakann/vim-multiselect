@@ -513,7 +513,8 @@ endfunction "}}}
 " event control
 function! s:Multiselector.event(name) abort "{{{
 	if !has_key(self._event, a:name)
-		let self._event[a:name] = s:Schedule.EventTask(a:name)
+		let self._event[a:name] = s:Schedule.EventTask()
+		call self._event[a:name].start(a:name)
 	endif
 	return self._event[a:name]
 endfunction "}}}

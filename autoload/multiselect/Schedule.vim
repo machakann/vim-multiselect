@@ -30,12 +30,12 @@ let s:Switch = {
 function! s:Switch() abort "{{{
 	return deepcopy(s:Switch)
 endfunction "}}}
-function! s:Switch.on() abort "{{{
+function! s:Switch._on() abort "{{{
 	let self.__switch__.state = s:ON
 	let self.__switch__.skipcount = -1
 	return self
 endfunction "}}}
-function! s:Switch.off() abort "{{{
+function! s:Switch._off() abort "{{{
 	let self.__switch__.state = s:OFF
 	let self.__switch__.skipcount = -1
 	return self
@@ -45,21 +45,21 @@ function! s:Switch.skip(...) abort "{{{
 	if n <= 0
 		return self
 	endif
-	call self.off()
+	call self._off()
 	let self.__switch__.skipcount = n
 	return self
 endfunction "}}}
-function! s:Switch.isactive() abort "{{{
+function! s:Switch._isactive() abort "{{{
 	return self.__switch__.state
 endfunction "}}}
 function! s:Switch._skipsthistime() abort "{{{
-	if self.isactive()
+	if self._isactive()
 		return s:FALSE
 	endif
 	if self.__switch__.skipcount > 0
 		let self.__switch__.skipcount -= 1
 		if self.__switch__.skipcount == 0
-			call self.on()
+			call self._on()
 		endif
 	endif
 	return s:TRUE
@@ -229,6 +229,7 @@ unlockvar! s:EventTask
 let s:EventTask = {
 	\	'__CLASS__': 'EventTask',
 	\	'_name': '',
+	\	'_state': s:OFF,
 	\	}
 function! s:EventTask() abort "{{{
 	let switch = s:Switch()
@@ -275,6 +276,7 @@ function! s:EventTask.start(name) abort "{{{
 		augroup END
 	endif
 	call add(s:eventtable[a:name], self)
+	let self._state = s:ON
 	return self
 endfunction "}}}
 function! s:EventTask.stop() abort "{{{
@@ -282,7 +284,11 @@ function! s:EventTask.stop() abort "{{{
 		call filter(s:eventtable[self._name], 'v:val isnot self')
 	endif
 	call s:sweep(self._name)
+	let self._state = s:OFF
 	return self
+endfunction "}}}
+function! s:EventTask.isactive() abort "{{{
+	return self._state && s:ClassSys.super(self, 'Switch')._isactive()
 endfunction "}}}
 function! s:doautocmd(name) abort "{{{
 	for event in s:eventtable[a:name]
@@ -291,6 +297,9 @@ function! s:doautocmd(name) abort "{{{
 	call s:sweep(a:name)
 endfunction "}}}
 function! s:sweep(name) abort "{{{
+	if !has_key(s:eventtable, a:name)
+		return
+	endif
 	call filter(s:eventtable[a:name], '!v:val.hasdone()')
 	if empty(s:eventtable[a:name])
 		augroup multiselect
@@ -308,6 +317,7 @@ let s:EitherTask = {
 	\		'Event': {},
 	\		'Timer': [],
 	\		},
+	\	'_state': s:OFF,
 	\	}
 function! s:EitherTask() abort "{{{
 	let switch = s:Switch()
@@ -375,6 +385,9 @@ function! s:EitherTask.stop() abort "{{{
 		call filter(self.__eithertask__.Timer, 0)
 	endif
 	return self
+endfunction "}}}
+function! s:EitherTask.isactive() abort "{{{
+	return self._state && s:ClassSys.super(self, 'Switch')._isactive()
 endfunction "}}}
 "}}}
 

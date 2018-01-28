@@ -4,11 +4,11 @@ Describe Switch
 		let Switch = Schedule.Switch
 	End
 
-	Context .on()/off()
+	Context ._on()/_off()
 		It controls the state of switch
-			Assert True(Switch().on().isactive())
-			Assert False(Switch().off().isactive())
-			Assert True(Switch().on().off().on().isactive())
+			Assert True(Switch()._on()._isactive())
+			Assert False(Switch()._off()._isactive())
+			Assert True(Switch()._on()._off()._on()._isactive())
 		End
 	End
 
@@ -16,21 +16,21 @@ Describe Switch
 		It controls temporal off state of a switch
 			let switch = Switch()
 
-			call switch.on().skip(1)
-			Assert False(switch.isactive())
+			call switch._on().skip(1)
+			Assert False(switch._isactive())
 
 			Assert True(switch._skipsthistime())
 
-			Assert True(switch.isactive())
+			Assert True(switch._isactive())
 			Assert False(switch._skipsthistime())
 
 			call switch.skip(2)
-			Assert False(switch.isactive())
+			Assert False(switch._isactive())
 
 			Assert True(switch._skipsthistime())
 			Assert True(switch._skipsthistime())
 
-			Assert True(switch.isactive())
+			Assert True(switch._isactive())
 			Assert False(switch._skipsthistime())
 		End
 	End
@@ -175,7 +175,7 @@ Describe EventTask
 	Context .trigger()
 		It triggers all registered functions and commands
 			let g:count = 0
-			let eventtask = EventTask('TestEvent')
+			let eventtask = EventTask()
 
 			call eventtask.execute('let g:count += 1').trigger()
 			Assert Equals(g:count, 1)
@@ -184,12 +184,11 @@ Describe EventTask
 			Assert Equals(g:count, 4)
 
 			unlet! g:count
-			call eventtask.finish()
 		End
 
 		It is skipped if skipcount is set
 			let g:count = 0
-			let eventtask = EventTask('TestEvent')
+			let eventtask = EventTask()
 			call eventtask.execute('let g:count += 1')
 
 			call eventtask.trigger()
@@ -202,12 +201,11 @@ Describe EventTask
 			Assert Equals(g:count, 2)
 
 			unlet! g:count
-			call eventtask.finish()
 		End
 
 		It is repeated n-times given by .repeat()
 			let g:count = 0
-			let eventtask = EventTask('TestEvent')
+			let eventtask = EventTask()
 			call eventtask.execute('let g:count += 1')
 
 			call eventtask.repeat(1)
@@ -231,32 +229,14 @@ Describe EventTask
 			Assert True(eventtask.hasdone())
 
 			unlet! g:count
-			call eventtask.finish()
-		End
-	End
-
-	Context .finish()
-		It finishes the execution of the task
-			let g:count = 0
-			let eventtask = EventTask('TestEvent')
-
-			call eventtask.execute('let g:count += 1').repeat(3)
-			Assert Equals(eventtask.leftcount(), 3)
-			call eventtask.trigger()
-			Assert Equals(eventtask.leftcount(), 2)
-			call eventtask.finish()
-			Assert Equals(eventtask.leftcount(), 0)
-			Assert True(eventtask.hasdone())
-
-			unlet! g:count
-			call eventtask.finish()
 		End
 	End
 
 	Context class
 		It is triggered by an autocmd event
 			let g:count = 0
-			let eventtask = EventTask('TextChanged')
+			let eventtask = EventTask()
+			call eventtask.start('TextChanged')
 			call eventtask.execute('let g:count += 1').repeat(3).skip(1)
 
 			doautocmd <nomodeline> multiselect TextChanged
@@ -265,11 +245,11 @@ Describe EventTask
 			doautocmd <nomodeline> multiselect TextChanged
 			Assert Equals(g:count, 1)
 
-			call eventtask.off()
+			call eventtask._off()
 			doautocmd <nomodeline> multiselect TextChanged
 			Assert Equals(g:count, 1)
 
-			call eventtask.on()
+			call eventtask._on()
 			doautocmd <nomodeline> multiselect TextChanged
 			Assert Equals(g:count, 2)
 
@@ -280,7 +260,7 @@ Describe EventTask
 			Assert Equals(g:count, 3)
 
 			unlet! g:count
-			call eventtask.finish()
+			call eventtask.stop()
 		End
 	End
 End

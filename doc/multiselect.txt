@@ -444,8 +444,6 @@ List of contents~
   EventTask.stop()		|multiselect-EventTask.stop()|
   EventTask.trigger()		|multiselect-EventTask.trigger()|
   EventTask.clear()		|multiselect-EventTask.clear()|
-  EventTask.on()		|multiselect-EventTask.on()|
-  EventTask.off()		|multiselect-EventTask.off()|
   EventTask.isactive()		|multiselect-EventTask.isactive()|
   EventTask.skip()		|multiselect-EventTask.skip()|
   EventTask.repeat()		|multiselect-EventTask.repeat()|
@@ -475,8 +473,6 @@ List of contents~
   EitherTask.stop()		|multiselect-EitherTask.stop()|
   EitherTask.trigger()		|multiselect-EitherTask.trigger()|
   EitherTask.clear()		|multiselect-EitherTask.clear()|
-  EitherTask.on()		|multiselect-EitherTask.on()|
-  EitherTask.off()		|multiselect-EitherTask.off()|
   EitherTask.isactive()		|multiselect-EitherTask.isactive()|
   EitherTask.skip()		|multiselect-EitherTask.skip()|
   EitherTask.repeat()		|multiselect-EitherTask.repeat()|
@@ -2042,18 +2038,6 @@ EventTask.clear()    [method]
 	`EventTask` itself.
 
 
-					*multiselect-EventTask.on()*
-EventTask.on()    [method]
-	This method activates the `EventTask` tasks. This method returns the
-	`EventTask` itself.
-
-
-					*multiselect-EventTask.off()*
-EventTask.off()    [method]
-	This method deactivates the `EventTask` tasks. This method returns the
-	`EventTask` itself.
-
-
 					*multiselect-EventTask.isactive()*
 EventTask.isactive()    [method]
 	This method returns |TRUE| if the `EventTask` is activated, |FALSE| if
@@ -2311,18 +2295,6 @@ EitherTask.trigger([{forcibly}])    [method]
 EitherTask.clear()    [method]
 	This method clears all registered tasks. This method returns the
 	`EitherTask` itself.
-
-
-					*multiselect-EitherTask.on()*
-EitherTask.on()    [method]
-	This method activates the `EitherTask` tasks. This method returns the
-	`EitherTask` itself.
-
-
-					*multiselect-EitherTask.off()*
-EitherTask.off()    [method]
-	This method deactivates the `EitherTask` tasks. This method returns
-	the `EitherTask` itself.
 
 
 					*multiselect-EitherTask.isactive()*
