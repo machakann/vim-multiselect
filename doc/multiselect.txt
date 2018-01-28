@@ -1,5 +1,5 @@
 *multiselect.txt*	A library for multiple selection
-						Last change:28-Jan-2018.
+						Last change:29-Jan-2018.
 
 Author  : machakann <https://github.com/machakann>
 License : MIT license
@@ -529,9 +529,9 @@ Multiselect.load()    [function]
   - class constructors
 				*multiselect-Multiselect.Multiselector()*
 Multiselect.Multiselector([{options}])    [function]
-	This is a constructor of `Multiselector` class. A plugin developer can
-	obtain a new `Multiselector` instance. Each `Multiselector` instance
-	is independent, it does not affect to others.
+	This is the constructor of `Multiselector` class. A plugin developer
+	can obtain a new `Multiselector` instance. Each `Multiselector`
+	instance is independent, it does not affect to others.
 	See |multiselect-class-Multiselector|.
 
 	{options} is a |Dictionary| containing optional arguments.
@@ -588,8 +588,8 @@ Multiselect.Multiselector([{options}])    [function]
 Multiselect.Region({head}[, {tail}[, {type}[, {extended}]]])    [function]
 Multiselect.Region({lnum})
 Multiselect.Region({startlnum}, {endlnum})
-	This is a constructor of `Region` class, it is a class to represent a
-	region of a buffer. See |multiselect-class-Region|.
+	This is the constructor of `Region` class, it is a class to represent
+	a region of a buffer. See |multiselect-class-Region|.
 
 	{head} and {tail} are the edge positions of the region. These
 	positions are a list like a return value of |getpos()|.
@@ -622,7 +622,7 @@ Multiselect.Region({startlnum}, {endlnum})
 Multiselect.Item({head}[, {tail}[, {type}[, {extended}]]])   [function]
 Multiselect.Item({lnum})
 Multiselect.Item({startlnum}, {endlnum})
-	This is a constructor of `Item` class, it is a subclass of `Region`
+	This is the constructor of `Item` class, it is a subclass of `Region`
 	class used for handling a selection region on a buffer.
 	See |multiselect-class-Item|.
 
@@ -634,15 +634,15 @@ Multiselect.Item({startlnum}, {endlnum})
 
 					*multiselect-Multiselect.Change()*
 Multiselect.Change()    [function]
-	This is a constructor of `Change` class. It is employed to track a
+	This is the constructor of `Change` class. It is employed to track a
 	position after some edits. See |multiselect-class-Change|.
 
 
 					*multiselect-Multiselect.Task()*
 Multiselect.Task()    [function]
-	This is a constructor of `Task` class. This class is used to assemble
-	several processes and trigger them all at onece, and is also a base
-	class of the following classes.
+	This is the constructor of `Task` class. This class is used to
+	assemble several processes and trigger them all at onece, and is also
+	a base class of the following classes.
 	|multiselect-class-NeatTask|
 	|multiselect-class-EventTask|
 	|multiselect-class-TimerTask|
@@ -650,28 +650,34 @@ Multiselect.Task()    [function]
 
 					*multiselect-Multiselect.NeatTask()*
 Multiselect.NeatTask()    [function]
-	This is a constructor of `NeatTask` class. It is very similar to
+	This is the constructor of `NeatTask` class. It is very similar to
 	`Task` class but has a little more features.
 	See |multiselect-class-NeatTask|.
 
 
 					*multiselect-Multiselect.EventTask()*
 Multiselect.EventTask()    [function]
-	This is a constructor of `EventTask` class. It is employed to hook
+	This is the constructor of `EventTask` class. It is employed to hook
 	processes for |autocmd-events|. See |multiselect-class-EventTask|.
 
 
 					*multiselect-Multiselect.TimerTask()*
 Multiselect.TimerTask()    [function]
-	This is a constructor of `TimerTask` class. It is employed to delay
+	This is the constructor of `TimerTask` class. It is employed to delay
 	the execution of processes. See |multiselect-class-TimerTask|.
 
 
 					*multiselect-Multiselect.EitherTask()*
 Multiselect.EitherTask()    [function]
-	This is a constructor of `EitherTask` class. It is employed to obtain
-	a task executed by multiple triggers.
+	This is the constructor of `EitherTask` class. It is employed to
+	obtain a task executed by multiple triggers.
 	See |multiselect-class-EitherTask|.
+
+
+					*multiselect-Multiselect.TaskChain()*
+Multiselect.TaskChain()    [function]
+	This is the constructor of `TaskChain` class. It makes a successive
+	sequence of autocmd events and timers.
 
 
   - utility functions
@@ -2501,6 +2507,123 @@ EitherTask.leftcount()    [method]
 EitherTask.hasdone()    [method]
 	This method returns |TRUE| if the task has done {count} times
 	specified by |multiselect-EitherTask.repeat()|, otherwise |FALSE|.
+
+
+
+------------------------------------------------------------------------------
+TaskChain class~
+					*multiselect-class-TaskChain*
+
+`TaskChain` class makes a task triggered by a successive sequence of autocmd
+events and timers.
+
+Use |multiselect-TaskChain.event()|, |multiselect-TaskChain.timer()| and
+|multiselect-TaskChain.either()| to make a sequence, and set tasks to the
+return value of these method. These method returns a `NeatTask` instance to
+set tasks for a step of sequence. Its number of execution is set as 1 in
+default but you can change it by |multiselect-NeatTask.repeat()|. >
+	let taskchain = s:Multiselect.TaskChain()
+	let task1 = taskchain.event('InsertLeave')
+	let task2 = taskchain.event('CursorMoved')
+	call task2.execute('echo "foo"')
+	call taskchain.start()
+<
+This example shows a message "foo" after leaving insert mode and then moving
+cursor. You can write shorter: >
+	let taskchain = s:Multiselect.TaskChain()
+	call taskchain.event('InsertLeave')
+	call taskchain.event('CursorMoved').execute('echo "foo"')
+	call taskchain.start()
+<
+
+					*multiselect-TaskChain.event()*
+TaskChain.event({event})    [method]
+	This method registers a task to the autocmd event. {event} should be
+	a name of autocmd event. |autocmd-events| This method returns a
+	`NeatTask` instance bound to the autocmd event. Its number of
+	execution is set as 1 in default >
+		let taskchain = s:Multiselect.TaskChain()
+		let task1 = taskchain.event('InsertEnter')
+		let task2 = taskchain.event('CursorMoved')
+		call task1.execute('echo "InsertEnter"')
+		call task2.execute('echo "CursorMoved"')
+		call taskchain.start()
+<
+	"InsertEnter" will be echoed at the first |InsertEnter| event, then
+	wait for |CursorMovedI| event to echo "CursorMovedI".
+	|multiselect-class-NeatTask|
+	|multiselect-NeatTask.repeat()|
+
+
+					*multiselect-TaskChain.timer()*
+TaskChain.timer({time})    [method]
+	This method registers a timer task. {time} is a delay time duration.
+	This method returns a `NeatTask` instance triggered after {time}
+	millisecond later. Its number of execution is set as 1 in default. >
+		let taskchain = s:Multiselect.TaskChain()
+		let task1 = taskchain.timer(1000)
+		let task2 = taskchain.timer(5000)
+		call task1.execute('echo "1s passed"')
+		call task2.execute('echo "6s passed"')
+		call taskchain.start()
+<
+	You will see the message "1s passed" 1 second later and then "6s
+	passed" will displayed after an additional 5 seconds.
+	|multiselect-class-NeatTask|
+	|multiselect-NeatTask.repeat()|
+
+
+					*multiselect-TaskChain.either()*
+TaskChain.either({triggerlist})    [method]
+	This method registers a multiple-triggered task. {triggers} is a list
+	of trigger names. If one of the item is |String|, it is regarded as an
+	autocmd event. If it is |Number|, it is regarded as an delay time.
+	This method returns a `NeatTask` instance to be called by either one
+	of those triggers. Its number of execution is set as 1 in default. >
+		let taskchain = s:Multiselect.TaskChain()
+		let task1 = taskchain.event('CmdwinLeave')
+		let task2 = taskchain.either(['CursorMoved', 1000])
+		call task2.execute('echo "original buffer"')
+		call taskchain.start()
+<
+	After leaving |cmdline-window|, you will see the message "original
+	buffer" if you move cursor or wait for 1 second.
+	|multiselect-class-NeatTask|
+	|multiselect-NeatTask.repeat()|
+
+
+					*multiselect-TaskChain.trigger()*
+TaskChain.trigger()    [method]
+	This method executes the next task. This method returns the taskchain
+	itself.
+
+
+					*multiselect-TaskChain.start()*
+TaskChain.start()    [method]
+	This method starts the taskchain, after calling this method it waits
+	for the first trigger to move for the next task.
+
+
+					*multiselect-TaskChain.stop()*
+TaskChain.stop()    [method]
+	This method stops an execution of the taskchain.
+
+
+					*multiselect-TaskChain.repeat()*
+TaskChain.repeat()    [method]
+	This method sets the number of execution. The default value is 1.
+
+
+					*multiselect-TaskChain.leftcount()*
+TaskChain.leftcount()    [method]
+	This method returns the left number of execution.
+	See |multiselect-TaskChain.repeat()|.
+
+
+					*multiselect-TaskChain.hasdone()*
+TaskChain.hasdone()    [method]
+	This method returns |TRUE| if the task has done {count} times
+	specified by |multiselect-TaskChain.repeat()|, otherwise |FALSE|.
 
 
 

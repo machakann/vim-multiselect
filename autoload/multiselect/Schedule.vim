@@ -1,5 +1,3 @@
-" TODO: Implement ChainedTask
-" TODO: Implement EventChain
 let s:ClassSys = multiselect#ClassSys#_import()
 let s:Errors = multiselect#Errors#_import()
 let s:TRUE = 1
@@ -405,6 +403,96 @@ function! s:EitherTask._timer() abort "{{{
 	return timer
 endfunction "}}}
 "}}}
+" TaskChain class (inherits Counter class) {{{
+let s:TaskChain = {
+	\	'__CLASS__': 'TaskChain',
+	\	'_index': 0,
+	\	'_triggerlist': [],
+	\	'_orderlist': [],
+	\	'_state': s:OFF,
+	\	}
+function! s:TaskChain() abort "{{{
+	let counter = s:Counter(1)
+	let taskchain = deepcopy(s:TaskChain)
+	return s:ClassSys.inherit(taskchain, counter)
+endfunction "}}}
+function! s:TaskChain.event(name) abort "{{{
+	let eventtask = s:EventTask()
+	let ordertask = s:NeatTask()
+	call self._settrigger(eventtask, [a:name])
+	call self._setorder(ordertask)
+	return ordertask
+endfunction "}}}
+function! s:TaskChain.timer(time) abort "{{{
+	let timertask = s:TimerTask()
+	let ordertask = s:NeatTask()
+	call self._settrigger(timertask, [a:time])
+	call self._setorder(ordertask)
+	return ordertask
+endfunction "}}}
+function! s:TaskChain.either(triggerlist) abort "{{{
+	let eithertask = s:EitherTask()
+	let ordertask = s:NeatTask()
+	call self._settrigger(eithertask, [a:triggerlist])
+	call self._setorder(ordertask)
+	return ordertask
+endfunction "}}}
+function! s:TaskChain.trigger() abort "{{{
+	if self._index >= len(self._orderlist)
+		return self
+	endif
+
+	let task = self._orderlist[self._index]
+	call task.trigger()
+	if task.hasdone()
+		call self._gonext()
+	endif
+	return self
+endfunction "}}}
+function! s:TaskChain.start() abort "{{{
+	call self.stop().repeat()
+	let self._state = s:ON
+	let [trigger, args] = self._triggerlist[self._index]
+	call call(trigger.start, args, trigger)
+	return self
+endfunction "}}}
+function! s:TaskChain.stop() abort "{{{
+	let self._state = s:OFF
+	if self._index == len(self._orderlist)
+		return self
+	endif
+	let [trigger, _] = self._triggerlist[self._index]
+	let task = self._orderlist[self._index]
+	call trigger.stop()
+	call task.stop()
+	return self
+endfunction "}}}
+function! s:TaskChain._settrigger(triggertask, args) abort "{{{
+	call a:triggertask.repeat(-1)
+	call a:triggertask.call(self.trigger, [], self)
+	call add(self._triggerlist, [a:triggertask, a:args])
+endfunction "}}}
+function! s:TaskChain._setorder(ordertask) abort "{{{
+	call a:ordertask.repeat(1)
+	call add(self._orderlist, a:ordertask)
+endfunction "}}}
+function! s:TaskChain._gonext() abort "{{{
+	let [trigger, _] = self._triggerlist[self._index]
+	call trigger.stop()
+
+	let self._index += 1
+	if self._index == len(self._orderlist)
+		call self._tick()
+		if self.hasdone()
+			call self.stop()
+			return
+		else
+			let self._index = 0
+		endif
+	endif
+	let [nexttrigger, args] = self._triggerlist[self._index]
+	call call(nexttrigger.start, args, nexttrigger)
+endfunction "}}}
 "}}}
 
 " Schedule module {{{
@@ -418,6 +506,7 @@ let s:Schedule = {
 	\	'TimerTask': function('s:TimerTask'),
 	\	'EventTask': function('s:EventTask'),
 	\	'EitherTask': function('s:EitherTask'),
+	\	'TaskChain': function('s:TaskChain'),
 	\	}
 lockvar! s:Schedule
 "}}}
