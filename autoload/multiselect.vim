@@ -626,6 +626,7 @@ let s:Multiselect = {
 	\	'Item': s:Buffer.Item,
 	\	'Change': s:Buffer.Change,
 	\	'Task': s:Schedule.Task,
+	\	'NeatTask': s:Schedule.NeatTask,
 	\	'EventTask': s:Schedule.EventTask,
 	\	'TimerTask': s:Schedule.TimerTask,
 	\	'EitherTask': s:Schedule.EitherTask,

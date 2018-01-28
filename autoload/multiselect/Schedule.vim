@@ -156,27 +156,24 @@ function! s:Task.clear() abort "{{{
 	return self
 endfunction "}}}
 function! s:Task.clone() abort "{{{
-	let clone = s:Task()
+	let clone = deepcopy(self)
 	let clone._orderlist = copy(self._orderlist)
 	return clone
 endfunction "}}}
 lockvar! s:Task
 "}}}
-" TimerTask class (inherits Switch, Counter and Task classes) {{{
-unlockvar! s:TimerTask
-let s:TimerTask = {
-	\	'__CLASS__': 'TimerTask',
-	\	'_id': -1,
-	\	'_state': s:OFF,
+" NeatTask class (inherits Switch, Counter and Task classes) {{{
+let s:NeatTask = {
+	\	'__CLASS__': 'NeatTask',
 	\	}
-function! s:TimerTask() abort "{{{
+function! s:NeatTask() abort "{{{
 	let switch = s:Switch()
-	let counter = s:Counter(1)
+	let counter = s:Counter(-1)
 	let task = s:Task()
-	let timertask = deepcopy(s:TimerTask)
-	return s:ClassSys.inherit(timertask, task, counter, switch)
+	let neattask = deepcopy(s:NeatTask)
+	return s:ClassSys.inherit(neattask, task, counter, switch)
 endfunction "}}}
-function! s:TimerTask.trigger(...) abort "{{{
+function! s:NeatTask.trigger(...) abort "{{{
 	if self._skipsthistime()
 		return self
 	endif
@@ -190,6 +187,29 @@ function! s:TimerTask.trigger(...) abort "{{{
 		call self.stop()
 	endif
 	return self
+endfunction "}}}
+function! s:NeatTask.start() abort "{{{
+	return self
+endfunction "}}}
+function! s:NeatTask.stop() abort "{{{
+	return self
+endfunction "}}}
+function! s:NeatTask.isactive() abort "{{{
+	return self._isactive()
+endfunction "}}}
+"}}}
+" TimerTask class (inherits NeatTask class) {{{
+unlockvar! s:TimerTask
+let s:TimerTask = {
+	\	'__CLASS__': 'TimerTask',
+	\	'_id': -1,
+	\	'_state': s:OFF,
+	\	}
+function! s:TimerTask() abort "{{{
+	let neattask = s:NeatTask()
+	call neattask.repeat(1)
+	let timertask = deepcopy(s:TimerTask)
+	return s:ClassSys.inherit(timertask, neattask)
 endfunction "}}}
 function! s:TimerTask.clone() abort "{{{
 	let clone = s:TimerTask()
@@ -207,12 +227,14 @@ function! s:TimerTask.start(time) abort "{{{
 		return self
 	endif
 
+	let self._state = s:ON
 	let id = timer_start(a:time, function('s:timercall'), {'repeat': -1})
 	let self._id = id
 	let s:timertable[string(id)] = self
 	return self
 endfunction "}}}
 function! s:TimerTask.stop() abort "{{{
+	let self._state = s:OFF
 	if self._id < 0
 		return self
 	endif
@@ -238,7 +260,7 @@ function! s:timercall(id) abort "{{{
 endfunction "}}}
 lockvar! s:TimerTask
 "}}}
-" EventTask class (inherits Switch, Counter and Task classes) {{{
+" EventTask class (inherits NeatTask class) {{{
 unlockvar! s:EventTask
 let s:EventTask = {
 	\	'__CLASS__': 'EventTask',
@@ -246,26 +268,9 @@ let s:EventTask = {
 	\	'_state': s:OFF,
 	\	}
 function! s:EventTask() abort "{{{
-	let switch = s:Switch()
-	let counter = s:Counter(-1)
-	let task = s:Task()
+	let neattask = s:NeatTask()
 	let eventtask = deepcopy(s:EventTask)
-	return s:ClassSys.inherit(eventtask, task, counter, switch)
-endfunction "}}}
-function! s:EventTask.trigger(...) abort "{{{
-	if self._skipsthistime()
-		return self
-	endif
-	let forcibly = get(a:000, 0, s:FALSE)
-	if !forcibly && self.hasdone()
-		return self
-	endif
-	call s:ClassSys.super(self, 'Task').trigger()
-	call self._tick()
-	if self.hasdone()
-		call self.stop()
-	endif
-	return self
+	return s:ClassSys.inherit(eventtask, neattask)
 endfunction "}}}
 function! s:EventTask.clone() abort "{{{
 	let clone = s:EventTask()
@@ -283,6 +288,7 @@ function! s:EventTask.start(name) abort "{{{
 		return self
 	endif
 
+	let self._state = s:ON
 	if !has_key(s:eventtable, a:name)
 		let s:eventtable[a:name] = []
 		augroup multiselect
@@ -302,11 +308,11 @@ function! s:EventTask.start(name) abort "{{{
 	return self
 endfunction "}}}
 function! s:EventTask.stop() abort "{{{
+	let self._state = s:OFF
 	if has_key(s:eventtable, self._name)
 		call filter(s:eventtable[self._name], 'v:val isnot self')
 	endif
 	call s:sweep(self._name)
-	let self._state = s:OFF
 	return self
 endfunction "}}}
 function! s:EventTask.isactive() abort "{{{
@@ -332,7 +338,7 @@ function! s:sweep(name) abort "{{{
 endfunction "}}}
 lockvar! s:EventTask
 "}}}
-" EitherTask class (inherits Switch, Counter and Task classes) {{{
+" EitherTask class (inherits NeatTask class) {{{
 let s:EitherTask = {
 	\	'__CLASS__': 'EitherTask',
 	\	'__eithertask__': {
@@ -342,11 +348,10 @@ let s:EitherTask = {
 	\	'_state': s:OFF,
 	\	}
 function! s:EitherTask() abort "{{{
-	let switch = s:Switch()
-	let counter = s:Counter(1)
-	let task = s:Task()
+	let neattask = s:NeatTask()
+	call neattask.repeat(1)
 	let eithertask = deepcopy(s:EitherTask)
-	return s:ClassSys.inherit(eithertask, task, counter, switch)
+	return s:ClassSys.inherit(eithertask, neattask)
 endfunction "}}}
 function! s:EitherTask.event(name) abort "{{{
 	if has_key(self.__eithertask__.Event, a:name)
@@ -367,22 +372,8 @@ function! s:EitherTask.timer(time) abort "{{{
 	let self.__eithertask__.Timer = [a:time, timer]
 	return self
 endfunction "}}}
-function! s:EitherTask.trigger(...) abort "{{{
-	if self._skipsthistime()
-		return self
-	endif
-	let forcibly = get(a:000, 0, s:FALSE)
-	if !forcibly && self.hasdone()
-		return self
-	endif
-	call s:ClassSys.super(self, 'Task').trigger()
-	call self._tick()
-	if self.hasdone()
-		call self.stop()
-	endif
-	return self
-endfunction "}}}
 function! s:EitherTask.start() abort "{{{
+	let self._state = s:ON
 	if !empty(self.__eithertask__.Event)
 		for [name, task] in items(self.__eithertask__.Event)
 			call task.start(name)
@@ -395,6 +386,7 @@ function! s:EitherTask.start() abort "{{{
 	return self
 endfunction "}}}
 function! s:EitherTask.stop() abort "{{{
+	let self._state = s:OFF
 	if !empty(self.__eithertask__.Event)
 		for [name, event] in items(self.__eithertask__.Event)
 			call event.stop()
@@ -420,6 +412,7 @@ let s:Schedule = {
 	\	'Switch': function('s:Switch'),
 	\	'Counter': function('s:Counter'),
 	\	'Task': function('s:Task'),
+	\	'NeatTask': function('s:NeatTask'),
 	\	'TimerTask': function('s:TimerTask'),
 	\	'EventTask': function('s:EventTask'),
 	\	'EitherTask': function('s:EitherTask'),

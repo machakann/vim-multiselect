@@ -435,6 +435,19 @@ List of contents~
   Task.trigger()		|multiselect-Task.trigger()|
   Task.clear()			|multiselect-Task.clear()|
 
+* NeatTask class~
+  NeatTask			|multiselect-class-NeatTask|
+  NeatTask.call()		|multiselect-NeatTask.call()|
+  NeatTask.execute()		|multiselect-NeatTask.execute()|
+  NeatTask.append()		|multiselect-NeatTask.append()|
+  NeatTask.trigger()		|multiselect-NeatTask.trigger()|
+  NeatTask.clear()		|multiselect-NeatTask.clear()|
+  NeatTask.isactive()		|multiselect-NeatTask.isactive()|
+  NeatTask.skip()		|multiselect-NeatTask.skip()|
+  NeatTask.repeat()		|multiselect-NeatTask.repeat()|
+  NeatTask.leftcount()		|multiselect-NeatTask.leftcount()|
+  NeatTask.hasdone()		|multiselect-NeatTask.hasdone()|
+
 * EventTask class~
   EventTask			|multiselect-class-EventTask|
   EventTask.call()		|multiselect-EventTask.call()|
@@ -632,8 +645,16 @@ Multiselect.Task()    [function]
 	This is a constructor of `Task` class. This class is used to assemble
 	several processes and trigger them all at onece, and is also a base
 	class of the following classes.
+	|multiselect-class-NeatTask|
 	|multiselect-class-EventTask|
 	|multiselect-class-TimerTask|
+
+
+					*multiselect-Multiselect.NeatTask()*
+Multiselect.NeatTask()    [function]
+	This is a constructor of `NeatTask` class. It is very similar to
+	`Task` class but has a little more features.
+	See |multiselect-class-NeatTask|.
 
 
 					*multiselect-Multiselect.EventTask()*
@@ -1909,14 +1930,158 @@ Task.append({task})    [method]
 
 					*multiselect-Task.trigger()*
 Task.trigger()    [method]
-	This method executes all the registered tasks forcibly.
-	This method returns the `EventTask` itself.
+	This method executes all the registered tasks.
+	This method returns the `Task` itself.
 
 
 					*multiselect-Task.clear()*
 Task.clear()    [method]
 	This method clears all registered tasks. This method returns the
-	`EventTask` itself.
+	`Task` itself.
+
+
+
+------------------------------------------------------------------------------
+NeatTask class~
+					*multiselect-class-NeatTask*
+
+`NeatTask` class is very similar to `Task` class but has a little more
+features. |multiselect-class-Task|
+
+`NeatTask` can have its life time. |multiselect-NeatTask.repeat()| sets the
+number of executions, and after the number of executions
+|multiselect-NeatTask.trigger()| does nothing. >
+	let neattask = s:Multiselect.NeatTask()
+	call neattask.execute('echo "foo"').repeat(1)
+
+	" echo 'foo'
+	call neattask.trigger()
+
+	" does nothing
+	call neattask.trigger()
+<
+`NeatTask` has its internal switch and it can be temporary off by
+|multiselect-NeatTask.skip()|. >
+	let neattask = s:Multiselect.NeatTask()
+	call neattask.execute('echo "foo"').skip(1)
+
+	" does nothing
+	call neattask.trigger()
+
+	" echo 'foo'
+	call neattask.trigger()
+<
+
+					*multiselect-NeatTask.call()*
+NeatTask.call({Funcref}, {args}[, {dict}])    [method]
+	This method registers a task to call a |Funcref| with a |List| of
+	{args} as arguments and set it for the event. {dict} is for functions
+	with the "dict" attribute. It will be used to set the local variable
+	"self". |Dictionary-function| This method returns the task itself.
+>
+		function! s:sayfoo() abort
+		    echo 'foo'
+		endfunction
+
+		" make a new task
+		let neattask = s:Multiselect.NeatTask()
+		call neattask.call(function('s:sayfoo'), [])
+
+		" trigger the task
+		call task.trigger()
+<
+
+					*multiselect-NeatTask.execute()*
+NeatTask.execute({cmd})    [method]
+	This method registers a task to execute an Ex command. This method
+	returns the task itself.  >
+		" make a new task
+		let neattask = s:Multiselect.NeatTask().execute('echo "foo"')
+
+		" trigger the task
+		call task.trigger()
+<
+
+					*multiselect-NeatTask.append()*
+NeatTask.append({task})    [method]
+	This method registers a task to trigger other tasks. {task} should be
+	an instance of `Task` class or its subclasses. This method returns
+	the task itself. >
+		" make new tasks
+		let task = s:Multiselect.Task().execute('echo "foo"')
+		let neattask = s:Multiselect.NeatTask().append(task)
+
+		" trigger the task
+		call neattask.trigger()
+<
+
+					*multiselect-NeatTask.trigger()*
+NeatTask.trigger([{forcibly}])    [method]
+	This method executes all the registered tasks.
+	This method returns the `NeatTask` instance itself.
+
+	If {forcibly} is given and it is |TRUE|, this method triggers the
+	registered task even if the task has already done.
+	|multiselect-NeatTask.hasdone()|
+
+
+					*multiselect-NeatTask.clear()*
+NeatTask.clear()    [method]
+	This method clears all registered tasks. This method returns the
+	`NeatTask` instance itself.
+
+
+					*multiselect-NeatTask.isactive()*
+NeatTask.isactive()    [method]
+	This method returns |TRUE| if the `NeatTask` is active, |FALSE|
+	if it is not active.
+
+
+					*multiselect-NeatTask.skip()*
+NeatTask.skip([{count}])    [method]
+	If this method is called, the following `NeatTask` is skipped
+	(not executed) {count} times. {count} is 1 if omitted.
+	This method returns the `NeatTask` itself. >
+		let neattask = s:Multiselect.NeatTask()
+		call neattask.execute('echo "foo"').skip(1)
+
+		" does nothing
+		call neattask.trigger()
+
+		" echo 'foo'
+		call neattask.trigger()
+<
+
+
+					*multiselect-NeatTask.repeat()*
+NeatTask.repeat([{count}])    [method]
+	This method sets the number of execution. If {count} is negative, the
+	`NeatTask` will be persistent. An `NeatTask` instance is produced as
+	it is 1 in default. If {count} is omitted, it will reset the number
+	of execution to the one last set. >
+		" 'foo' will be displayed three times
+		let neattask = s:Multiselect.NeatTask()
+					   \.execute('echo "foo"')
+					   \.repeat(3)
+
+		call neattask.trigger()
+		call neattask.trigger()
+		call neattask.trigger()
+		call neattask.trigger() " does nothing
+<
+	This method returns the task itself.
+
+
+					*multiselect-NeatTask.leftcount()*
+NeatTask.leftcount()    [method]
+	This method returns the left number of execution.
+	See |multiselect-NeatTask.repeat()|.
+
+
+					*multiselect-NeatTask.hasdone()*
+NeatTask.hasdone()    [method]
+	This method returns |TRUE| if the task has done {count} times
+	specified by |multiselect-NeatTask.repeat()|, otherwise |FALSE|.
 
 
 
@@ -2030,6 +2195,7 @@ EventTask.stop()    [method]
 EventTask.trigger([{forcibly}])    [method]
 	This method executes all the registered tasks.
 	This method returns the `EventTask` itself.
+
 	If {forcibly} is given and it is |TRUE|, this method triggers the
 	registered task even if the task has already done.
 	|multiselect-EventTask.hasdone()|
@@ -2068,7 +2234,7 @@ EventTask.repeat([{count}])    [method]
 	This method sets the number of execution. If {count} is negative, the
 	`EventTask` will be persistent. An `EventTask` instance is produced as
 	it is -1 in default. If {count} is omitted, it will reset the number
-	of execution to the last set one. >
+	of execution to the one last set. >
 		" 'foo' will be displayed and the task is abandoned
 		call s:Multiselect.EventTask()
 				 \.execute('echo "foo"')
@@ -2162,9 +2328,13 @@ TimerTask.stop()    [method]
 
 
 					*multiselect-TimerTask.trigger()*
-TimerTask.trigger()    [method]
-	This method executes all the registered tasks forcibly.
+TimerTask.trigger([{forcibly}])    [method]
+	This method executes all the registered tasks.
 	This method returns the task itself.
+
+	If {forcibly} is given and it is |TRUE|, this method triggers the
+	registered task even if the task has already done.
+	|multiselect-EitherTask.hasdone()|
 
 
 					*multiselect-TimerTask.clear()*
@@ -2191,8 +2361,7 @@ TimerTask.repeat([{count}])    [method]
 	This method sets the number of execution. If {count} is negative, the
 	`TimerTask` will be persistent. An `TimerTask` instance is produced as
 	it is 1 in default. If {count} is omitted, it will reset the number
-	of execution to the last set one. Note that this method should be
-	called before |multiselect-TimerTask.start()|. >
+	of execution to the one last set. >
 		" 'foo' will be displayed three times every one second
 		call s:Multiselect.TimerTask()
 				 \.execute('echo "foo"')
@@ -2302,6 +2471,7 @@ EitherTask.stop()    [method]
 EitherTask.trigger([{forcibly}])    [method]
 	This method executes all the registered tasks.
 	This method returns the `EitherTask` itself.
+
 	If {forcibly} is given and it is |TRUE|, this method triggers the
 	registered task even if the task has already done.
 	|multiselect-EitherTask.hasdone()|
@@ -2337,7 +2507,7 @@ EitherTask.repeat([{count}])    [method]
 	This method sets the number of execution. If {count} is negative, the
 	`EitherTask` will be persistent. An `EitherTask` instance is produced
 	as it is -1 in default. If {count} is omitted, it will reset the
-	number of execution to the last set one. >
+	number of execution to the one last set. >
 		" 'foo' will be displayed and the task is abandoned
 		call s:Multiselect.EitherTask()
 				 \.event('TextChanged')
