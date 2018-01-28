@@ -1,5 +1,5 @@
 *multiselect.txt*	A library for multiple selection
-						Last change:27-Jan-2018.
+						Last change:28-Jan-2018.
 
 Author  : machakann <https://github.com/machakann>
 License : MIT license
@@ -78,8 +78,8 @@ The following keymappings are available with |:nmap| and |:xmap|.
 <
 
 <Plug>(multiselect-uncheck)		*<Plug>(multiselect-uncheck)*
-	This keymapping deletes registered multipleselet items. In normal
-	mode, it deletes an item under the cursor. In visual mode, it deletes
+	This keymapping deletes registered multiselect items. In normal mode,
+	it deletes an item under the cursor. In visual mode, it deletes
 	registered items in the current visual-selected range.
 
 
@@ -436,10 +436,11 @@ List of contents~
 
 * EventTask class~
   EventTask			|multiselect-class-EventTask|
-  EventTask.name		|multiselect-EventTask.name|
   EventTask.call()		|multiselect-EventTask.call()|
   EventTask.execute()		|multiselect-EventTask.execute()|
-  EventTask.finish()		|multiselect-EventTask.finish()|
+  EventTask.append()		|multiselect-EventTask.append()|
+  EventTask.start()		|multiselect-EventTask.start()|
+  EventTask.stop()		|multiselect-EventTask.stop()|
   EventTask.trigger()		|multiselect-EventTask.trigger()|
   EventTask.clear()		|multiselect-EventTask.clear()|
   EventTask.on()		|multiselect-EventTask.on()|
@@ -454,6 +455,7 @@ List of contents~
   TimerTask			|multiselect-class-TimerTask|
   TimerTask.call()		|multiselect-TimerTask.call()|
   TimerTask.execute()		|multiselect-TimerTask.execute()|
+  TimerTask.append()		|multiselect-TimerTask.append()|
   TimerTask.start()		|multiselect-TimerTask.start()|
   TimerTask.stop()		|multiselect-TimerTask.stop()|
   TimerTask.trigger()		|multiselect-TimerTask.trigger()|
@@ -468,7 +470,8 @@ List of contents~
   EitherTask.timer()		|multiselect-EitherTask.timer()|
   EitherTask.call()		|multiselect-EitherTask.call()|
   EitherTask.execute()		|multiselect-EitherTask.execute()|
-  EitherTask.finish()		|multiselect-EitherTask.finish()|
+  EitherTask.start()		|multiselect-EitherTask.start()|
+  EitherTask.stop()		|multiselect-EitherTask.stop()|
   EitherTask.trigger()		|multiselect-EitherTask.trigger()|
   EitherTask.clear()		|multiselect-EitherTask.clear()|
   EitherTask.on()		|multiselect-EitherTask.on()|
@@ -1920,24 +1923,22 @@ subclass of `Task` class and automatically triggered by an autocmd event.
 
 An `EventTask` instance can hold one or more tasks to execute, the tasks will
 be executed in the order of registration by |multiselect-EventTask.call()| and
-|multiselect-EventTask.execute()|. If the purpose of the task has achieved,
-use |multiselect-EventTask.finish()| to abandon the task. >
+|multiselect-EventTask.execute()|.
+
+|multiselect-EventTask.start()| sets the task to an autocmd event. If the
+purpose of the task has achieved, use |multiselect-EventTask.stop()|. >
 	function! s:sayfoo() abort
 		echo 'foo'
 	endfunction
 
-	let eventtask = s:Multiselect.EventTask('TextChanged')
+	let eventtask = s:Multiselect.EventTask()
 	call eventtask.call(function('s:sayfoo'), [])
 	call eventtask.execute('echo "foo"')
+	call eventtask.start('TextChanged')
 
 	" finish the task
-	call eventtask.finish()
+	call eventtask.stop()
 <
-
-					*multiselect-EventTask.name*
-EventTask.name    [string]
-	This is the name of autocmd event which is responsible for.
-	See |autocmd-events|.
 
 					*multiselect-EventTask.call()*
 EventTask.call({Funcref}, {args}[, {dict}])    [method]
@@ -1947,24 +1948,26 @@ EventTask.call({Funcref}, {args}[, {dict}])    [method]
 	will be used to set the local variable "self". |Dictionary-function|
 
 	If you have achieved the purpose of the task, you can
-	abandon the task by calling |multiselect-EventTask.finish()|. >
+	stop the task by calling |multiselect-EventTask.stop()|. >
 		function! s:sayfoo() abort
 		    echo 'foo'
 		endfunction
 
 		" make and set a new task to 'TextChanged' event
-		let task = s:Multiselect.EventTask('TextChanged')
+		let task = s:Multiselect.EventTask()
 					\.call(function('s:sayfoo'), [])
+					\.start('TextChanged')
 
 		" finish the task
-		call task.finish()
+		call task.stop()
 <
 	Or use |multiselect-EventTask.repeat()| to finish after a certain
 	number of callings. >
 		" it will be abandoned after three times callings
-		let task = s:Multiselect.EventTask('TextChanged')
+		let task = s:Multiselect.EventTask()
 					\.execute('echo "foo"')
 					\.repeat(3)
+					\.start('TextChanged')
 <
 
 					*multiselect-EventTask.execute()*
@@ -1973,20 +1976,22 @@ EventTask.execute({cmd})    [method]
 	returns the task itself.
 
 	If you have achieved the purpose of the task, you can
-	abandon the task by calling |multiselect-EventTask.finish()|. >
+	stop the task by calling |multiselect-EventTask.stop()|. >
 		" make and set a new task to 'TextChanged' event
-		let task = s:Multiselect.EventTask('TextChanged')
+		let task = s:Multiselect.EventTask()
 					\.execute('echo "foo"')
+					\.start('TextChanged')
 
 		" finish the task
-		call task.finish()
+		call task.stop()
 <
 	Or use |multiselect-EventTask.repeat()| to finish after a certain
 	number of callings. >
 		" it will be abandoned after three times callings
-		let task = s:Multiselect.EventTask('TextChanged')
+		let task = s:Multiselect.EventTask()
 					\.execute('echo "foo"')
 					\.repeat(3)
+					\.start('TextChanged')
 <
 
 					*multiselect-EventTask.append()*
@@ -1996,9 +2001,18 @@ EventTask.append({task})    [method]
 	task itself. See |multiselect-Task.append()|
 
 
-					*multiselect-EventTask.finish()*
-EventTask.finish()    [method]
-	This method is used to abandon the task.
+					*multiselect-EventTask.start()*
+EventTask.start({name})    [method]
+	This method sets the task itself to an autocmd event. {name} should be
+	an autocmd event name. An `EventTask` instance can be bound to only an
+	event. If you need multiple triggers, use
+	|multiselect-class-EitherTask|.
+	This method returns the task itself.
+
+
+					*multiselect-EventTask.stop()*
+EventTask.stop()    [method]
+	This method stops the execution of the event task.
 
 
 					*multiselect-EventTask.trigger()*
@@ -2039,9 +2053,13 @@ EventTask.skip([{count}])    [method]
 	If this method is called, the following `EventTask` is skipped
 	(not executed) {count} times. {count} is 1 if omitted. >
 		" 'foo' will be displayed after twice edits
-		call s:Multiselect.EventTask('TextChanged')
+		call s:Multiselect.EventTask()
 				 \.execute('echo "foo"')
 				 \.skip(1)
+				 \.start('TextChanged')
+
+		" finish the task
+		call task.stop()
 <
 	This method returns the `EventTask` itself.
 
@@ -2053,9 +2071,10 @@ EventTask.repeat([{count}])    [method]
 	it is -1 in default. If {count} is omitted, it will reset the number
 	of execution to the last set one. >
 		" 'foo' will be displayed and the task is abandoned
-		call s:Multiselect.EventTask('TextChanged')
+		call s:Multiselect.EventTask()
 				 \.execute('echo "foo"')
 				 \.repeat(1)
+				 \.start('TextChanged')
 <
 	This method returns the `EventTask` itself.
 
@@ -2081,10 +2100,21 @@ TimerTask class~
 `Task` class and automatically triggered by a delay time.
 
 The tasks will be registered by using |multiselect-TimerTask.call()| and
-|multiselect-TimerTask.execute()| methods. |multiselect-TimerTask.start()|
-sets the delay time and start counting down, after the delay time the
-registered tasks are executed. If you want to stop a started `TimerTask`
-before the execution, you can use |multiselect-TimerTask.stop()|.
+|multiselect-TimerTask.execute()| methods.
+
+|multiselect-TimerTask.start()| sets the delay time and start counting down,
+after the delay time the registered tasks are executed. If you want to stop a
+started `TimerTask` before the execution, you can use
+|multiselect-TimerTask.stop()|. >
+	function! s:sayfoo() abort
+		echo 'foo'
+	endfunction
+
+	let timertask = s:Multiselect.TimerTask()
+	call timertask.call(function('s:sayfoo'), [])
+	call timertask.execute('echo "foo"')
+	call timertask.start(100)
+<
 
 					*multiselect-TimerTask.call()*
 TimerTask.call({Funcref}, {args}[, {dict}])    [method]
@@ -2244,9 +2274,15 @@ EitherTask.append({task})    [method]
 	task itself. See |multiselect-Task.append()|
 
 
-					*multiselect-EitherTask.finish()*
-EitherTask.finish()    [method]
-	This method is used to abandon the task.
+					*multiselect-EitherTask.start()*
+EitherTask.start()    [method]
+	This method starts to wait for an auto-trigger set by
+	|multiselect-EitherTask.event()| and |multiselect-EitherTask.timer()|.
+
+
+					*multiselect-EitherTask.stop()*
+EitherTask.stop()    [method]
+	This method stops to execute the registered tasks.
 
 
 					*multiselect-EitherTask.trigger()*

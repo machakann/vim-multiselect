@@ -232,30 +232,14 @@ lockvar! s:TimerTask
 unlockvar! s:EventTask
 let s:EventTask = {
 	\	'__CLASS__': 'EventTask',
-	\	'name': '',
+	\	'_name': '',
 	\	}
-function! s:EventTask(name) abort "{{{
+function! s:EventTask() abort "{{{
 	let switch = s:Switch()
 	let counter = s:Counter(-1)
 	let task = s:Task()
 	let eventtask = deepcopy(s:EventTask)
 	let eventtask = s:ClassSys.inherit(eventtask, task, counter, switch)
-	let eventtask.name = a:name
-	if !has_key(s:eventtable, a:name)
-		let s:eventtable[a:name] = []
-		augroup multiselect
-			if count(s:BUILTINEVENTS, a:name) != 0
-				" Built-in autocmd
-				execute printf('autocmd %s * call s:doautocmd("%s")',
-								\ a:name, a:name)
-			else
-				" User autocmd
-				execute printf('autocmd User %s call s:doautocmd("%s")',
-								\ a:name, a:name)
-			endif
-		augroup END
-	endif
-	call add(s:eventtable[a:name], eventtask)
 	return eventtask
 endfunction "}}}
 function! s:EventTask.trigger(...) abort "{{{
@@ -271,25 +255,46 @@ function! s:EventTask.trigger(...) abort "{{{
 	return self
 endfunction "}}}
 function! s:EventTask.clone() abort "{{{
-	let clone = s:EventTask(self.name)
+	let clone = s:EventTask(self._name)
 	let clone.__switch__ = deepcopy(self.__switch__)
 	let clone.__counter__ = deepcopy(self.__counter__)
 	let clone._orderlist = copy(self._orderlist)
 	return clone
 endfunction "}}}
-function! s:EventTask.finish() abort "{{{
-	return self._finish()
-	if has_key(s:eventtable, self.name)
-		call filter(s:eventtable[self.name], 'v:val isnot self')
+function! s:EventTask.start(name) abort "{{{
+	let self._name = a:name
+	if !has_key(s:eventtable, a:name)
+		let s:eventtable[a:name] = []
+		augroup multiselect
+			if count(s:BUILTINEVENTS, a:name) != 0
+				" Built-in autocmd
+				execute printf('autocmd %s * call s:doautocmd("%s")',
+								\ a:name, a:name)
+			else
+				" User autocmd
+				execute printf('autocmd User %s call s:doautocmd("%s")',
+								\ a:name, a:name)
+			endif
+		augroup END
 	endif
+	call add(s:eventtable[a:name], self)
+	return self
+endfunction "}}}
+function! s:EventTask.stop() abort "{{{
+	if has_key(s:eventtable, self._name)
+		call filter(s:eventtable[self._name], 'v:val isnot self')
+	endif
+	call s:sweep(self._name)
 	return self
 endfunction "}}}
 function! s:doautocmd(name) abort "{{{
 	for event in s:eventtable[a:name]
 		call event.trigger()
 	endfor
+	call s:sweep(a:name)
+endfunction "}}}
+function! s:sweep(name) abort "{{{
 	call filter(s:eventtable[a:name], '!v:val.hasdone()')
-
 	if empty(s:eventtable[a:name])
 		augroup multiselect
 			execute printf('autocmd! %s *', a:name)
@@ -344,7 +349,7 @@ function! s:EitherTask.trigger(...) abort "{{{
 	call s:ClassSys.super(self, 'Task').trigger()
 	call self._tick()
 	if self.hasdone()
-		call self.finish()
+		call self.stop()
 	endif
 	return self
 endfunction "}}}
