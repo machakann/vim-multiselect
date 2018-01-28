@@ -221,8 +221,7 @@ function! s:TimerTask.clone() abort "{{{
 	return clone
 endfunction "}}}
 function! s:TimerTask.start(time) abort "{{{
-	call self.stop()
-	call self.repeat()
+	call self.stop().repeat()
 	if self.leftcount() == 0
 		return self
 	endif
@@ -283,7 +282,7 @@ function! s:EventTask.clone() abort "{{{
 endfunction "}}}
 function! s:EventTask.start(name) abort "{{{
 	let self._name = a:name
-	call self.stop()
+	call self.stop().repeat()
 	if self.leftcount() == 0
 		return self
 	endif
@@ -353,36 +352,20 @@ function! s:EitherTask() abort "{{{
 	let eithertask = deepcopy(s:EitherTask)
 	return s:ClassSys.inherit(eithertask, neattask)
 endfunction "}}}
-function! s:EitherTask.event(name) abort "{{{
-	if has_key(self.__eithertask__.Event, a:name)
-		return self
-	endif
-	let event = s:EventTask()
-	call event.call(self.trigger, [], self).repeat(-1)
-	let self.__eithertask__.Event[a:name] = event
-	return self
-endfunction "}}}
-function! s:EitherTask.timer(time) abort "{{{
-	if !empty(self.__eithertask__.Timer)
-		let self.__eithertask__.Timer[0] = a:time
-		return self
-	endif
-	let timer = s:TimerTask()
-	call timer.call(self.trigger, [], self).repeat(-1)
-	let self.__eithertask__.Timer = [a:time, timer]
-	return self
-endfunction "}}}
-function! s:EitherTask.start() abort "{{{
+function! s:EitherTask.start(triggerlist) abort "{{{
+	call self.stop().repeat()
 	let self._state = s:ON
-	if !empty(self.__eithertask__.Event)
-		for [name, task] in items(self.__eithertask__.Event)
-			call task.start(name)
-		endfor
-	endif
-	if !empty(self.__eithertask__.Timer)
-		let [time, task] = self.__eithertask__.Timer
-		call task.start(time)
-	endif
+	let events = filter(copy(a:triggerlist), 'type(v:val) is v:t_string')
+	call uniq(sort(events))
+	for eventname in events
+		let eventtask = self._event(eventname)
+		call eventtask.start(eventname)
+	endfor
+
+	let times = filter(copy(a:triggerlist), 'type(v:val) is v:t_number')
+	let time = min(filter(times, 'v:val > 0'))
+	let timertask = self._timer()
+	call timertask.start(time)
 	return self
 endfunction "}}}
 function! s:EitherTask.stop() abort "{{{
@@ -394,15 +377,34 @@ function! s:EitherTask.stop() abort "{{{
 		endfor
 	endif
 	if !empty(self.__eithertask__.Timer)
-		let [_, timer] = self.__eithertask__.Timer
+		let timer = self.__eithertask__.Timer
 		call timer.stop()
-		call filter(self.__eithertask__.Timer, 0)
+		let self.__eithertask__.Timer = {}
 	endif
 	return self
 endfunction "}}}
 function! s:EitherTask.isactive() abort "{{{
 	return self._state && s:ClassSys.super(self, 'Switch')._isactive()
 endfunction "}}}
+function! s:EitherTask._event(name) abort "{{{
+	if has_key(self.__eithertask__.Event, a:name)
+		return self.__eithertask__.Event[a:name]
+	endif
+	let event = s:EventTask()
+	call event.call(self.trigger, [], self).repeat(-1)
+	let self.__eithertask__.Event[a:name] = event
+	return event
+endfunction "}}}
+function! s:EitherTask._timer() abort "{{{
+	if !empty(self.__eithertask__.Timer)
+		return self.__eithertask__.Timer
+	endif
+	let timer = s:TimerTask()
+	call timer.call(self.trigger, [], self).repeat(-1)
+	let self.__eithertask__.Timer = timer
+	return timer
+endfunction "}}}
+"}}}
 "}}}
 
 " Schedule module {{{

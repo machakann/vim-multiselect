@@ -480,8 +480,6 @@ List of contents~
 
 * EitherTask class~
   EitherTask			|multiselect-class-EitherTask|
-  EitherTask.event()		|multiselect-EitherTask.event()|
-  EitherTask.timer()		|multiselect-EitherTask.timer()|
   EitherTask.call()		|multiselect-EitherTask.call()|
   EitherTask.execute()		|multiselect-EitherTask.execute()|
   EitherTask.append()		|multiselect-EitherTask.append()|
@@ -2399,54 +2397,27 @@ default. The number of execution can be changed by
 |multiselect-EitherTask.repeat()|.
 
 
-					*multiselect-EitherTask.event()*
-EitherTask.event({name})    [method]
-	This method registers an event trigger for the `EitherTask` instance.
-	{name} should be a name of autocmd event. >
-		" The EitherTask instance will be triggered by
-		" TextChanged or InsertEnter events
-		let either = s:Multiselect.EitherTask().execute('echo "foo"')
-		call either.event('TextChanged')
-		call either.event('InsertEnter')
-<
-
-					*multiselect-EitherTask.timer()*
-EitherTask.timer({time})    [method]
-	This method registers a delay time for the `EitherTask` instance.
-	{time} should be a delay time duration. >
-		" The EitherTask instance will be triggered 100 milliseconds
-		" later
-		let either = s:Multiselect.EitherTask().execute('echo "foo"')
-		call either.timer(100)
-<
-
 					*multiselect-EitherTask.call()*
 EitherTask.call({Funcref}, {args}[, {dict}])    [method]
 	This method registers a task to call a |Funcref| with a |List| of
 	{args} as arguments and set it for the event. This method returns the
 	task itself. {dict} is for functions with the "dict" attribute. It
-	will be used to set the local variable "self". |Dictionary-function|
->
+	will be used to set the local variable "self". |Dictionary-function| >
 		function! s:sayfoo() abort
 		    echo 'foo'
 		endfunction
 
-		" set a new task to 'TextChanged' event or a delay
 		let task = s:Multiselect.EitherTask()
 					\.call(function('s:sayfoo'), [])
-		call task.event('TextChanged')
-		call task.timer(100)
+		call task.start(['TextChanged', 100])
 <
 
 					*multiselect-EitherTask.execute()*
 EitherTask.execute({cmd})    [method]
 	This method registers a task to execute an Ex command. This method
-	returns the task itself.
->
-		" set a new task to 'TextChanged' event
+	returns the task itself.  >
 		let task = s:Multiselect.EitherTask().execute('echo "foo"')
-		call task.event('TextChanged')
-		call task.timer(100)
+		call task.start(['TextChanged', 100])
 <
 
 					*multiselect-EitherTask.append()*
@@ -2457,10 +2428,13 @@ EitherTask.append({task})    [method]
 
 
 					*multiselect-EitherTask.start()*
-EitherTask.start()    [method]
-	This method starts to wait for an auto-trigger set by
-	|multiselect-EitherTask.event()| and |multiselect-EitherTask.timer()|.
-
+EitherTask.start({triggers})    [method]
+	This method starts to wait for an auto-trigger. {triggers} is a list
+	of trigger names. If one of the item is |String|, it is regarded as an
+	autocmd event. If it is |Number|, it is regarded as an delay time. >
+		let task = s:Multiselect.EitherTask().execute('echo "foo"')
+		call task.start(['TextChanged', 100])
+<
 
 					*multiselect-EitherTask.stop()*
 EitherTask.stop()    [method]
