@@ -459,6 +459,8 @@ List of contents~
   TimerTask.stop()		|multiselect-TimerTask.stop()|
   TimerTask.trigger()		|multiselect-TimerTask.trigger()|
   TimerTask.clear()		|multiselect-TimerTask.clear()|
+  TimerTask.isactive()		|multiselect-TimerTask.isactive()|
+  TimerTask.skip()		|multiselect-TimerTask.skip()|
   TimerTask.repeat()		|multiselect-TimerTask.repeat()|
   TimerTask.leftcount()		|multiselect-TimerTask.leftcount()|
   TimerTask.hasdone()		|multiselect-TimerTask.hasdone()|
@@ -469,6 +471,7 @@ List of contents~
   EitherTask.timer()		|multiselect-EitherTask.timer()|
   EitherTask.call()		|multiselect-EitherTask.call()|
   EitherTask.execute()		|multiselect-EitherTask.execute()|
+  EitherTask.append()		|multiselect-EitherTask.append()|
   EitherTask.start()		|multiselect-EitherTask.start()|
   EitherTask.stop()		|multiselect-EitherTask.stop()|
   EitherTask.trigger()		|multiselect-EitherTask.trigger()|
@@ -2040,8 +2043,8 @@ EventTask.clear()    [method]
 
 					*multiselect-EventTask.isactive()*
 EventTask.isactive()    [method]
-	This method returns |TRUE| if the `EventTask` is activated, |FALSE| if
-	it is deactivated.
+	This method returns |TRUE| if the `EventTask` is active, |FALSE| if
+	it is not active.
 
 
 					*multiselect-EventTask.skip()*
@@ -2168,6 +2171,19 @@ TimerTask.trigger()    [method]
 TimerTask.clear()    [method]
 	This method clears all registered tasks.
 	This method returns the task itself.
+
+
+					*multiselect-TimerTask.isactive()*
+TimerTask.isactive()    [method]
+	This method returns |TRUE| if the `TimerTask` is active, |FALSE|
+	if it is not active.
+
+
+					*multiselect-TimerTask.skip()*
+TimerTask.skip([{count}])    [method]
+	If this method is called, the following `TimerTask` is skipped
+	(not executed) {count} times. {count} is 1 if omitted.
+	This method returns the `TimerTask` itself.
 
 
 					*multiselect-TimerTask.repeat()*
@@ -2299,8 +2315,8 @@ EitherTask.clear()    [method]
 
 					*multiselect-EitherTask.isactive()*
 EitherTask.isactive()    [method]
-	This method returns |TRUE| if the `EitherTask` is activated, |FALSE|
-	if it is deactivated.
+	This method returns |TRUE| if the `EitherTask` is active, |FALSE|
+	if it is not active.
 
 
 					*multiselect-EitherTask.skip()*

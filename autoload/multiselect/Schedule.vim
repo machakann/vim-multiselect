@@ -162,19 +162,24 @@ function! s:Task.clone() abort "{{{
 endfunction "}}}
 lockvar! s:Task
 "}}}
-" TimerTask class (inherits Counter and Task classes) {{{
+" TimerTask class (inherits Switch, Counter and Task classes) {{{
 unlockvar! s:TimerTask
 let s:TimerTask = {
 	\	'__CLASS__': 'TimerTask',
 	\	'_id': -1,
+	\	'_state': s:OFF,
 	\	}
 function! s:TimerTask() abort "{{{
+	let switch = s:Switch()
 	let counter = s:Counter(1)
 	let task = s:Task()
 	let timertask = deepcopy(s:TimerTask)
-	return s:ClassSys.inherit(timertask, task, counter)
+	return s:ClassSys.inherit(timertask, task, counter, switch)
 endfunction "}}}
 function! s:TimerTask.trigger(...) abort "{{{
+	if self._skipsthistime()
+		return self
+	endif
 	let forcibly = get(a:000, 0, s:FALSE)
 	if !forcibly && self.hasdone()
 		return self
@@ -188,14 +193,20 @@ function! s:TimerTask.trigger(...) abort "{{{
 endfunction "}}}
 function! s:TimerTask.clone() abort "{{{
 	let clone = s:TimerTask()
+	let clone.__switch__ = deepcopy(self.__switch__)
 	let clone.__counter__ = deepcopy(self.__counter__)
 	let clone.__timer__.id = -1
+	let clone._state = s:OFF
 	let clone._orderlist = copy(self._orderlist)
 	return clone
 endfunction "}}}
 function! s:TimerTask.start(time) abort "{{{
 	call self.stop()
 	call self.repeat()
+	if self.leftcount() == 0
+		return self
+	endif
+
 	let id = timer_start(a:time, function('s:timercall'), {'repeat': -1})
 	let self._id = id
 	let s:timertable[string(id)] = self
@@ -214,6 +225,9 @@ function! s:TimerTask.stop() abort "{{{
 		let self._id = -1
 	endif
 	return self
+endfunction "}}}
+function! s:TimerTask.isactive() abort "{{{
+	return self._state && s:ClassSys.super(self, 'Switch')._isactive()
 endfunction "}}}
 function! s:timercall(id) abort "{{{
 	if !has_key(s:timertable, string(a:id))
@@ -236,8 +250,7 @@ function! s:EventTask() abort "{{{
 	let counter = s:Counter(-1)
 	let task = s:Task()
 	let eventtask = deepcopy(s:EventTask)
-	let eventtask = s:ClassSys.inherit(eventtask, task, counter, switch)
-	return eventtask
+	return s:ClassSys.inherit(eventtask, task, counter, switch)
 endfunction "}}}
 function! s:EventTask.trigger(...) abort "{{{
 	if self._skipsthistime()
@@ -249,18 +262,27 @@ function! s:EventTask.trigger(...) abort "{{{
 	endif
 	call s:ClassSys.super(self, 'Task').trigger()
 	call self._tick()
+	if self.hasdone()
+		call self.stop()
+	endif
 	return self
 endfunction "}}}
 function! s:EventTask.clone() abort "{{{
 	let clone = s:EventTask()
 	let clone.__switch__ = deepcopy(self.__switch__)
 	let clone.__counter__ = deepcopy(self.__counter__)
+	let clone._name = ''
+	let clone._state = s:OFF
 	let clone._orderlist = copy(self._orderlist)
 	return clone
 endfunction "}}}
 function! s:EventTask.start(name) abort "{{{
-	call self.stop()
 	let self._name = a:name
+	call self.stop()
+	if self.leftcount() == 0
+		return self
+	endif
+
 	if !has_key(s:eventtable, a:name)
 		let s:eventtable[a:name] = []
 		augroup multiselect
