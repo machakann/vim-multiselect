@@ -1925,8 +1925,12 @@ An `EventTask` instance can hold one or more tasks to execute, the tasks will
 be executed in the order of registration by |multiselect-EventTask.call()| and
 |multiselect-EventTask.execute()|.
 
-|multiselect-EventTask.start()| sets the task to an autocmd event. If the
-purpose of the task has achieved, use |multiselect-EventTask.stop()|. >
+|multiselect-EventTask.start()| sets the task to an autocmd event. An
+`EventTask` is repeated forever in default.
+
+Its life time can be set by |multiselect-EventTask.repeat()|.
+
+If the purpose of the task has achieved, use |multiselect-EventTask.stop()|. >
 	function! s:sayfoo() abort
 		echo 'foo'
 	endfunction
@@ -2103,9 +2107,10 @@ The tasks will be registered by using |multiselect-TimerTask.call()| and
 |multiselect-TimerTask.execute()| methods.
 
 |multiselect-TimerTask.start()| sets the delay time and start counting down,
-after the delay time the registered tasks are executed. If you want to stop a
-started `TimerTask` before the execution, you can use
-|multiselect-TimerTask.stop()|. >
+after the delay time the registered tasks are executed. `TimerTask` finishes
+after an action in default, this number of execution can be changed by
+|multiselect-TimerTask.repeat()|. If you want to stop a started `TimerTask`
+before the last execution, you can use |multiselect-TimerTask.stop()|. >
 	function! s:sayfoo() abort
 		echo 'foo'
 	endfunction
