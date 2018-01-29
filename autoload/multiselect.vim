@@ -633,6 +633,8 @@ let s:Multiselect = {
 	\	'TaskChain': s:Schedule.TaskChain,
 	\	'shiftenv': function('s:shiftenv'),
 	\	'restoreenv': function('s:restoreenv'),
+	\	'percolate': function('s:percolate'),
+	\	'enumerate': function('s:enumerate'),
 	\	'str2type': s:Buffer.str2type,
 	\	'str2visualcmd': s:Buffer.str2visualcmd,
 	\	'inorderof': s:Buffer.inorderof,
