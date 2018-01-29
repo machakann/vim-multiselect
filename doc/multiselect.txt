@@ -329,7 +329,6 @@ List of contents~
   Multiselect.Region()		|multiselect-Multiselect.Region()|
   Multiselect.Item()		|multiselect-Multiselect.Item()|
   Multiselect.Change()		|multiselect-Multiselect.Change()|
-  Multiselect.Task()		|multiselect-Multiselect.Task()|
   Multiselect.EventTask()	|multiselect-Multiselect.EventTask()|
   Multiselect.TimerTask()	|multiselect-Multiselect.TimerTask()|
   Multiselect.RaceTask()	|multiselect-Multiselect.RaceTask()|
@@ -424,14 +423,6 @@ List of contents~
   Change.afterinsert()		|multiselect-Change.afterinsert()|
   Change.apply()		|multiselect-Change.apply()|
   Change.mapapply()		|multiselect-Change.mapapply()|
-
-* Task class~
-  Task				|multiselect-class-Task|
-  Task.call()			|multiselect-Task.call()|
-  Task.execute()		|multiselect-Task.execute()|
-  Task.append()			|multiselect-Task.append()|
-  Task.trigger()		|multiselect-Task.trigger()|
-  Task.clear()			|multiselect-Task.clear()|
 
 * NeatTask class~
   NeatTask			|multiselect-class-NeatTask|
@@ -636,21 +627,16 @@ Multiselect.Change()    [function]
 	position after some edits. See |multiselect-class-Change|.
 
 
-					*multiselect-Multiselect.Task()*
-Multiselect.Task()    [function]
-	This is the constructor of `Task` class. This class is used to
-	assemble several processes and trigger them all at onece, and is also
-	a base class of the following classes.
-	|multiselect-class-NeatTask|
-	|multiselect-class-EventTask|
-	|multiselect-class-TimerTask|
-
-
 					*multiselect-Multiselect.NeatTask()*
 Multiselect.NeatTask()    [function]
-	This is the constructor of `NeatTask` class. It is very similar to
-	`Task` class but has a little more features.
+	This is the constructor of `NeatTask` class.
 	See |multiselect-class-NeatTask|.
+	
+	This class is used to assemble several processes and trigger them all
+	at onece, and is also a base class of the following classes.
+	|multiselect-class-EventTask|
+	|multiselect-class-TimerTask|
+	|multiselect-class-RaceTask|
 
 
 					*multiselect-Multiselect.EventTask()*
@@ -1824,93 +1810,25 @@ last edit. >
 
 
 ------------------------------------------------------------------------------
-Task class~
-					*multiselect-class-Task*
+NeatTask class~
+					*multiselect-class-NeatTask*
 
-`Task` class is used to assemble several processes and trigger them all at
-onece. The processes are registered via |multiselect-Task.call()|,
-|multiselect-Task.execute()| and |multiselect-Task.append()|. >
+`NeatTask` class is used to assemble several processes and trigger them all at
+onece. The processes are registered via |multiselect-NeatTask.call()|,
+|multiselect-NeatTask.execute()| and |multiselect-NeatTask.append()|. >
 	function! s:sayfoo() abort
 		echo 'foo'
 	endfunction
 
-	let task = s:Multiselect.Task()
+	let task = s:Multiselect.NeatTask()
 	call task.call(function('s:sayfoo'), [])
 	call task.execute('echo "foo"')
 <
 
-Those tasks are executed to call |multiselect-Task.trigger()|, it executes
+Those tasks are executed to call |multiselect-NeatTask.trigger()|, it executes
 them in the order of registration. >
 	call task.trigger()
 <
-
-					*multiselect-Task.call()*
-Task.call({Funcref}, {args}[, {dict}])    [method]
-	This method registers a task to call a |Funcref| with a |List| of
-	{args} as arguments and set it for the event. {dict} is for functions
-	with the "dict" attribute. It will be used to set the local variable
-	"self". |Dictionary-function| This method returns the task itself.
->
-		function! s:sayfoo() abort
-		    echo 'foo'
-		endfunction
-
-		" make a new task
-		let task = s:Multiselect.Task().call(function('s:sayfoo'), [])
-
-		" trigger the task
-		call task.trigger()
-<
-
-					*multiselect-Task.execute()*
-Task.execute({cmd})    [method]
-	This method registers a task to execute an Ex command. This method
-	returns the task itself.  >
-		" make a new task
-		let task = s:Multiselect.Task().execute('echo "foo"')
-
-		" trigger the task
-		call task.trigger()
-<
-
-					*multiselect-Task.append()*
-Task.append({task})    [method]
-	This method registers a task to trigger other tasks. {task} should be
-	an instance of `Task` class or its subclasses. This method returns the
-	task itself. >
-		" make new tasks
-		let task1 = s:Multiselect.Task().execute('echo "foo"')
-		let task2 = s:Multiselect.Task().append(task1)
-
-		" trigger the task
-		call task2.trigger()
-<
-
-					*multiselect-Task.trigger()*
-Task.trigger()    [method]
-	This method executes all the registered tasks.
-	This method returns the `Task` itself.
-
-
-					*multiselect-Task.clear()*
-Task.clear()    [method]
-	This method clears all registered tasks. This method returns the
-	`Task` itself.
-
-
-					*multiselect-Task.clone()*
-Task.clone()    [method]
-	This method returns another `Task` instance which have the same task
-	with itself.
-
-
-
-------------------------------------------------------------------------------
-NeatTask class~
-					*multiselect-class-NeatTask*
-
-`NeatTask` class is very similar to `Task` class but has a little more
-features. |multiselect-class-Task|
 
 `NeatTask` can have its life time. |multiselect-NeatTask.repeat()| sets the
 number of executions, and after the number of executions
@@ -1924,6 +1842,7 @@ number of executions, and after the number of executions
 	" does nothing
 	call neattask.trigger()
 <
+
 `NeatTask` has its internal switch and it can be temporary off by
 |multiselect-NeatTask.skip()|. >
 	let neattask = s:Multiselect.NeatTask()
@@ -1969,10 +1888,10 @@ NeatTask.execute({cmd})    [method]
 					*multiselect-NeatTask.append()*
 NeatTask.append({task})    [method]
 	This method registers a task to trigger other tasks. {task} should be
-	an instance of `Task` class or its subclasses. This method returns
+	an instance of `NeatTask` class or its subclasses. This method returns
 	the task itself. >
 		" make new tasks
-		let task = s:Multiselect.Task().execute('echo "foo"')
+		let task = s:Multiselect.NeatTask().execute('echo "foo"')
 		let neattask = s:Multiselect.NeatTask().append(task)
 
 		" trigger the task
@@ -2060,8 +1979,8 @@ EventTask class~
 					*multiselect-class-EventTask*
 
 `EventTask` class is used to hook processes for |autocmd-events|. It is a
-subclass of `Task` class and automatically triggered by an autocmd event.
-|multiselect-class-Task|
+subclass of `NeatTask` class and automatically triggered by an autocmd event.
+|multiselect-class-NeatTask|
 
 An `EventTask` instance can hold one or more tasks to execute, the tasks will
 be executed in the order of registration by |multiselect-EventTask.call()| and
@@ -2143,8 +2062,8 @@ EventTask.execute({cmd})    [method]
 					*multiselect-EventTask.append()*
 EventTask.append({task})    [method]
 	This method registers a task to trigger other tasks. {task} should be
-	an instance of `Task` class or its subclasses. This method returns the
-	task itself. See |multiselect-Task.append()|
+	an instance of `NeatTask` class or its subclasses. This method returns
+	the task itself. See |multiselect-NeatTask.append()|
 
 
 					*multiselect-EventTask.start()*
@@ -2238,7 +2157,7 @@ TimerTask class~
 					*multiselect-class-TimerTask*
 
 `TimerTask` is used to delay the execution of tasks. It is a subclass of
-`Task` class and automatically triggered by a delay time.
+`NeatTask` class and automatically triggered by a delay time.
 
 The tasks will be registered by using |multiselect-TimerTask.call()| and
 |multiselect-TimerTask.execute()| methods.
@@ -2287,8 +2206,8 @@ TimerTask.execute({cmd})    [method]
 					*multiselect-TimerTask.append()*
 TimerTask.append({task})    [method]
 	This method registers a task to trigger other tasks. {task} should be
-	an instance of `Task` class or its subclasses. This method returns the
-	task itself. See |multiselect-Task.append()|
+	an instance of `NeatTask` class or its subclasses. This method returns
+	the task itself. See |multiselect-NeatTask.append()|
 
 
 					*multiselect-TimerTask.start()*
@@ -2370,9 +2289,9 @@ TimerTask.hasdone()    [method]
 RaceTask class~
 					*multiselect-class-RaceTask*
 
-RaceTask class is a subclass of `Task` class which can have multiple
+RaceTask class is a subclass of `NeatTask` class which can have multiple
 automatic triggers, autocmd events and a delay time.
-See also |multiselect-class-Task|
+See also |multiselect-class-NeatTask|
 	 |multiselect-class-EventTask|
 	 |multiselect-class-TimerTask|.
 
@@ -2407,8 +2326,8 @@ RaceTask.execute({cmd})    [method]
 					*multiselect-RaceTask.append()*
 RaceTask.append({task})    [method]
 	This method registers a task to trigger other tasks. {task} should be
-	an instance of `Task` class or its subclasses. This method returns the
-	task itself. See |multiselect-Task.append()|
+	an instance of `NeatTask` class or its subclasses. This method returns
+	the task itself. See |multiselect-NeatTask.append()|
 
 
 					*multiselect-RaceTask.start()*
