@@ -352,6 +352,10 @@ function! s:EitherTask() abort "{{{
 endfunction "}}}
 function! s:EitherTask.start(triggerlist) abort "{{{
 	call self.stop().repeat()
+	if s:invalid_triggerlist(a:triggerlist) is s:TRUE
+		return {}
+	endif
+
 	let self._state = s:ON
 	let events = filter(copy(a:triggerlist), 'type(v:val) is v:t_string')
 	call uniq(sort(events))
@@ -431,6 +435,9 @@ function! s:TaskChain.timer(time) abort "{{{
 	return ordertask
 endfunction "}}}
 function! s:TaskChain.either(triggerlist) abort "{{{
+	if s:invalid_triggerlist(a:triggerlist)
+		return {}
+	endif
 	let eithertask = s:EitherTask()
 	let ordertask = s:NeatTask()
 	call self._settrigger(eithertask, [a:triggerlist])
@@ -494,6 +501,11 @@ function! s:TaskChain._gonext() abort "{{{
 	call call(nexttrigger.start, args, nexttrigger)
 endfunction "}}}
 "}}}
+
+function! s:invalid_triggerlist(triggerlist) abort "{{{
+	return empty(filter(copy(a:triggerlist),
+		\ 'type(v:val) is v:t_string || type(v:val) is v:t_number'))
+endfunction "}}}
 
 " Schedule module {{{
 unlockvar! s:Schedule

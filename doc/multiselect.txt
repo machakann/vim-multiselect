@@ -2437,7 +2437,10 @@ EitherTask.append({task})    [method]
 EitherTask.start({triggers})    [method]
 	This method starts to wait for an auto-trigger. {triggers} is a list
 	of trigger names. If one of the item is |String|, it is regarded as an
-	autocmd event. If it is |Number|, it is regarded as an delay time. >
+	autocmd event. If it is |Number|, it is regarded as an delay time.
+	This method returns the task itself. However, note that if
+	{triggerlist} does not contain any valid trigger item, this method
+	returns an empty dictionary. >
 		let task = s:Multiselect.EitherTask().execute('echo "foo"')
 		call task.start(['TextChanged', 100])
 <
@@ -2579,7 +2582,9 @@ TaskChain.either({triggerlist})    [method]
 	of trigger names. If one of the item is |String|, it is regarded as an
 	autocmd event. If it is |Number|, it is regarded as an delay time.
 	This method returns a `NeatTask` instance to be called by either one
-	of those triggers. Its number of execution is set as 1 in default. >
+	of those triggers. Its number of execution is set as 1 in default.
+	Note that if {triggerlist} does not contain any valid trigger item,
+	this method returns an empty dictionary. >
 		let taskchain = s:Multiselect.TaskChain()
 		let task1 = taskchain.event('CmdwinLeave')
 		let task2 = taskchain.either(['CursorMoved', 1000])
