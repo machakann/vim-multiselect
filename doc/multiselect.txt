@@ -111,6 +111,79 @@ The following keymappings are available with |:nmap| and |:xmap|.
 	string over the current buffer.
 
 
+Broadcasting textobjects~
+
+The following textobjects behave as same as those original textobjects,
+except in |linewise| visual mode. In that mode, a broadcasting textobject
+tries itself for each line at the cursor column to multiselect. It is like
+|blockwise-visual| mode but it does not requires strict block shaped targets.
+For example, `<Plug>(multiselect-iw)` can select "foo", "bar" and "baz" in the
+following case.
+>
+	foo
+	 bar
+	  baz
+<
+Use |:xmap| to map them.
+>
+	xmap iw <Plug>(multiselect-iw)
+<
+
+<Plug>(multiselect-iw)			*<Plug>(multiselect-iw)*
+	The broadcasting textobject of |iw|.
+
+<Plug>(multiselect-aw)			*<Plug>(multiselect-aw)*
+	The broadcasting textobject of |iw|.
+
+<Plug>(multiselect-iW)			*<Plug>(multiselect-iW)*
+	The broadcasting textobject of |iw|.
+
+<Plug>(multiselect-aW)			*<Plug>(multiselect-aW)*
+	The broadcasting textobject of |aw|.
+
+<Plug>(multiselect-i')			*<Plug>(multiselect-i')*
+	The broadcasting textobject of |i'|.
+
+<Plug>(multiselect-a')			*<Plug>(multiselect-a')*
+	The broadcasting textobject of |a'|.
+
+<Plug>(multiselect-i")			*<Plug>(multiselect-iquote)*
+	The broadcasting textobject of |iquote|.
+
+<Plug>(multiselect-a")			*<Plug>(multiselect-aquote)*
+	The broadcasting textobject of |aquote|.
+
+<Plug>(multiselect-i`)			*<Plug>(multiselect-i`)*
+	The broadcasting textobject of |i`|.
+
+<Plug>(multiselect-a`)			*<Plug>(multiselect-a`)*
+	The broadcasting textobject of |a`|.
+
+<Plug>(multiselect-i()			*<Plug>(multiselect-i()*
+	The broadcasting textobject of |i(|.
+
+<Plug>(multiselect-a()			*<Plug>(multiselect-a()*
+	The broadcasting textobject of |a(|.
+
+<Plug>(multiselect-i[)			*<Plug>(multiselect-i[)*
+	The broadcasting textobject of |i[|.
+
+<Plug>(multiselect-a[)			*<Plug>(multiselect-a[)*
+	The broadcasting textobject of |a[|.
+
+<Plug>(multiselect-i{)			*<Plug>(multiselect-i{)*
+	The broadcasting textobject of |i{|.
+
+<Plug>(multiselect-a{)			*<Plug>(multiselect-a{)*
+	The broadcasting textobject of |a{|.
+
+<Plug>(multiselect-it)			*<Plug>(multiselect-it)*
+	The broadcasting textobject of |it|.
+
+<Plug>(multiselect-at)			*<Plug>(multiselect-at)*
+	The broadcasting textobject of |at|.
+
+
 ==============================================================================
 HIGHLIGHT GROUPS			*multiselect-higroups*
 
