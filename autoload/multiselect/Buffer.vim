@@ -409,7 +409,8 @@ function! s:Change.mapapply(itemlist) abort "{{{
 			endif
 		endfor
 	elseif t_item is v:t_dict
-		let itemlist = map(copy(a:itemlist), 'v:val.head') + map(copy(a:itemlist), 'v:val.tail')
+		let itemlist = map(copy(a:itemlist), 'v:val.head')
+					\+ map(copy(a:itemlist), 'v:val.tail')
 		call self.mapapply(itemlist)
 	endif
 	return a:itemlist
