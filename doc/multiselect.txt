@@ -482,6 +482,18 @@ List of contents~
   RaceTask.leftcount()	|multiselect-RaceTask.leftcount()|
   RaceTask.hasdone()		|multiselect-RaceTask.hasdone()|
 
+* TaskChain class~
+  TaskChain			|multiselect-class-TaskChain|
+  TaskChain.event()		|multiselect-TaskChain.event()|
+  TaskChain.timer()		|multiselect-TaskChain.timer()|
+  TaskChain.race()		|multiselect-TaskChain.race()|
+  TaskChain.trigger()		|multiselect-TaskChain.trigger()|
+  TaskChain.start()		|multiselect-TaskChain.start()|
+  TaskChain.stop()		|multiselect-TaskChain.stop()|
+  TaskChain.repeat()		|multiselect-TaskChain.repeat()|
+  TaskChain.leftcount()		|multiselect-TaskChain.leftcount()|
+  TaskChain.hasdone()		|multiselect-TaskChain.hasdone()|
+
 ------------------------------------------------------------------------------
 Multiselect module~
 					*multiselect-module-Multiselect*
