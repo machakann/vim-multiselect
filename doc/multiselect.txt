@@ -439,11 +439,11 @@ List of contents~
 
 * EventTask class~
   EventTask			|multiselect-class-EventTask|
+  EventTask.start()		|multiselect-EventTask.start()|
+  EventTask.stop()		|multiselect-EventTask.stop()|
   EventTask.call()		|multiselect-EventTask.call()|
   EventTask.execute()		|multiselect-EventTask.execute()|
   EventTask.append()		|multiselect-EventTask.append()|
-  EventTask.start()		|multiselect-EventTask.start()|
-  EventTask.stop()		|multiselect-EventTask.stop()|
   EventTask.trigger()		|multiselect-EventTask.trigger()|
   EventTask.clear()		|multiselect-EventTask.clear()|
   EventTask.isactive()		|multiselect-EventTask.isactive()|
@@ -454,11 +454,11 @@ List of contents~
 
 * TimerTask class~
   TimerTask			|multiselect-class-TimerTask|
+  TimerTask.start()		|multiselect-TimerTask.start()|
+  TimerTask.stop()		|multiselect-TimerTask.stop()|
   TimerTask.call()		|multiselect-TimerTask.call()|
   TimerTask.execute()		|multiselect-TimerTask.execute()|
   TimerTask.append()		|multiselect-TimerTask.append()|
-  TimerTask.start()		|multiselect-TimerTask.start()|
-  TimerTask.stop()		|multiselect-TimerTask.stop()|
   TimerTask.trigger()		|multiselect-TimerTask.trigger()|
   TimerTask.clear()		|multiselect-TimerTask.clear()|
   TimerTask.isactive()		|multiselect-TimerTask.isactive()|
@@ -469,17 +469,17 @@ List of contents~
 
 * RaceTask class~
   RaceTask			|multiselect-class-RaceTask|
+  RaceTask.start()		|multiselect-RaceTask.start()|
+  RaceTask.stop()		|multiselect-RaceTask.stop()|
   RaceTask.call()		|multiselect-RaceTask.call()|
   RaceTask.execute()		|multiselect-RaceTask.execute()|
   RaceTask.append()		|multiselect-RaceTask.append()|
-  RaceTask.start()		|multiselect-RaceTask.start()|
-  RaceTask.stop()		|multiselect-RaceTask.stop()|
   RaceTask.trigger()		|multiselect-RaceTask.trigger()|
   RaceTask.clear()		|multiselect-RaceTask.clear()|
   RaceTask.isactive()		|multiselect-RaceTask.isactive()|
   RaceTask.skip()		|multiselect-RaceTask.skip()|
   RaceTask.repeat()		|multiselect-RaceTask.repeat()|
-  RaceTask.leftcount()	|multiselect-RaceTask.leftcount()|
+  RaceTask.leftcount()		|multiselect-RaceTask.leftcount()|
   RaceTask.hasdone()		|multiselect-RaceTask.hasdone()|
 
 * TaskChain class~
@@ -1994,9 +1994,9 @@ EventTask class~
 subclass of `NeatTask` class and automatically triggered by an autocmd event.
 |multiselect-class-NeatTask|
 
-An `EventTask` instance can hold one or more tasks to execute, the tasks will
-be executed in the order of registration by |multiselect-EventTask.call()| and
-|multiselect-EventTask.execute()|.
+`EventTask` class instance has the same methods with that of `NeatTask` class,
+and additionally |multiselect-EventTask.start()| and
+|multiselect-EventTask.stop()|.
 
 |multiselect-EventTask.start()| sets the task to an autocmd event. An
 `EventTask` is repeated forever in default.
@@ -2017,12 +2017,12 @@ If the purpose of the task has achieved, use |multiselect-EventTask.stop()|. >
 	call eventtask.stop()
 <
 
-					*multiselect-EventTask.call()*
-EventTask.call({Funcref}, {args}[, {dict}])    [method]
-	This method registers a task to call a |Funcref| with a |List| of
-	{args} as arguments and set it for the event. This method returns the
-	task itself. {dict} is for functions with the "dict" attribute. It
-	will be used to set the local variable "self". |Dictionary-function|
+					*multiselect-EventTask.start()*
+EventTask.start({name})    [method]
+	This method sets the task itself to an autocmd event. {name} should be
+	an autocmd event name. An `EventTask` instance can be bound to only an
+	event. If you need multiple triggers, use
+	|multiselect-class-RaceTask|.
 
 	If you have achieved the purpose of the task, you can
 	stop the task by calling |multiselect-EventTask.stop()|. >
@@ -2046,44 +2046,6 @@ EventTask.call({Funcref}, {args}[, {dict}])    [method]
 					\.repeat(3)
 					\.start('TextChanged')
 <
-
-					*multiselect-EventTask.execute()*
-EventTask.execute({cmd})    [method]
-	This method registers a task to execute an Ex command. This method
-	returns the task itself.
-
-	If you have achieved the purpose of the task, you can
-	stop the task by calling |multiselect-EventTask.stop()|. >
-		" make and set a new task to 'TextChanged' event
-		let task = s:Multiselect.EventTask()
-					\.execute('echo "foo"')
-					\.start('TextChanged')
-
-		" finish the task
-		call task.stop()
-<
-	Or use |multiselect-EventTask.repeat()| to finish after a certain
-	number of callings. >
-		" it will be abandoned after three times callings
-		let task = s:Multiselect.EventTask()
-					\.execute('echo "foo"')
-					\.repeat(3)
-					\.start('TextChanged')
-<
-
-					*multiselect-EventTask.append()*
-EventTask.append({task})    [method]
-	This method registers a task to trigger other tasks. {task} should be
-	an instance of `NeatTask` class or its subclasses. This method returns
-	the task itself. See |multiselect-NeatTask.append()|
-
-
-					*multiselect-EventTask.start()*
-EventTask.start({name})    [method]
-	This method sets the task itself to an autocmd event. {name} should be
-	an autocmd event name. An `EventTask` instance can be bound to only an
-	event. If you need multiple triggers, use
-	|multiselect-class-RaceTask|.
 	This method returns the task itself.
 
 
@@ -2092,75 +2054,59 @@ EventTask.stop()    [method]
 	This method stops the execution of the event task.
 
 
+					*multiselect-EventTask.call()*
+EventTask.call({Funcref}, {args}[, {dict}])    [method]
+	See |multiselect-NeatTask.call()|.
+
+
+					*multiselect-EventTask.execute()*
+EventTask.execute({cmd})    [method]
+	See |multiselect-NeatTask.execute()|.
+
+
+					*multiselect-EventTask.append()*
+EventTask.append({task})    [method]
+	See |multiselect-NeatTask.append()|.
+
+
 					*multiselect-EventTask.trigger()*
 EventTask.trigger([{forcibly}])    [method]
-	This method executes all the registered tasks.
-	This method returns the `EventTask` itself.
-
-	If {forcibly} is given and it is |TRUE|, this method triggers the
-	registered task even if the task has already done.
-	|multiselect-EventTask.hasdone()|
+	See |multiselect-NeatTask.trigger()|.
 
 
 					*multiselect-EventTask.clear()*
 EventTask.clear()    [method]
-	This method clears all registered tasks. This method returns the
-	`EventTask` itself.
+	See |multiselect-NeatTask.clear()|.
 
 
 					*multiselect-EventTask.clone()*
 EventTask.clone()    [method]
-	This method returns another `EventTask` instance which have the same
-	task with itself.
+	See |multiselect-NeatTask.clone()|.
 
 
 					*multiselect-EventTask.isactive()*
 EventTask.isactive()    [method]
-	This method returns |TRUE| if the `EventTask` is active, |FALSE| if
-	it is not active.
+	See |multiselect-NeatTask.isactive()|.
 
 
 					*multiselect-EventTask.skip()*
 EventTask.skip([{count}])    [method]
-	If this method is called, the following `EventTask` is skipped
-	(not executed) {count} times. {count} is 1 if omitted. >
-		" 'foo' will be displayed after twice edits
-		call s:Multiselect.EventTask()
-				 \.execute('echo "foo"')
-				 \.skip(1)
-				 \.start('TextChanged')
-
-		" finish the task
-		call task.stop()
-<
-	This method returns the `EventTask` itself.
+	See |multiselect-NeatTask.skip()|.
 
 
 					*multiselect-EventTask.repeat()*
 EventTask.repeat([{count}])    [method]
-	This method sets the number of execution. If {count} is negative, the
-	`EventTask` will be persistent. An `EventTask` instance is produced as
-	it is -1 in default. If {count} is omitted, it will reset the number
-	of execution to the one last set. >
-		" 'foo' will be displayed and the task is abandoned
-		call s:Multiselect.EventTask()
-				 \.execute('echo "foo"')
-				 \.repeat(1)
-				 \.start('TextChanged')
-<
-	This method returns the `EventTask` itself.
+	See |multiselect-NeatTask.repeat()|.
 
 
 					*multiselect-EventTask.leftcount()*
 EventTask.leftcount()    [method]
-	This method returns the left number of execution.
-	See |multiselect-EventTask.repeat()|.
+	See |multiselect-NeatTask.leftcount()|.
 
 
 					*multiselect-EventTask.hasdone()*
 EventTask.hasdone()    [method]
-	This method returns |TRUE| if the task has done {count} times
-	specified by |multiselect-EventTask.repeat()|, otherwise |FALSE|.
+	See |multiselect-NeatTask.hasdone()|.
 
 
 
@@ -2170,9 +2116,11 @@ TimerTask class~
 
 `TimerTask` is used to delay the execution of tasks. It is a subclass of
 `NeatTask` class and automatically triggered by a delay time.
+See |multiselect-class-NeatTask|.
 
-The tasks will be registered by using |multiselect-TimerTask.call()| and
-|multiselect-TimerTask.execute()| methods.
+`TimerTask` class instance has the same methods with that of `NeatTask` class,
+and additionally |multiselect-TimerTask.start()| and
+|multiselect-TimerTask.stop()|.
 
 |multiselect-TimerTask.start()| sets the delay time and start counting down,
 after the delay time the registered tasks are executed. `TimerTask` finishes
@@ -2189,12 +2137,10 @@ before the last execution, you can use |multiselect-TimerTask.stop()|. >
 	call timertask.start(100)
 <
 
-					*multiselect-TimerTask.call()*
-TimerTask.call({Funcref}, {args}[, {dict}])    [method]
-	This method registers a task to call a |Funcref| with a |List| of
-	{args} as arguments and set it for the event. {dict} is for functions
-	with the "dict" attribute. It will be used to set the local variable
-	"self". |Dictionary-function| This method returns the task itself. >
+					*multiselect-TimerTask.start()*
+TimerTask.start({time})    [method]
+	This method sets the delay time and start counting down.
+	This method returns the task itself. >
 		function! s:sayfoo() abort
 			echo 'foo'
 		endfunction
@@ -2205,95 +2151,65 @@ TimerTask.call({Funcref}, {args}[, {dict}])    [method]
 					\.start(100)
 <
 
-					*multiselect-TimerTask.execute()*
-TimerTask.execute({cmd})    [method]
-	This method registers a task to execute an Ex command. This method
-	returns the task itself. >
-		" make and start a new task executed after 100 millisecond
-		let task  = s:Multiselect.TimerTask()
-					\.execute('echo "foo"')
-					\.start(100)
-<
-
-					*multiselect-TimerTask.append()*
-TimerTask.append({task})    [method]
-	This method registers a task to trigger other tasks. {task} should be
-	an instance of `NeatTask` class or its subclasses. This method returns
-	the task itself. See |multiselect-NeatTask.append()|
-
-
-					*multiselect-TimerTask.start()*
-TimerTask.start({time})    [method]
-	This method sets the delay time and start counting down.
-	This method returns the task itself.
-
-
 					*multiselect-TimerTask.stop()*
 TimerTask.stop()    [method]
 	This method stops to cancell the delayed task.
 	This method returns the task itself.
 
 
+					*multiselect-TimerTask.call()*
+TimerTask.call({Funcref}, {args}[, {dict}])    [method]
+	See |multiselect-NeatTask.call()|.
+
+
+					*multiselect-TimerTask.execute()*
+TimerTask.execute({cmd})    [method]
+	See |multiselect-NeatTask.execute()|.
+
+
+					*multiselect-TimerTask.append()*
+TimerTask.append({task})    [method]
+	See |multiselect-NeatTask.append()|.
+
+
 					*multiselect-TimerTask.trigger()*
 TimerTask.trigger([{forcibly}])    [method]
-	This method executes all the registered tasks.
-	This method returns the task itself.
-
-	If {forcibly} is given and it is |TRUE|, this method triggers the
-	registered task even if the task has already done.
-	|multiselect-RaceTask.hasdone()|
+	See |multiselect-NeatTask.trigger()|.
 
 
 					*multiselect-TimerTask.clear()*
 TimerTask.clear()    [method]
-	This method clears all registered tasks.
-	This method returns the task itself.
+	See |multiselect-NeatTask.clear()|.
 
 
 					*multiselect-TimerTask.clone()*
 TimerTask.clone()    [method]
-	This method returns another `TimerTask` instance which have the same
-	task with itself.
+	See |multiselect-NeatTask.clone()|.
 
 
 					*multiselect-TimerTask.isactive()*
 TimerTask.isactive()    [method]
-	This method returns |TRUE| if the `TimerTask` is active, |FALSE|
-	if it is not active.
+	See |multiselect-NeatTask.isactive()|.
 
 
 					*multiselect-TimerTask.skip()*
 TimerTask.skip([{count}])    [method]
-	If this method is called, the following `TimerTask` is skipped
-	(not executed) {count} times. {count} is 1 if omitted.
-	This method returns the `TimerTask` itself.
+	See |multiselect-NeatTask.skip()|.
 
 
 					*multiselect-TimerTask.repeat()*
 TimerTask.repeat([{count}])    [method]
-	This method sets the number of execution. If {count} is negative, the
-	`TimerTask` will be persistent. An `TimerTask` instance is produced as
-	it is 1 in default. If {count} is omitted, it will reset the number
-	of execution to the one last set. >
-		" 'foo' will be displayed three times every one second
-		call s:Multiselect.TimerTask()
-				 \.execute('echo "foo"')
-				 \.repeat(3)
-				 \.start(1000)
-<
-	This method returns the task itself.
+	See |multiselect-NeatTask.repeat()|.
 
 
 					*multiselect-TimerTask.leftcount()*
 TimerTask.leftcount()    [method]
-	This method returns the left number of execution.
-	See |multiselect-TimerTask.repeat()|.
+	See |multiselect-NeatTask.leftcount()|.
 
 
 					*multiselect-TimerTask.hasdone()*
 TimerTask.hasdone()    [method]
-	This method returns |TRUE| if the task has done {count} times
-	specified by |multiselect-TimerTask.repeat()|, otherwise |FALSE|.
+	See |multiselect-NeatTask.hasdone()|.
 
 
 
@@ -2301,124 +2217,87 @@ TimerTask.hasdone()    [method]
 RaceTask class~
 					*multiselect-class-RaceTask*
 
-RaceTask class is a subclass of `NeatTask` class which can have multiple
+`RaceTask` class is a subclass of `NeatTask` class which can have multiple
 automatic triggers, autocmd events and a delay time.
 See also |multiselect-class-NeatTask|
 	 |multiselect-class-EventTask|
 	 |multiselect-class-TimerTask|.
 
-RaceTask will be executed once by either one of registered auto-triggers in
+`RaceTask` class instance has the same methods with that of `NeatTask` class,
+and additionally |multiselect-RaceTask.start()| and
+|multiselect-RaceTask.stop()|.
+
+`RaceTask` will be executed once by either one of registered auto-triggers in
 default. The number of execution can be changed by
 |multiselect-RaceTask.repeat()|.
-
-
-					*multiselect-RaceTask.call()*
-RaceTask.call({Funcref}, {args}[, {dict}])    [method]
-	This method registers a task to call a |Funcref| with a |List| of
-	{args} as arguments and set it for the event. This method returns the
-	task itself. {dict} is for functions with the "dict" attribute. It
-	will be used to set the local variable "self". |Dictionary-function| >
-		function! s:sayfoo() abort
-		    echo 'foo'
-		endfunction
-
-		let task = s:Multiselect.RaceTask()
-					\.call(function('s:sayfoo'), [])
-		call task.start(['TextChanged', 100])
-<
-
-					*multiselect-RaceTask.execute()*
-RaceTask.execute({cmd})    [method]
-	This method registers a task to execute an Ex command. This method
-	returns the task itself.  >
-		let task = s:Multiselect.RaceTask().execute('echo "foo"')
-		call task.start(['TextChanged', 100])
-<
-
-					*multiselect-RaceTask.append()*
-RaceTask.append({task})    [method]
-	This method registers a task to trigger other tasks. {task} should be
-	an instance of `NeatTask` class or its subclasses. This method returns
-	the task itself. See |multiselect-NeatTask.append()|
 
 
 					*multiselect-RaceTask.start()*
 RaceTask.start({triggers})    [method]
 	This method starts to wait for an auto-trigger. {triggers} is a list
 	of trigger names. If one of the item is |String|, it is regarded as an
-	autocmd event. If it is |Number|, it is regarded as an delay time.
-	This method returns the task itself. However, note that if
-	{triggerlist} does not contain any valid trigger item, this method
-	returns an empty dictionary. >
+	autocmd event. If it is |Number|, it is regarded as an delay time. >
 		let task = s:Multiselect.RaceTask().execute('echo "foo"')
 		call task.start(['TextChanged', 100])
 <
+	This method returns the task itself. However, note that if
+	{triggerlist} does not contain any valid trigger item, this method
+	returns an empty dictionary.
+
 
 					*multiselect-RaceTask.stop()*
 RaceTask.stop()    [method]
 	This method stops to execute the registered tasks.
 
 
+					*multiselect-RaceTask.call()*
+RaceTask.call({Funcref}, {args}[, {dict}])    [method]
+	See |multiselect-NeatTask.call()|.
+
+
+					*multiselect-RaceTask.execute()*
+RaceTask.execute({cmd})    [method]
+	See |multiselect-NeatTask.execute()|.
+
+
+					*multiselect-RaceTask.append()*
+RaceTask.append({task})    [method]
+	See |multiselect-NeatTask.append()|.
+
+
 					*multiselect-RaceTask.trigger()*
 RaceTask.trigger([{forcibly}])    [method]
-	This method executes all the registered tasks.
-	This method returns the `RaceTask` itself.
-
-	If {forcibly} is given and it is |TRUE|, this method triggers the
-	registered task even if the task has already done.
-	|multiselect-RaceTask.hasdone()|
+	See |multiselect-NeatTask.trigger()|.
 
 
 					*multiselect-RaceTask.clear()*
 RaceTask.clear()    [method]
-	This method clears all registered tasks. This method returns the
-	`RaceTask` itself.
+	See |multiselect-NeatTask.clear()|.
 
 
 					*multiselect-RaceTask.isactive()*
 RaceTask.isactive()    [method]
-	This method returns |TRUE| if the `RaceTask` is active, |FALSE|
-	if it is not active.
+	See |multiselect-NeatTask.isactive()|.
 
 
 					*multiselect-RaceTask.skip()*
 RaceTask.skip([{count}])    [method]
-	If this method is called, the following `RaceTask` is skipped
-	(not executed) {count} times. {count} is 1 if omitted. >
-		" 'foo' will be displayed after twice edits
-		call s:Multiselect.RaceTask()
-				 \.event('TextChanged')
-				 \.execute('echo "foo"')
-				 \.skip(1)
-<
-	This method returns the `RaceTask` itself.
+	See |multiselect-NeatTask.skip()|.
 
 
 					*multiselect-RaceTask.repeat()*
 RaceTask.repeat([{count}])    [method]
-	This method sets the number of execution. If {count} is negative, the
-	`RaceTask` will be persistent. An `RaceTask` instance is produced
-	as it is -1 in default. If {count} is omitted, it will reset the
-	number of execution to the one last set. >
-		" 'foo' will be displayed and the task is abandoned
-		call s:Multiselect.RaceTask()
-				 \.event('TextChanged')
-				 \.execute('echo "foo"')
-				 \.repeat(1)
-<
-	This method returns the `RaceTask` itself.
+	See |multiselect-NeatTask.repeat()|.
 
 
 					*multiselect-RaceTask.leftcount()*
 RaceTask.leftcount()    [method]
-	This method returns the left number of execution.
-	See |multiselect-RaceTask.repeat()|.
+	See |multiselect-NeatTask.leftcount()|.
 
 
 					*multiselect-RaceTask.hasdone()*
 RaceTask.hasdone()    [method]
-	This method returns |TRUE| if the task has done {count} times
-	specified by |multiselect-RaceTask.repeat()|, otherwise |FALSE|.
+	See |multiselect-NeatTask.hasdone()|.
 
 
 
