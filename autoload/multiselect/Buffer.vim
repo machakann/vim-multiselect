@@ -629,7 +629,7 @@ function! s:inbetween(pos, head, tail) abort  "{{{
 endfunction "}}}
 function! s:isextended() abort "{{{
 	if visualmode() isnot# "\<C-v>"
-		return
+		return s:FALSE
 	endif
 
 	let view = winsaveview()
