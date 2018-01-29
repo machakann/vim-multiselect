@@ -179,17 +179,20 @@ function! s:Multiselector.keymap_checkpattern(mode, pat, ...) abort "{{{
 		return
 	endif
 
+	let view = winsaveview()
 	let options = get(a:000, 0, {})
 	let openfold = !!get(options, 'openfold', s:FALSE)
-	let view = winsaveview()
-	if a:mode is# 'x'
-		let start = getpos("'<")
-		let end = getpos("'>")
-	else
-		let start = [0, 1, 1, 0]
-		let end = [0, line('$'), col([line('$'), '$']), 0]
+	let region = get(options, 'region', {})
+	if empty(region)
+		if a:mode is# 'x'
+			let start = getpos("'<")
+			let end = getpos("'>")
+		else
+			let start = [0, 1, 1, 0]
+			let end = [0, line('$'), col([line('$'), '$']), 0]
+		endif
+		let region = s:Buffer.Region(start, end)
 	endif
-	let region = s:Buffer.Region(start, end)
 	call setpos('.', region.head)
 
 	let itemlist = []
@@ -208,6 +211,7 @@ function! s:Multiselector.keymap_checkpattern(mode, pat, ...) abort "{{{
 	endwhile
 
 	" It is sure that the items in 'itemlist' has no overlap
+	" FIXME: Should I add this as an API? Like 'Multiselector.unsafe_append()'
 	if !empty(itemlist)
 		for newitem in itemlist
 			call self.filter({_, olditem -> !newitem.touches(olditem)})
@@ -276,29 +280,36 @@ function! s:Multiselector.keymap_multiselect(mode) abort "{{{
 	let itemlist = []
 	if a:mode is# 'x'
 		let type = s:Buffer.str2type(visualmode())
-		let extended = type is# 'block' ? s:Buffer.isextended() : s:FALSE
+		let extended = s:Buffer.isextended()
 		let region = s:Buffer.Region(getpos("'<"), getpos("'>"), type, extended)
-		let item_in_visual = self.itemnum({_, item -> item.isinside(region)})
-		if item_in_visual == 0
-			if type is# 'char'
+		if type is# 'char'
+			if self.itemnum({_, item -> region.includes(item)}) != 0
+				call self.filter({_, item -> region.includes(item)})
+			elseif self.itemnum({_, item -> region.isinside(item)}) != 0
 				let pat = s:Buffer.patternofselection(region)
-				call self.keymap_checkpattern('n', pat)
+				let item = self.emit({_, item -> region.isinside(item)})[0]
+				let options = {'region': item}
+				call self.keymap_checkpattern('n', pat, options)
 			else
 				call self.keymap_check(a:mode)
 			endif
 		else
-			if item_in_visual != self.itemnum()
-				call self.filter({_, item -> item.isinside(region)})
+			if self.itemnum({_, item -> region.includes(item)}) != 0
+				call self.filter({_, item -> region.includes(item)})
+			else
+				call self.keymap_check(a:mode)
 			endif
 		endif
-		return
 	else
 		let curpos = getpos('.')
-		let itemlist = self.emit_touching(curpos)
-		if empty(itemlist)
-			let pat = printf('\<%s\>', expand('<cword>'))
-			call self.keymap_checkpattern(a:mode, pat)
+		let pat = printf('\<%s\>', expand('<cword>'))
+		if self.itemnum({_, item -> item.touches(curpos)}) != 0
+			let item = self.emit_touching(curpos)[0]
+			let options = {'region': item}
+		else
+			let options = {}
 		endif
+		call self.keymap_checkpattern(a:mode, pat, options)
 	endif
 endfunction "}}}
 function! s:Multiselector.keymap_broadcast(cmd, ...) abort "{{{

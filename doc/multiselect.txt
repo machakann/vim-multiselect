@@ -100,15 +100,28 @@ The following keymappings are available with |:nmap| and |:xmap|.
 
 
 <Plug>(multiselect)			*<Plug>(multiselect)*
-	|Normal| mode: This keymapping removes an item under the cursor if
-	the text is selected. Otherwise this keymapping selects the |word|
-	under the cursor over the current buffer.
+	This is a bit complex but could be a useful keymapping.
 
-	|Visual| mode: If multiselect items are in the selection region, this
-	keymapping removes the items outside the selection. Otherwise, this
-	keymapping selects the selection region. If in character-wise visual
-	mode, this keymapping selects all texts matching with the selected
-	string over the current buffer.
+	|Normal| mode: This keymapping selects texts matching with the |word|
+	under the cursor. If the cursor is on a multiselection, only the texts
+	inside the region will be selected.
+
+	|characterwise-visual| mode:
+	If the visual selection includes one or more multiselection, this
+	keymapping removes the items outside the visual selection.
+
+	If the visual selection is included in a multiselection, this
+	keymapping multi-selects texts matching with the selected string
+	inside the original multiselection.
+
+	Otherwise this keymapping multi-selects texts matching with the
+	selected string over the current buffer.
+
+	|linewise-visual| or |blockwise-visual| mode:
+	If the visual selection includes one or more multiselection, this
+	keymapping removes the items outside the visual selection.
+
+	Otherwise, this keymapping selects the selection region.
 
 
 Broadcasting textobjects~
