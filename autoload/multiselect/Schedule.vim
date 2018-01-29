@@ -335,22 +335,22 @@ function! s:sweep(name) abort "{{{
 endfunction "}}}
 lockvar! s:EventTask
 "}}}
-" EitherTask class (inherits NeatTask class) {{{
-let s:EitherTask = {
-	\	'__CLASS__': 'EitherTask',
-	\	'__eithertask__': {
+" RaceTask class (inherits NeatTask class) {{{
+let s:RaceTask = {
+	\	'__CLASS__': 'RaceTask',
+	\	'__racetask__': {
 	\		'Event': {},
 	\		'Timer': [],
 	\		},
 	\	'_state': s:OFF,
 	\	}
-function! s:EitherTask() abort "{{{
+function! s:RaceTask() abort "{{{
 	let neattask = s:NeatTask()
 	call neattask.repeat(1)
-	let eithertask = deepcopy(s:EitherTask)
-	return s:ClassSys.inherit(eithertask, neattask)
+	let racetask = deepcopy(s:RaceTask)
+	return s:ClassSys.inherit(racetask, neattask)
 endfunction "}}}
-function! s:EitherTask.start(triggerlist) abort "{{{
+function! s:RaceTask.start(triggerlist) abort "{{{
 	call self.stop().repeat()
 	if s:invalid_triggerlist(a:triggerlist) is s:TRUE
 		return {}
@@ -370,40 +370,40 @@ function! s:EitherTask.start(triggerlist) abort "{{{
 	call timertask.start(time)
 	return self
 endfunction "}}}
-function! s:EitherTask.stop() abort "{{{
+function! s:RaceTask.stop() abort "{{{
 	let self._state = s:OFF
-	if !empty(self.__eithertask__.Event)
-		for [name, event] in items(self.__eithertask__.Event)
+	if !empty(self.__racetask__.Event)
+		for [name, event] in items(self.__racetask__.Event)
 			call event.stop()
-			call remove(self.__eithertask__.Event, name)
+			call remove(self.__racetask__.Event, name)
 		endfor
 	endif
-	if !empty(self.__eithertask__.Timer)
-		let timer = self.__eithertask__.Timer
+	if !empty(self.__racetask__.Timer)
+		let timer = self.__racetask__.Timer
 		call timer.stop()
-		let self.__eithertask__.Timer = {}
+		let self.__racetask__.Timer = {}
 	endif
 	return self
 endfunction "}}}
-function! s:EitherTask.isactive() abort "{{{
+function! s:RaceTask.isactive() abort "{{{
 	return self._state && s:ClassSys.super(self, 'Switch')._isactive()
 endfunction "}}}
-function! s:EitherTask._event(name) abort "{{{
-	if has_key(self.__eithertask__.Event, a:name)
-		return self.__eithertask__.Event[a:name]
+function! s:RaceTask._event(name) abort "{{{
+	if has_key(self.__racetask__.Event, a:name)
+		return self.__racetask__.Event[a:name]
 	endif
 	let event = s:EventTask()
 	call event.call(self.trigger, [], self).repeat(-1)
-	let self.__eithertask__.Event[a:name] = event
+	let self.__racetask__.Event[a:name] = event
 	return event
 endfunction "}}}
-function! s:EitherTask._timer() abort "{{{
-	if !empty(self.__eithertask__.Timer)
-		return self.__eithertask__.Timer
+function! s:RaceTask._timer() abort "{{{
+	if !empty(self.__racetask__.Timer)
+		return self.__racetask__.Timer
 	endif
 	let timer = s:TimerTask()
 	call timer.call(self.trigger, [], self).repeat(-1)
-	let self.__eithertask__.Timer = timer
+	let self.__racetask__.Timer = timer
 	return timer
 endfunction "}}}
 "}}}
@@ -434,13 +434,13 @@ function! s:TaskChain.timer(time) abort "{{{
 	call self._setorder(ordertask)
 	return ordertask
 endfunction "}}}
-function! s:TaskChain.either(triggerlist) abort "{{{
+function! s:TaskChain.race(triggerlist) abort "{{{
 	if s:invalid_triggerlist(a:triggerlist)
 		return {}
 	endif
-	let eithertask = s:EitherTask()
+	let racetask = s:RaceTask()
 	let ordertask = s:NeatTask()
-	call self._settrigger(eithertask, [a:triggerlist])
+	call self._settrigger(racetask, [a:triggerlist])
 	call self._setorder(ordertask)
 	return ordertask
 endfunction "}}}
@@ -517,7 +517,7 @@ let s:Schedule = {
 	\	'NeatTask': function('s:NeatTask'),
 	\	'TimerTask': function('s:TimerTask'),
 	\	'EventTask': function('s:EventTask'),
-	\	'EitherTask': function('s:EitherTask'),
+	\	'RaceTask': function('s:RaceTask'),
 	\	'TaskChain': function('s:TaskChain'),
 	\	}
 lockvar! s:Schedule

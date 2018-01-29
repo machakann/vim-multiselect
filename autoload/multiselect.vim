@@ -629,7 +629,7 @@ let s:Multiselect = {
 	\	'NeatTask': s:Schedule.NeatTask,
 	\	'EventTask': s:Schedule.EventTask,
 	\	'TimerTask': s:Schedule.TimerTask,
-	\	'EitherTask': s:Schedule.EitherTask,
+	\	'RaceTask': s:Schedule.RaceTask,
 	\	'TaskChain': s:Schedule.TaskChain,
 	\	'shiftenv': function('s:shiftenv'),
 	\	'restoreenv': function('s:restoreenv'),
