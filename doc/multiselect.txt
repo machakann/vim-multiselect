@@ -1898,6 +1898,12 @@ Task.clear()    [method]
 	`Task` itself.
 
 
+					*multiselect-Task.clone()*
+Task.clone()    [method]
+	This method returns another `Task` instance which have the same task
+	with itself.
+
+
 
 ------------------------------------------------------------------------------
 NeatTask class~
@@ -1987,6 +1993,12 @@ NeatTask.trigger([{forcibly}])    [method]
 NeatTask.clear()    [method]
 	This method clears all registered tasks. This method returns the
 	`NeatTask` instance itself.
+
+
+					*multiselect-NeatTask.clone()*
+NeatTask.clone()    [method]
+	This method returns another `NeatTask` instance which have the same
+	task with itself.
 
 
 					*multiselect-NeatTask.isactive()*
@@ -2165,6 +2177,12 @@ EventTask.clear()    [method]
 	`EventTask` itself.
 
 
+					*multiselect-EventTask.clone()*
+EventTask.clone()    [method]
+	This method returns another `EventTask` instance which have the same
+	task with itself.
+
+
 					*multiselect-EventTask.isactive()*
 EventTask.isactive()    [method]
 	This method returns |TRUE| if the `EventTask` is active, |FALSE| if
@@ -2299,6 +2317,12 @@ TimerTask.trigger([{forcibly}])    [method]
 TimerTask.clear()    [method]
 	This method clears all registered tasks.
 	This method returns the task itself.
+
+
+					*multiselect-TimerTask.clone()*
+TimerTask.clone()    [method]
+	This method returns another `TimerTask` instance which have the same
+	task with itself.
 
 
 					*multiselect-TimerTask.isactive()*

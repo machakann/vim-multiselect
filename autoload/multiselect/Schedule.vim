@@ -350,6 +350,14 @@ function! s:RaceTask() abort "{{{
 	let racetask = deepcopy(s:RaceTask)
 	return s:ClassSys.inherit(racetask, neattask)
 endfunction "}}}
+function! s:RaceTask.clone() abort "{{{
+	let clone = s:RaceTask()
+	let clone.__switch__ = deepcopy(self.__switch__)
+	let clone.__counter__ = deepcopy(self.__counter__)
+	let clone._state = s:OFF
+	let clone._orderlist = copy(self._orderlist)
+	return clone
+endfunction "}}}
 function! s:RaceTask.start(triggerlist) abort "{{{
 	call self.stop().repeat()
 	if s:invalid_triggerlist(a:triggerlist) is s:TRUE
