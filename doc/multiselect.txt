@@ -2036,8 +2036,9 @@ NeatTask.isactive()    [method]
 					*multiselect-NeatTask.skip()*
 NeatTask.skip([{count}])    [method]
 	If this method is called, the following `NeatTask` is skipped
-	(not executed) {count} times. {count} is 1 if omitted.
-	This method returns the `NeatTask` itself. >
+	(not executed) {count} times. {count} is 1 if omitted. If {count} is
+	less than 1, the skip count would be reset and the task will not skip
+	after that. This method returns the `NeatTask` itself. >
 		let neattask = s:Multiselect.NeatTask()
 		call neattask.execute('echo "foo"').skip(1)
 

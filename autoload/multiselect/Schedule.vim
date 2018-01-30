@@ -41,6 +41,7 @@ endfunction "}}}
 function! s:Switch.skip(...) abort "{{{
 	let n = get(a:000, 0, 1)
 	if n <= 0
+		call self._on()
 		return self
 	endif
 	call self._off()
