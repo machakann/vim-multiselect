@@ -69,6 +69,44 @@ function! s:Multiselector.check(expr, ...) abort  "{{{
 	call self.append(newitem)
 	return newitem
 endfunction "}}}
+function! s:Multiselector.checkpattern(pat, ...) abort "{{{
+	if empty(a:pat)
+		return []
+	endif
+
+	if a:0 == 0
+		let start = [0, 1, 1, 0]
+		let end = [0, line('$'), col([line('$'), '$']), 0]
+		let region = s:Buffer.Region(start, end)
+	else
+		let region = a:1
+	endif
+	let itemlist = []
+	let view = winsaveview()
+	call setpos('.', region.head)
+	let head = s:Buffer.searchpos(a:pat, 'cW')
+	while head != s:NULLPOS && region.includes(head)
+		let tail = s:Buffer.searchpos(a:pat, 'ceW')
+		if !region.includes(tail)
+			break
+		endif
+		let newitem = s:Buffer.Item(head, tail, 'v')
+		call add(itemlist, newitem)
+		let head = s:Buffer.searchpos(a:pat, 'W')
+	endwhile
+
+	" It is sure that the items in 'itemlist' has no overlap
+	" FIXME: Should I add this as an API? Like 'Multiselector.unsafe_append()'
+	if !empty(itemlist)
+		for newitem in itemlist
+			call self.filter({_, olditem -> !newitem.touches(olditem)})
+		endfor
+		call extend(self.itemlist, itemlist)
+		call self._checkpost(itemlist)
+	endif
+	call winrestview(view)
+	return itemlist
+endfunction "}}}
 function! s:Multiselector.uncheck(expr, ...) abort  "{{{
 	let args = [a:expr] + a:000
 	try
@@ -175,51 +213,22 @@ function! s:Multiselector.keymap_check(mode) abort "{{{
 	return newitem
 endfunction "}}}
 function! s:Multiselector.keymap_checkpattern(mode, pat, ...) abort "{{{
-	if empty(a:pat)
-		return
+	if a:mode is# 'x'
+		let region = s:Buffer.Region(getpos("'<"), getpos("'>"))
+		let itemlist = self.checkpattern(a:pat, region)
+	else
+		let itemlist = self.checkpattern(a:pat)
 	endif
 
-	let view = winsaveview()
 	let options = get(a:000, 0, {})
-	let openfold = !!get(options, 'openfold', s:FALSE)
-	let region = get(options, 'region', {})
-	if empty(region)
-		if a:mode is# 'x'
-			let start = getpos("'<")
-			let end = getpos("'>")
-		else
-			let start = [0, 1, 1, 0]
-			let end = [0, line('$'), col([line('$'), '$']), 0]
-		endif
-		let region = s:Buffer.Region(start, end)
-	endif
-	call setpos('.', region.head)
-
-	let itemlist = []
-	let head = s:Buffer.searchpos(a:pat, 'cW')
-	while head != s:NULLPOS && region.includes(head)
-		let tail = s:Buffer.searchpos(a:pat, 'ceW')
-		if !region.includes(tail)
-			break
-		endif
-		let newitem = s:Buffer.Item(head, tail, 'v')
-		call add(itemlist, newitem)
-		if openfold is s:TRUE
-			call s:Buffer.openfold(newitem.head[1])
-		endif
-		let head = s:Buffer.searchpos(a:pat, 'W')
-	endwhile
-
-	" It is sure that the items in 'itemlist' has no overlap
-	" FIXME: Should I add this as an API? Like 'Multiselector.unsafe_append()'
-	if !empty(itemlist)
-		for newitem in itemlist
-			call self.filter({_, olditem -> !newitem.touches(olditem)})
+	if get(options, 'openfold', s:FALSE) is s:TRUE
+		let view = winsaveview()
+		for item in itemlist
+			call setpos('.', item.head)
+			call s:Buffer.openfold()
 		endfor
-		call extend(self.itemlist, itemlist)
-		call self._checkpost(itemlist)
+		call winrestview(view)
 	endif
-	call winrestview(view)
 	return itemlist
 endfunction "}}}
 function! s:Multiselector.keymap_uncheck(mode) abort "{{{

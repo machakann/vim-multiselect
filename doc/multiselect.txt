@@ -1,5 +1,5 @@
 *multiselect.txt*	A library for multiple selection
-						Last change:29-Jan-2018.
+						Last change:30-Jan-2018.
 
 Author  : machakann <https://github.com/machakann>
 License : MIT license
@@ -437,6 +437,7 @@ List of contents~
 
   - main interfaces
   Multiselector.check()		|multiselect-Multiselector.check()|
+  Multiselector.checkpattern()	|multiselect-Multiselector.checkpattern()|
   Multiselector.uncheck()	|multiselect-Multiselector.uncheck()|
   Multiselector.uncheckall()	|multiselect-Multiselector.uncheckall()|
   Multiselector.emit()		|multiselect-Multiselector.emit()|
@@ -977,6 +978,14 @@ Multiselector.check({region})
 		let region = s:Multiselect.Region(head, tail, 'block', 1)
 		call s:multiselector.check(region)
 <
+
+				    *multiselect-Multiselector.checkpattern()*
+Multiselector.checkpattern({pat}[, {region}])    [method]
+	This method searches the texts matching with the assigned regular
+	expression {pat} and add them as multiselections into
+	`Multiselect.itemlist`. This method returns a list of the added item.
+	|multiselect-Multiselector.itemlist|
+
 
 					*multiselect-Multiselector.uncheck()*
 Multiselector.uncheck({head}[, {tail}[, {type}[, {extended}]]])    [method]
