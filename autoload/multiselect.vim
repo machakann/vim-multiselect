@@ -243,14 +243,9 @@ endfunction "}}}
 function! s:Multiselector.keymap_undo() abort "{{{
 	let last = self.lastevent()
 	if last.event is# 'check'
-		let removing = []
 		for checked in last.itemlist
-			let i = self.search(checked)
-			if i != -1
-				call add(removing, i)
-			endif
+			call self.filter({_, item -> item isnot checked})
 		endfor
-		call self.remove(removing)
 	elseif last.event is# 'uncheck'
 		call self.append(last.itemlist)
 	endif
