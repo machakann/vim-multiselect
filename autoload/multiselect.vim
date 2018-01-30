@@ -587,10 +587,10 @@ function! s:Multiselector._uncheckpost(removed) abort "{{{
 	call s:douserautocmd(self.EVENTUNCHECKPOST)
 endfunction "}}}
 function! s:Multiselector._abandon() abort "{{{
+	call self.uncheckall()
 	for event in values(self._event)
-		call event.clear()
+		call event.stop()
 	endfor
-	call filter(self, 0)
 endfunction "}}}
 function! s:douserautocmd(name) abort "{{{
 	if !exists('#User#' . a:name)
