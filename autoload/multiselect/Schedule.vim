@@ -1,3 +1,5 @@
+" TODO: Implement NeatTask.preprocess()/.postprocess()
+" TODO: Implement NeatTask.finishif()
 let s:ClassSys = multiselect#ClassSys#_import()
 let s:Errors = multiselect#Errors#_import()
 let s:TRUE = 1
