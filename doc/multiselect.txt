@@ -1,5 +1,5 @@
 *multiselect.txt*	A library for multiple selection
-						Last change:31-Jan-2018.
+						Last change:01-Feb-2018.
 
 Author  : machakann <https://github.com/machakann>
 License : MIT license
@@ -124,6 +124,7 @@ The following keymappings are available with |:nmap| and |:xmap|.
 	Otherwise, this keymapping selects the selection region.
 
 
+					*multiselect-broadcasting-textobject*
 Broadcasting textobjects~
 
 The following textobjects behave as same as those original textobjects,
@@ -275,7 +276,7 @@ The first thing to do is to load the `Multiselect` module and to obtain an
 	let s:Multiselect = multiselect#import()
 <
 This module contains some functions, constructors and constants, but in many
-cases what you need would be only the `s:Multiselect.load()` function. This
+cases what you need would be only the `Multiselect.load()` function. This
 function returns the `Multiselector` instance.
 >
 	" Multiselector instance
@@ -285,7 +286,7 @@ Use this instance to get information and to control the multiple selections.
 
 
 
-Step2~
+Step 2~
 Next, user may already have some selections, then get the positions of the
 selections. Use `Multiselector.emit()` method to get all the items. The
 "emitted" items are no longer selected.
@@ -466,7 +467,7 @@ List of contents~
   Multiselector.show()		|multiselect-Multiselector.show()|
   Multiselector.quench()	|multiselect-Multiselector.quench()|
 
-  -event controls
+  - event controls
   Multiselector.event()		|multiselect-Multiselector.event()|
 
 * Region class~
