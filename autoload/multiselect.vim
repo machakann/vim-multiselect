@@ -370,6 +370,9 @@ function! s:try(lnum, column, command) abort "{{{
 	execute printf('normal! %dG%d|', a:lnum, a:column)
 	let curpos = getpos('.')
 	execute a:command
+	if mode() isnot# 'v'
+		return {}
+	endif
 	execute "normal! \<Esc>"
 	let vhead = getpos("'<")
 	let vtail = getpos("'>")
