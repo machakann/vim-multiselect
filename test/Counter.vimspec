@@ -1,0 +1,65 @@
+Describe Counter
+	Before
+		let Schedule = multiselect#Schedule#_import()
+		let Counter = Schedule.Counter
+	End
+
+	Context .leftcount()
+		It returns the left count
+			Assert Equals(Counter(2).leftcount(), 2)
+			Assert Equals(Counter(3).leftcount(), 3)
+			Assert Equals(Counter(1).leftcount(), 1)
+			Assert Equals(Counter(-1).leftcount(), -1)
+		End
+	End
+
+	Context .repeat(count)
+		It sets its left count
+			Assert Equals(Counter(1).repeat(1).leftcount(), 1)
+			Assert Equals(Counter(1).repeat(2).leftcount(), 2)
+			Assert Equals(Counter(1).repeat(2).repeat(1).leftcount(), 1)
+
+			let counter = Counter(3)
+			call counter._tick() " first
+			Assert Equals(counter.leftcount(), 2)
+
+			call counter._tick() " second
+			Assert Equals(counter.leftcount(), 1)
+
+			call counter._tick() " third
+			Assert Equals(counter.leftcount(), 0)
+		End
+	End
+
+	Context .hasdone()
+		It returns TRUE if the count down has finished
+			let counter = Counter(3)
+			Assert False(counter.hasdone())
+
+			call counter._tick() " first
+			Assert False(counter.hasdone())
+
+			call counter._tick() " second
+			Assert False(counter.hasdone())
+
+			call counter._tick() " third
+			Assert True(counter.hasdone())
+
+
+			" never done
+			let counter = Counter(-1)
+			Assert False(counter.hasdone())
+
+			call counter._tick() " first
+			Assert False(counter.hasdone())
+
+			call counter._tick() " second
+			Assert False(counter.hasdone())
+
+			call counter._tick() " third
+			Assert False(counter.hasdone())
+		End
+	End
+End
+
+" vim:set noet ts=4 sw=4 sts=-1:

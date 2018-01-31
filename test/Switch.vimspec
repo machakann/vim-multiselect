@@ -1,0 +1,39 @@
+Describe Switch
+	Before
+		let Schedule = multiselect#Schedule#_import()
+		let Switch = Schedule.Switch
+	End
+
+	Context ._on()/_off()
+		It controls the state of switch
+			Assert True(Switch()._on()._isactive())
+			Assert False(Switch()._off()._isactive())
+			Assert True(Switch()._on()._off()._on()._isactive())
+		End
+	End
+
+	Context .skip()
+		It controls temporal off state of a switch
+			let switch = Switch()
+
+			call switch._on().skip(1)
+			Assert False(switch._isactive())
+
+			Assert True(switch._skipsthistime())
+
+			Assert True(switch._isactive())
+			Assert False(switch._skipsthistime())
+
+			call switch.skip(2)
+			Assert False(switch._isactive())
+
+			Assert True(switch._skipsthistime())
+			Assert True(switch._skipsthistime())
+
+			Assert True(switch._isactive())
+			Assert False(switch._skipsthistime())
+		End
+	End
+End
+
+" vim:set noet ts=4 sw=4 sts=-1:
