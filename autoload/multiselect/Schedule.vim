@@ -1,3 +1,5 @@
+" TODO: Implement NeatTask.preprocess()/.postprocess()
+" TODO: Implement NeatTask.finishif()
 let s:ClassSys = multiselect#ClassSys#_import()
 let s:Errors = multiselect#Errors#_import()
 let s:TRUE = 1
@@ -329,7 +331,11 @@ function! s:sweep(name) abort "{{{
 	call filter(s:eventtable[a:name], '!v:val.hasdone()')
 	if empty(s:eventtable[a:name])
 		augroup multiselect
-			execute printf('autocmd! %s *', a:name)
+			if count(s:BUILTINEVENTS, a:name) != 0
+				execute printf('autocmd! %s *', a:name)
+			else
+				execute printf('autocmd! User %s', a:name)
+			endif
 		augroup END
 		call remove(s:eventtable, a:name)
 	endif

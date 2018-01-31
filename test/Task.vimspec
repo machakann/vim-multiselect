@@ -1,0 +1,67 @@
+Describe Task
+	Before
+		let Schedule = multiselect#Schedule#_import()
+		let Task = Schedule.Task
+	End
+
+	Context .call(func, args, ...)
+		It registers a function to be called later
+			let g:count = 0
+			let task = Task()
+			call task.call({n -> execute('let g:count += n')}, [1])
+			Assert Equals(g:count, 0)
+
+			call task.trigger()
+			Assert Equals(g:count, 1)
+
+			call task.call({n -> execute('let g:count += 2*n')}, [1])
+			Assert Equals(g:count, 1)
+
+			call task.trigger()
+			Assert Equals(g:count, 4)
+
+			unlet! g:count
+		End
+	End
+
+	Context .execute(cmd)
+		It registers a command to be executed later
+			let g:count = 0
+			let task = Task()
+			call task.execute('let g:count += 1')
+			Assert Equals(g:count, 0)
+
+			call task.trigger()
+			Assert Equals(g:count, 1)
+
+			call task.execute('let g:count += 2')
+			Assert Equals(g:count, 1)
+
+			call task.trigger()
+			Assert Equals(g:count, 4)
+
+			unlet! g:count
+		End
+	End
+
+	Context .clear()
+		It clears all functions and commands registerd
+			let g:count = 0
+			let task = Task()
+			call task.execute('let g:count += 1')
+			call task.trigger()
+			call task.execute('let g:count += 2')
+			call task.trigger()
+			Assert Equals(g:count, 4)
+
+			call task.clear()
+			Assert Equals(g:count, 4)
+			call task.trigger()
+			Assert Equals(g:count, 4)
+
+			unlet! g:count
+		End
+	End
+End
+
+" vim:set noet ts=4 sw=4 sts=-1:
