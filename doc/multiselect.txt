@@ -137,6 +137,9 @@ following case.
 	 bar
 	  baz
 <
+NOTE: These keymappings has a known bug. If the target of textobject is a
+character, this target may not be selected.
+
 Use |:xmap| to map them.
 >
 	xmap iw <Plug>(multiselect-iw)
