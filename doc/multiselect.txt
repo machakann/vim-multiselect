@@ -282,9 +282,8 @@ The first thing to do is to load the `Multiselect` module and to obtain an
 	let s:Multiselect = multiselect#import()
 <
 This module contains some functions, constructors and constants, but in many
-cases what you need is only the `s:Multiselect.load()` function. This function
-returns a "global" `Multiselector` instance. Here, "global" means that it is
-shared among all the other plugins.
+cases what you need would be only the `s:Multiselect.load()` function. This
+function returns the `Multiselector` instance.
 >
 	" Multiselector instance
 	let s:multiselector = s:Multiselect.load()
@@ -411,7 +410,6 @@ List of contents~
   Multiselect.load()		|multiselect-Multiselect.load()|
 
   - class constructors
-  Multiselect.Multiselector()	|multiselect-Multiselect.Multiselector()|
   Multiselect.Region()		|multiselect-Multiselect.Region()|
   Multiselect.Item()		|multiselect-Multiselect.Item()|
   Multiselect.Change()		|multiselect-Multiselect.Change()|
@@ -588,7 +586,7 @@ List of contents~
 Multiselect module~
 					*multiselect-module-Multiselect*
 
-This module holds a function to get "global" multiselector instance,
+This module holds a function to get the "global" multiselector instance,
 |multiselect-Multiselect.load()|.
 
 Additionally, class constructors and utility functions are included. These
@@ -609,72 +607,15 @@ Multiselect.DEFAULTHIGROUP    [string]
 
 					*multiselect-Multiselect.load()*
 Multiselect.load()    [function]
-	This function returns the "global" `Multiselector` instance.
+	This function returns the `Multiselector` instance.
 	See |multiselect-class-Multiselector|. >
 		let s:multiselector = s:Multiselect.load()
 <
-	Users can communicate with the "global" instance with the provided
-	keymappings |multiselect-keymappings|.
+	Users can communicate with the instance with the provided keymappings
+	|multiselect-keymappings|.
 
 
   - class constructors
-				*multiselect-Multiselect.Multiselector()*
-Multiselect.Multiselector([{options}])    [function]
-	This is the constructor of `Multiselector` class. A plugin developer
-	can obtain a new `Multiselector` instance. Each `Multiselector`
-	instance is independent, it does not affect to others.
-	See |multiselect-class-Multiselector|.
-
-	{options} is a |Dictionary| containing optional arguments.
-	The following keys are available.
-	  name:
-	    The identifier of the instance. It does not affect its
-	    functionality. It would be an empty string if omitted.
-
-	  higroup:
-	    The name of highlight group for selection areas. It would be
-	    "MultiselectItem" if omitted.
-
-	  eventinit:
-	    The name of autocmd event triggered every time the Multiselect
-	    instance is initialized. It would be an empty string if omitted,
-	    and the autocmd event would not be triggered.
-	    The initialization is called when:
-	      - an instance is produced
-	      - the cursor moved to another buffer
-	      - the cursor moved to another tabpage
-
-	  eventcheckpost:
-	    The name of autocmd event triggered every time when buffer texts
-	    are selected. It would be an empty string if omitted, and the
-	    autocmd event would not be triggered.
-
-	  eventuncheckpost:
-	    The name of autocmd event triggered every time when selection
-	    items are unselected. It would be an empty string if omitted, and
-	    the autocmd event would not be triggered.
->
-	let s:multiselector = s:Multiselect.Multiselector({
-		\ 'name': 'multiselect',
-		\ 'higroup': 'MultiselectItem',
-		\ 'eventinit': 'MultiselectInit',
-		\ 'eventcheckpost': 'MultiselectCheckPost',
-		\ 'eventuncheckpost': 'MultiselectUncheckPost',
-		\ })
-<
-	The new "local" (private) instance cannot be controlled by the
-	provided mappings |multiselect-keymappings|, alternative keymappings
-	should be defined by developers themselves. `Multiselector` instance
-	has some basic functions for the keymappings, see
-	|multiselect-class-Multiselector|.
-	|multiselect-Multiselector.keymap_check()|
-	|multiselect-Multiselector.keymap_checkpattern()|
-	|multiselect-Multiselector.keymap_uncheck()|
-	|multiselect-Multiselector.keymap_uncheckall()|
-	|multiselect-Multiselector.keymap_undo()|
-	|multiselect-Multiselector.keymap_multiselect()|
-
-
 					*multiselect-Multiselect.Region()*
 Multiselect.Region({head}[, {tail}[, {type}[, {extended}]]])    [function]
 Multiselect.Region({lnum})
@@ -932,12 +873,8 @@ Multiselect.isextended()    [function]
 Multiselector class~
 					*multiselect-class-Multiselector*
 
-A developer can access to the "global" multiselector instance by
-`Multiselect.load()` function. |multiselect-Multiselect.load()|
-
-If you need a new (private) multiselector instance, the constructor of
-`Multiselector` class is available with `Multiselect` module.
-|multiselect-Multiselect.Multiselector()|
+A developer can access to the multiselector instance by `Multiselect.load()`
+function. |multiselect-Multiselect.load()|
 
   - members
 					*multiselect-Multiselector.name*
@@ -1152,31 +1089,21 @@ Multiselector.sort({itemlist})    [function]
   - keymap interfaces
 				*multiselect-Multiselector.keymap_check()*
 Multiselector.keymap_check({mode})    [method]
-	This method is employed to define a keymapping to communicate with the
-	`Multiselector` instance.
+	This method has the same function with the keymapping
+	|<Plug>(multiselect-check)|.
 
 	This method registers a current visual selection area as a multiple
 	selection area. In normal mode, it registers a |word| under the
 	cursor.
 
 	{mode} is a character representing the mode mapped; 'n' for |Normal|
-	mode, 'x' for |Visual| mode. >
-		let s:Multiselect = multiselect#import()
-		let s:private_ms = s:Multiselect.Multiselector()
-		function! s:check(mode) abort
-		  call s:private_ms.keymap_check(a:mode)
-		endfunction
-		nnoremap <Plug>(check) :<C-u>call <SID>check('n')<CR>
-		xnoremap <Plug>(check) <Esc>:call <SID>check('x')<CR>
-<
-	|multiselect#import()|
-	|multiselect-Multiselect.Multiselector()|
+	mode, 'x' for |Visual| mode.
 
 
 			     *multiselect-Multiselector.keymap_checkpattern()*
 Multiselector.keymap_checkpattern({mode}, {pat})    [method]
-	This method is employed to define a keymapping to communicate with the
-	`Multiselector` instance.
+	This method is the base function of the keymapping
+	|<Plug>(multiselect-checksearched)| and |<Plug>(multiselect)|.
 
 	This method registers the texts matching with the given regular
 	expression pattern {pat}. In normal mode, it registers all the matched
@@ -1184,64 +1111,34 @@ Multiselector.keymap_checkpattern({mode}, {pat})    [method]
 	pattern in the visual-selected range.
 
 	{mode} is a character representing the mode mapped; 'n' for |Normal|
-	mode, 'x' for |Visual| mode. >
-		let s:Multiselect = multiselect#import()
-		let s:private_ms = s:Multiselect.Multiselector()
-		function! s:checksearch(mode) abort
-		  call s:private_ms.keymap_checkpattern(a:mode, @/)
-		endfunction
-		nnoremap <Plug>(checks) :<C-u>call <SID>checksearch('n')<CR>
-		xnoremap <Plug>(checks) <Esc>:call <SID>checksearch('x')<CR>
-<
-	|multiselect#import()|
-	|multiselect-Multiselect.Multiselector()|
+	mode, 'x' for |Visual| mode.
 
 
 				*multiselect-Multiselector.keymap_uncheck()*
 Multiselector.keymap_uncheck({mode})    [method]
-	This method is employed to define a keymapping to communicate with the
-	`Multiselector` instance.
+	This method has the same function with the keymapping
+	|<Plug>(multiselect-uncheck)|.
 
-	This method deletes registered multiple selet items. In normal mode,
+	This method deletes registered multiselect items. In normal mode,
 	it deletes an item under the cursor. In visual mode, it deletes
 	registered items in the current visual-selected range.
 
 	{mode} is a character representing the mode mapped; 'n' for |Normal|
-	mode, 'x' for |Visual| mode. >
-		let s:Multiselect = multiselect#import()
-		let s:private_ms = s:Multiselect.Multiselector()
-		function! s:uncheck(mode) abort
-		  call s:private_ms.keymap_uncheck(a:mode)
-		endfunction
-		nnoremap <Plug>(uncheck) :<C-u>call <SID>uncheck('n')<CR>
-		xnoremap <Plug>(uncheck) <Esc>:call <SID>uncheck('x')<CR>
-<
-	|multiselect#import()|
-	|multiselect-Multiselect.Multiselector()|
+	mode, 'x' for |Visual| mode.
 
 
 			       *multiselect-Multiselector.keymap_uncheckall()*
 Multiselector.keymap_uncheckall()    [method]
-	This method is employed to define a keymapping to communicate with the
-	`Multiselector` instance.
+	This method has the same function with the keymapping
+	|<Plug>(multiselect-uncheckall)|.
 
-	This method deletes all registered items. >
-		let s:Multiselect = multiselect#import()
-		let s:private_ms = s:Multiselect.Multiselector()
-		function! s:uncheckall() abort
-		  call s:private_ms.keymap_uncheckall()
-		endfunction
-		nnoremap <Plug>(uncheckall) :<C-u>call <SID>uncheckall()<CR>
-		xnoremap <Plug>(uncheckall) <Esc>:call <SID>uncheckall()<CR>
-<
-	|multiselect#import()|
-	|multiselect-Multiselect.Multiselector()|
+	This method deletes all registered items.
 
 
 				*multiselect-Multiselector.keymap_undo()*
 Multiselector.keymap_undo()    [method]
-	This method is employed to define a keymapping to communicate with the
-	`Multiselector` instance.
+	This method has the same function with the keymapping
+	|<Plug>(multiselect-undo)|.
 
 	This method undo the last check or uncheck action. This undo itself is
 	an action, thus the undo action will be undone by the subsequent call
@@ -1251,8 +1148,8 @@ Multiselector.keymap_undo()    [method]
 
 			      *multiselect-Multiselector.keymap_multiselect()*
 Multiselector.keymap_multiselect({mode})    [method]
-	This method is employed to define a keymapping to communicate with the
-	`Multiselector` instance.
+	This method has the same function with the keymapping
+	|<Plug>(multiselect)|.
 
 	In |Normal| mode, this method removes an item under the cursor if the
 	text is selected. Otherwise this method selects the |word| under the
@@ -1264,21 +1161,13 @@ Multiselector.keymap_multiselect({mode})    [method]
 	selected word over the current buffer.
 
 	{mode} is a character representing the mode mapped; 'n' for |Normal|
-	mode, 'x' for |Visual| mode. >
-		let s:Multiselect = multiselect#import()
-		let s:private_ms = s:Multiselect.Multiselector()
-		function! s:multiselect(mode) abort
-		  call s:private_ms.keymap_toggle(a:mode)
-		endfunction
-		nnoremap <Plug>(multisel) :<C-u>call <SID>multisel('n')<CR>
-		xnoremap <Plug>(multisel) <Esc>:call <SID>multisel('x')<CR>
-<
-	|multiselect#import()|
-	|multiselect-Multiselect.Multiselector()|
+	mode, 'x' for |Visual| mode.
 
 
 				*multiselect-Multiselector.keymap_broadcast()*
 Multiselector.keymap_broadcast({cmd})   [method]
+	This method is the base function of broadcasting textobjects.
+
 	{cmd} is a {motion} command or a kind of |text-objects|. This method
 	works as a {cmd} if it is used in |characterwise| or
 	|blockwise-visual| mode. In case it is used in |linewise-visual| mode,
@@ -1290,15 +1179,7 @@ Multiselector.keymap_broadcast({cmd})   [method]
 <
 	Visual-select |linewise| the three lines and put the cursor at the 3rd
 	or 4th column, and then use this method with |iw| as {cmd} to
-	multiselect "fooo", "bar" and "bazzzz". >
-		let s:Multiselect = multiselect#import()
-		let s:private_ms = s:Multiselect.Multiselector()
-		function! s:broadcast(cmd) abort
-		  call s:private_ms.keymap_broadcast(a:cmd)
-		endfunction
-		xnoremap <Plug>(broadcast) <Esc>:call <SID>broadcast('iw')<CR>
-<
-	This method is only for visual mode.
+	multiselect "fooo", "bar" and "bazzzz".
 
 
   - low-level interfaces
