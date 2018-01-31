@@ -153,13 +153,13 @@ Use |:xmap| to map them.
 	The broadcasting textobject of |iw|.
 
 <Plug>(multiselect-aw)			*<Plug>(multiselect-aw)*
-	The broadcasting textobject of |iw|.
+	The broadcasting textobject of |aw|.
 
 <Plug>(multiselect-iW)			*<Plug>(multiselect-iW)*
-	The broadcasting textobject of |iw|.
+	The broadcasting textobject of |iW|.
 
 <Plug>(multiselect-aW)			*<Plug>(multiselect-aW)*
-	The broadcasting textobject of |aw|.
+	The broadcasting textobject of |aW|.
 
 <Plug>(multiselect-i')			*<Plug>(multiselect-i')*
 	The broadcasting textobject of |i'|.
