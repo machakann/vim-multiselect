@@ -1146,6 +1146,22 @@ Multiselector.keymap_undo()    [method]
 	times.
 
 
+			      *multiselect-Multiselector.keymap_next()*
+Multiselector.keymap_next({mode})    [method]
+	This method has the same function with the keymapping
+	|<Plug>(multiselect-next)|.
+
+	This method moves the cursor to the next multiselect item.
+
+
+			      *multiselect-Multiselector.keymap_previous()*
+Multiselector.keymap_previous({mode})    [method]
+	This method has the same function with the keymapping
+	|<Plug>(multiselect-previous)|.
+
+	This method moves the cursor to the previous multiselect item.
+
+
 			      *multiselect-Multiselector.keymap_multiselect()*
 Multiselector.keymap_multiselect({mode})    [method]
 	This method has the same function with the keymapping
