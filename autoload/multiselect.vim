@@ -19,7 +19,6 @@ let s:Multiselector = {
 	\	'bufnr': -1,
 	\	'itemlist': [],
 	\	'higroup': '',
-	\	'EVENTINIT': '',
 	\	'EVENTCHECKPOST': '',
 	\	'EVENTUNCHECKPOST': '',
 	\	'_event': {},
@@ -39,10 +38,8 @@ function! s:Multiselector(...) abort "{{{
 	let multiselector.higroup = get(options, 'higroup', s:Highlights.DEFAULTHIGROUP)
 	let multiselector.name = get(options, 'name', '')
 
-	let EVENTINIT = get(options, 'eventinit', '')
 	let EVENTCHECKPOST = get(options, 'eventcheckpost', '')
 	let EVENTUNCHECKPOST = get(options, 'eventuncheckpost', '')
-	let multiselector.EVENTINIT = EVENTINIT
 	let multiselector.EVENTCHECKPOST = EVENTCHECKPOST
 	let multiselector.EVENTUNCHECKPOST = EVENTUNCHECKPOST
 	call multiselector.event('BufLeave').call(multiselector._initialize, [], multiselector)
@@ -541,7 +538,6 @@ endfunction "}}}
 function! s:Multiselector._initialize() abort "{{{
 	let self.bufnr = -1
 	call self.uncheckall()
-	call s:douserautocmd(self.EVENTINIT)
 endfunction "}}}
 function! s:Multiselector._suspend() abort "{{{
 	let self._pending.bufnr = self.bufnr
@@ -599,12 +595,6 @@ function! s:Multiselector._abandon() abort "{{{
 		call event.stop()
 	endfor
 endfunction "}}}
-function! s:douserautocmd(name) abort "{{{
-	if !exists('#User#' . a:name)
-		return
-	endif
-	execute 'doautocmd <nomodeline> User ' . a:name
-endfunction "}}}
 lockvar! s:Multiselector
 "}}}
 function! s:shiftenv() abort "{{{
@@ -628,6 +618,12 @@ function! s:restoreenv(env) abort "{{{
 	elseif has_key(a:env, 'cinkeys')
 		let &l:cinkeys = a:env.cinkeys
 	endif
+endfunction "}}}
+function! s:douserautocmd(name) abort "{{{
+	if !exists('#User#' . a:name)
+		return
+	endif
+	execute 'doautocmd <nomodeline> User ' . a:name
 endfunction "}}}
 
 " Multiselect module{{{
@@ -664,10 +660,10 @@ lockvar! s:Multiselect
 let s:multiselector = s:Multiselect.Multiselector({
 	\	'name': 'multiselect',
 	\	'higroup': s:Highlights.DEFAULTHIGROUP,
-	\	'eventinit': 'MultiselectInit',
 	\	'eventcheckpost': 'MultiselectCheckPost',
 	\	'eventuncheckpost': 'MultiselectUncheckPost',
 	\	})
+call s:douserautocmd('MultiselectEnter')
 " vim:set foldmethod=marker:
 " vim:set commentstring="%s:
 " vim:set noet ts=4 sw=4 sts=-1:

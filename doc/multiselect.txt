@@ -138,8 +138,8 @@ following case.
 	  baz
 <
 NOTE: These keymappings has a known bug. If the target of textobject is a
-character, this target may not be selected. The following "a" may not be
-selected. >
+      character, this target may not be selected. The "a" at the second line
+      may not be selected. >
 	foo
 	  a
 	  baz
@@ -226,23 +226,9 @@ MultiselectItem				*hl-MultiselectItem*
 ==============================================================================
 AUTOCMD EVENTS				*multiselect-events*
 
-MultiselectInit				*MultiselectInit*
-	This autocmd event is triggered when a `Multiselector` instance is
-	initialized.
-
-	In an initialization process, all the multiselect items are removed to
-	empty `Multiselector.itemlist` and `Multiselector.bufnr` is cleared. >
-		autocmd User MultiselectInit echom 'Initialized!'
-<
-	This is triggered when:
-	  - A `Multiselector` instance is produced
-	  - |BufLeave| event is triggered
-	  - |TabLeave| event is triggered
-	  - |CmdwinLeave| event is triggered
-
-	|multiselect-class-Multiselector|
-	|multiselect-Multiselector.itemlist|
-	|multiselect-Multiselector.bufnr|
+MultiselectEnter			*MultiselectEnter*
+	This autocmd event is triggered once when the `Multiselector` instance
+	is born.
 
 
 MultiselectCheckPost			*MultiselectCheckPost*
