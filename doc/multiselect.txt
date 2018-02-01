@@ -765,7 +765,7 @@ Multiselect.str2type({str})    [function]
 
 				*multiselect-Multiselect.str2visualcmd()*
 Multiselect.str2visualcmd({str})    [function]
-	This function returns a string representing a type of region.
+	This function returns a character to enter a certain visual mode.
 	This function returns "char" if {str} is "char" or "v".
 	This function returns "line" if {str} is "line" or "V".
 	This function returns "block" if {str} is "block" or "<C-v>"
@@ -904,6 +904,7 @@ Multiselector.check({region})
 	This method produces an `Item` instance and add it into
 	`Multiselector.itemlist`. This method returns the added item.
 	|multiselect-Multiselector.itemlist|
+	|multiselect-class-Item|
 
 	The arguments are common with `Multiselect.Region()`, and additionally
 	an instance of `Region` class or its subclasses is also acceptable.
@@ -1029,8 +1030,11 @@ Multiselector.filter({Filterexpr})    [method]
 
 	{Filterexpr} is an |Funcref|. {Filterexpr} is evaluated with two
 	arguments, an index and an item, for each item in
-	`Multiselector.itemlist`, and when the result is FALSE, this function
-	removes the item. The resulted `Multiselector.itemlist` is returned.
+	`Multiselector.itemlist`, and when the result is |FALSE|, this
+	function removes the item.
+
+	The resulted `Multiselector.itemlist` is returned.
+
 	  - Example1: filter items except in line 5 >
 		let pos = [0, 5, 1, 0]
 		let line5 = s:Multiselect.Region(pos, pos, 'V')
@@ -1057,11 +1061,11 @@ Multiselector.filter({Filterexpr})    [method]
 					*multiselect-Multiselector.sort()*
 Multiselector.sort({itemlist})    [function]
 	This method sorts the items in {itemlist}. An item in {itemlist}
-	should be an instance of `Region` class or its subclasses. An item
-	closer to the beginning of a buffer comes to the earlier order in the
-	{itemlist}; however if blockwise items and characterwise items are in
-	a same line, these items are sorted by screen columns. The items at
-	left-side comes earlier. >
+	should be an instance of `Item` class. An item closer to the beginning
+	of a buffer comes to the earlier order in the {itemlist}; however if
+	blockwise items and characterwise items are in a same line, these
+	items are sorted by screen columns. The items at left-side comes
+	earlier. >
 		"#" represents selection and the number is the order in the
 		sorted list
 
@@ -1098,7 +1102,7 @@ Multiselector.keymap_check({mode})    [method]
 			     *multiselect-Multiselector.keymap_checkpattern()*
 Multiselector.keymap_checkpattern({mode}, {pat})    [method]
 	This method is the base function of the keymapping
-	|<Plug>(multiselect-checksearched)| and |<Plug>(multiselect)|.
+	|<Plug>(multiselect-checksearched)|.
 
 	This method registers the texts matching with the given regular
 	expression pattern {pat}. In normal mode, it registers all the matched
@@ -1148,6 +1152,9 @@ Multiselector.keymap_next({mode})    [method]
 
 	This method moves the cursor to the next multiselect item.
 
+	{mode} is a character representing the mode mapped; 'n' for |Normal|
+	mode, 'x' for |Visual| mode.
+
 
 			      *multiselect-Multiselector.keymap_previous()*
 Multiselector.keymap_previous({mode})    [method]
@@ -1156,20 +1163,35 @@ Multiselector.keymap_previous({mode})    [method]
 
 	This method moves the cursor to the previous multiselect item.
 
+	{mode} is a character representing the mode mapped; 'n' for |Normal|
+	mode, 'x' for |Visual| mode.
+
 
 			      *multiselect-Multiselector.keymap_multiselect()*
 Multiselector.keymap_multiselect({mode})    [method]
 	This method has the same function with the keymapping
 	|<Plug>(multiselect)|.
 
-	In |Normal| mode, this method removes an item under the cursor if the
-	text is selected. Otherwise this method selects the |word| under the
-	cursor over the current buffer.
+	|Normal| mode: This keymapping selects texts matching with the |word|
+	under the cursor. If the cursor is on a multiselection, only the texts
+	inside the region will be selected.
 
-	In |Visual| mode, this method filters out the items outside the visual
-	selection. If no item is inside, this method selects it.
-	Especially with character-wise selection, this method selects the
-	selected word over the current buffer.
+	|characterwise-visual| mode:
+	If the visual selection includes one or more multiselection, this
+	keymapping removes the items outside the visual selection.
+
+	If the visual selection is included in a multiselection, this
+	keymapping multi-selects texts matching with the selected string
+	inside the original multiselection.
+
+	Otherwise this keymapping multi-selects texts matching with the
+	selected string over the current buffer.
+
+	|linewise-visual| or |blockwise-visual| mode:
+	If the visual selection includes one or more multiselection, this
+	keymapping removes the items outside the visual selection.
+
+	Otherwise, this keymapping selects the selection region.
 
 	{mode} is a character representing the mode mapped; 'n' for |Normal|
 	mode, 'x' for |Visual| mode.
@@ -1932,8 +1954,8 @@ NeatTask.isactive()    [method]
 NeatTask.skip([{count}])    [method]
 	If this method is called, the following `NeatTask` is skipped
 	(not executed) {count} times. {count} is 1 if omitted. If {count} is
-	less than 1, the skip count would be reset and the task will not skip
-	after that. This method returns the `NeatTask` itself. >
+	0, the skip count would be reset and the task will not skip after
+	that. This method returns the `NeatTask` itself. >
 		let neattask = s:Multiselect.NeatTask()
 		call neattask.execute('echo "foo"').skip(1)
 
