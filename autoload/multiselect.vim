@@ -331,12 +331,12 @@ endfunction "}}}
 
 function! s:Multiselector.keymap_broadcast(cmd, ...) abort "{{{
 	let options = get(a:000, 0, {})
-	let noremap = !!get(options, 'noremap', s:TRUE)
+	let remap = !!get(options, 'remap', s:FALSE)
 	let openfold = !!get(options, 'openfold', s:FALSE)
 	let countstr = s:countstr(v:prevcount)
 	let visualcmd = visualmode()
 	if visualcmd !=# 'V'
-		let flag = noremap ? 'in' : 'im'
+		let flag = remap ? 'im' : 'in'
 		call feedkeys(printf('gv%s%s', countstr, a:cmd), flag)
 		return
 	endif
@@ -347,7 +347,7 @@ function! s:Multiselector.keymap_broadcast(cmd, ...) abort "{{{
 	let startlnum = vhead[1]
 	let endlnum = vtail[1]
 	let column = virtcol('.')
-	let command = s:selector_buildcommand(noremap, countstr, a:cmd)
+	let command = s:selector_buildcommand(remap, countstr, a:cmd)
 	let itemlist = []
 	for lnum in range(startlnum, endlnum)
 		let item = s:try(lnum, column, command)
@@ -367,11 +367,11 @@ function! s:Multiselector.keymap_broadcast(cmd, ...) abort "{{{
 	call winrestview(view)
 endfunction "}}}
 
-function! s:selector_buildcommand(noremap, countstr, cmd) abort "{{{
-	if a:noremap is s:TRUE
-		let bang = '!'
-	else
+function! s:selector_buildcommand(remap, countstr, cmd) abort "{{{
+	if a:remap is s:TRUE
 		let bang = ''
+	else
+		let bang = '!'
 	endif
 	return printf('noautocmd normal%s v%s%s', bang, a:countstr, a:cmd)
 endfunction "}}}
