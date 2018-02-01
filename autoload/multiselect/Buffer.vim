@@ -6,11 +6,8 @@ let s:FALSE = 0
 let s:MAXCOL = 2147483647
 let s:NULLPOS = [0, 0, 0, 0]
 
-function! multiselect#Buffer#_import() abort "{{{
-	return s:Buffer
-endfunction "}}}
-
 " Region class{{{
+unlockvar! s:Region
 let s:Region = {
 	\	'__CLASS__': 'Region',
 	\	'head': copy(s:NULLPOS),
@@ -71,6 +68,7 @@ function! s:Region(expr, ...) abort "{{{
 	endif
 	return region
 endfunction "}}}
+
 function! s:Region.select() abort "{{{
 	let visualcmd = s:str2visualcmd(self.type)
 	execute 'normal! ' . visualcmd
@@ -81,6 +79,7 @@ function! s:Region.select() abort "{{{
 		normal! $
 	endif
 endfunction "}}}
+
 function! s:Region.yank() abort "{{{
 	" FIXME: Should I restore visualmode() ?
 	let reg = ['"', getreg('"'), getregtype('"')]
@@ -97,6 +96,7 @@ function! s:Region.yank() abort "{{{
 	endtry
 	return text
 endfunction "}}}
+
 function! s:Region.includes(expr, ...) abort "{{{
 	if a:0 == 0 && type(a:expr) is v:t_dict
 		let region = a:expr
@@ -114,6 +114,7 @@ function! s:Region.includes(expr, ...) abort "{{{
 	endtry
 	return self.includes(region)
 endfunction "}}}
+
 function! s:Region.isinside(expr, ...) abort  "{{{
 	if a:0 == 0 && type(a:expr) is v:t_dict
 		let region = a:expr
@@ -131,6 +132,7 @@ function! s:Region.isinside(expr, ...) abort  "{{{
 	endtry
 	return self.isinside(region)
 endfunction "}}}
+
 function! s:Region.touches(expr, ...) abort "{{{
 	if a:0 == 0 && type(a:expr) is v:t_dict
 		let region = a:expr
@@ -149,14 +151,18 @@ function! s:Region.touches(expr, ...) abort "{{{
 	return self.touches(region)
 endfunction "}}}
 
+
+
 function! s:char_is_included_in_char(item, region) abort "{{{
 	return !s:inorderof(a:item.head, a:region.head) &&
 		\  !s:inorderof(a:region.tail, a:item.tail)
 endfunction "}}}
+
 function! s:char_is_included_in_line(item, region) abort "{{{
 	return a:region.head[1] <= a:item.head[1] &&
 		\  a:item.tail[1] <= a:region.tail[1]
 endfunction "}}}
+
 function! s:char_is_included_in_block(item, region) abort "{{{
 	if !s:char_is_included_in_char(a:item, a:region)
 		return s:FALSE
@@ -176,28 +182,34 @@ function! s:char_is_included_in_block(item, region) abort "{{{
 	let regionright = virtcol(a:region.tail[1:2]) + a:region.tail[3]
 	return regionleft <= itemleft && itemright <= regionright
 endfunction "}}}
+
 function! s:line_is_included_in_char(item, region) abort "{{{
 	let item = s:Region(a:item.head, a:item.tail, 'line')
 	let item.type = 'char'
 	let item.tail[2] = col([item.tail[1], '$'])
 	return s:char_is_included_in_char(item, a:region)
 endfunction "}}}
+
 function! s:line_is_included_in_line(item, region) abort "{{{
 	return a:region.head[1] <= a:item.head[1] &&
 		\  a:item.tail[1] <= a:region.tail[1]
 endfunction "}}}
+
 function! s:line_is_included_in_block(item, region) abort "{{{
 	let item = s:Region(a:item.head, a:item.tail, 'line')
 	let item.type = 'char'
 	let item.tail[2] = col([item.tail[1], '$'])
 	return s:char_is_included_in_block(item, a:region)
 endfunction "}}}
+
 function! s:block_is_included_in_char(item, region) abort "{{{
 	return s:char_is_included_in_char(a:item, a:region)
 endfunction "}}}
+
 function! s:block_is_included_in_line(item, region) abort "{{{
 	return s:char_is_included_in_line(a:item, a:region)
 endfunction "}}}
+
 function! s:block_is_included_in_block(item, region) abort "{{{
 	if a:item.head[1] < a:region.head[1] || a:region.tail[1] < a:item.tail[1]
 		return s:FALSE
@@ -208,13 +220,16 @@ function! s:block_is_included_in_block(item, region) abort "{{{
 	let regionright = virtcol(a:region.tail[1:2]) + a:region.tail[3]
 	return regionleft <= itemleft && itemright <= regionright
 endfunction "}}}
+
 function! s:char_is_touching_char(item, region) abort "{{{
 	return !(s:inorderof(a:item.tail, a:region.head) ||
 	\        s:inorderof(a:region.tail, a:item.head))
 endfunction "}}}
+
 function! s:char_is_touching_line(item, region) abort "{{{
 	return s:line_is_touching_line(a:item, a:region)
 endfunction "}}}
+
 function! s:char_is_touching_block(item, region) abort "{{{
 	if s:inorderof(a:item.tail, a:region.head) ||
 	\  s:inorderof(a:region.tail, a:item.head)
@@ -232,22 +247,28 @@ function! s:char_is_touching_block(item, region) abort "{{{
 	endif
 	return !(itemright < regionleft || regionright < itemleft)
 endfunction "}}}
+
 function! s:line_is_touching_char(item, region) abort "{{{
 	return s:char_is_touching_line(a:region, a:item)
 endfunction "}}}
+
 function! s:line_is_touching_line(item, region) abort "{{{
 	return !(a:item.tail[1] < a:region.head[1] ||
 	\        a:region.tail[1] < a:item.head[1])
 endfunction "}}}
+
 function! s:line_is_touching_block(item, region) abort "{{{
 	return s:line_is_touching_line(a:item, a:region)
 endfunction "}}}
+
 function! s:block_is_touching_char(item, region) abort "{{{
 	return s:char_is_touching_block(a:region, a:item)
 endfunction "}}}
+
 function! s:block_is_touching_line(item, region) abort "{{{
 	return s:line_is_touching_block(a:region, a:item)
 endfunction "}}}
+
 function! s:block_is_touching_block(item, region) abort "{{{
 	if !s:line_is_touching_line(a:item, a:region)
 		return s:FALSE
@@ -258,7 +279,11 @@ function! s:block_is_touching_block(item, region) abort "{{{
 	let regionright = virtcol(a:region.tail[1:2]) + a:region.tail[3]
 	return !(itemright < regionleft || regionright < itemleft)
 endfunction "}}}
+lockvar! s:Region
 "}}}
+
+
+
 " Item class (inherits Region class)"{{{
 unlockvar! s:Item
 let s:Item = {
@@ -282,19 +307,23 @@ function! s:Item(expr, ...) abort "{{{
 	let item._highlight = s:Highlights.Highlight()
 	return item
 endfunction "}}}
+
 function! s:Item.show(higroup) abort "{{{
 	if self._highlight.initialize(a:higroup, self)
 		call self._highlight.quench()
 	endif
 	call self._highlight.show()
 endfunction "}}}
+
 function! s:Item.quench() abort "{{{
 	call self._highlight.quench()
 endfunction "}}}
+
 function! s:Item.isshownin(...) abort "{{{
 	let winid = get(a:000, 0, win_getid())
 	return self._highlight.status(winid) is s:Highlights.ON
 endfunction "}}}
+
 function! s:Item._showlocal(higroup) abort "{{{
 	if self._highlight.initialize(a:higroup, self)
 		call self._highlight.quench()
@@ -303,18 +332,26 @@ function! s:Item._showlocal(higroup) abort "{{{
 		call self._highlight.showlocal()
 	endif
 endfunction "}}}
+
 function! s:Item._quenchlocal() abort "{{{
 	call self._highlight.quenchlocal()
 endfunction "}}}
-lockvar! s:Item
+
+
 
 let s:itemid = 0
 function! s:itemid() abort "{{{
 	let s:itemid += 1
 	return s:itemid
 endfunction "}}}
+
+lockvar! s:Item
 "}}}
+
+
+
 " Change class "{{{
+unlockva! s:Change
 let s:Change = {
 	\	'__CLASS__': 'Change',
 	\	'_changelist': [],
@@ -322,6 +359,7 @@ let s:Change = {
 function! s:Change() abort "{{{
 	return deepcopy(s:Change)
 endfunction "}}}
+
 function! s:Change.beforedelete(expr, ...) abort "{{{
 	if a:0 == 0 && type(a:expr) is v:t_dict
 		let deletion = deepcopy(a:expr)
@@ -351,6 +389,7 @@ function! s:Change.beforedelete(expr, ...) abort "{{{
 	endif
 	return self
 endfunction "}}}
+
 function! s:Change.afterinsert(expr, ...) abort "{{{
 	if a:0 == 0 && type(a:expr) is v:t_dict
 		let insertion = deepcopy(a:expr)
@@ -376,6 +415,7 @@ function! s:Change.afterinsert(expr, ...) abort "{{{
 	endif
 	return self
 endfunction "}}}
+
 function! s:Change.apply(expr) abort "{{{
 	let t_expr = type(a:expr)
 	if t_expr is v:t_list
@@ -394,6 +434,7 @@ function! s:Change.apply(expr) abort "{{{
 	endif
 	return a:expr
 endfunction "}}}
+
 function! s:Change.mapapply(itemlist) abort "{{{
 	if empty(a:itemlist)
 		return a:itemlist
@@ -415,6 +456,9 @@ function! s:Change.mapapply(itemlist) abort "{{{
 	endif
 	return a:itemlist
 endfunction "}}}
+
+
+
 function! s:push(shiftedpos, head, tail, linewise) abort  "{{{
 	if a:shiftedpos == s:NULLPOS
 		return a:shiftedpos
@@ -440,6 +484,7 @@ function! s:push(shiftedpos, head, tail, linewise) abort  "{{{
 	let a:shiftedpos[1:2] += shift[1:2]
 	return a:shiftedpos
 endfunction "}}}
+
 function! s:pull(shiftedpos, head, tail, linewise) abort "{{{
 	if a:shiftedpos == s:NULLPOS
 		return a:shiftedpos
@@ -482,6 +527,7 @@ function! s:pull(shiftedpos, head, tail, linewise) abort "{{{
 	endif
 	return a:shiftedpos
 endfunction "}}}
+
 function! s:mappush(poslist, head, tail, linewise) abort "{{{
 	if a:linewise
 		let poslist = filter(copy(a:poslist), 'v:val[1] >= a:head[1]')
@@ -501,6 +547,7 @@ function! s:mappush(poslist, head, tail, linewise) abort "{{{
 	endif
 	return a:poslist
 endfunction "}}}
+
 function! s:mappull(poslist, head, tail, linewise) abort "{{{
 	if a:linewise
 		let poslist0 = filter(copy(a:poslist), 'a:tail[1] < v:val[1]')
@@ -541,22 +588,27 @@ function! s:mappull(poslist, head, tail, linewise) abort "{{{
 	endif
 	return a:poslist
 endfunction "}}}
+
 function! s:shift(pos, shift) abort "{{{
 	let a:pos[1:2] += a:shift[1:2]
 	return a:pos
 endfunction "}}}
+
 function! s:setpos(pos, set) abort "{{{
 	let a:pos[1:2] = a:set[1:2]
 	return a:pos
 endfunction "}}}
+
 function! s:setcol(pos, col) abort "{{{
 	let a:pos[2] = a:col
 	return a:pos
 endfunction "}}}
+
 function! s:setlnum(pos, lnum) abort "{{{
 	let a:pos[1] = a:lnum
 	return a:pos
 endfunction "}}}
+
 function! s:splitblock(item) abort "{{{
 	let view = winsaveview()
 	let dispheadcol = virtcol(a:item.head[1:2])
@@ -600,7 +652,10 @@ function! s:splitblock(item) abort "{{{
 	endtry
 	return itemlist
 endfunction "}}}
+lockvar! s:Change
 "}}}
+
+
 
 function! s:str2type(str) abort "{{{
 	if a:str is# 'line' || a:str is# 'V'
@@ -610,6 +665,7 @@ function! s:str2type(str) abort "{{{
 	endif
 	return 'char'
 endfunction "}}}
+
 function! s:str2visualcmd(str) abort "{{{
 	if a:str is# 'line' || a:str is# 'V'
 		return 'V'
@@ -618,15 +674,18 @@ function! s:str2visualcmd(str) abort "{{{
 	endif
 	return 'v'
 endfunction "}}}
+
 function! s:inorderof(pos1, pos2) abort  "{{{
 	return a:pos1[1] < a:pos2[1] || (a:pos1[1] == a:pos2[1] && a:pos1[2] + a:pos1[3] < a:pos2[2] + a:pos2[3])
 endfunction "}}}
+
 function! s:inbetween(pos, head, tail) abort  "{{{
 	return a:pos != s:NULLPOS && a:head != s:NULLPOS && a:tail != s:NULLPOS
 		\ && (a:pos[0] == a:head[0] && a:pos[0] == a:tail[0])
 		\ && ((a:pos[1] > a:head[1]) || ((a:pos[1] == a:head[1]) && (a:pos[2] + a:pos[3] >= a:head[2] + a:head[3])))
 		\ && ((a:pos[1] < a:tail[1]) || ((a:pos[1] == a:tail[1]) && (a:pos[2] + a:pos[3] <= a:tail[2] + a:tail[3])))
 endfunction "}}}
+
 function! s:isextended() abort "{{{
 	if visualmode() isnot# "\<C-v>"
 		return s:FALSE
@@ -640,9 +699,11 @@ function! s:isextended() abort "{{{
 	return extended
 endfunction
 "}}}
+
 function! s:searchpos(pat, ...) abort "{{{
 	return [0] + call('searchpos', [a:pat] + a:000) + [0]
 endfunction "}}}
+
 function! s:openfold(lnum) abort "{{{
 	if foldclosed(a:lnum) == -1
 		return
@@ -650,6 +711,7 @@ function! s:openfold(lnum) abort "{{{
 	call cursor(a:lnum, 1)
 	normal! zO
 endfunction "}}}
+
 function! s:patternofselection(region) abort "{{{
 	let pat = ''
 	let view = winsaveview()
@@ -668,7 +730,10 @@ function! s:patternofselection(region) abort "{{{
 	return pat
 endfunction "}}}
 
+
+
 " Buffer module {{{
+unlockvar! s:Buffer
 let s:Buffer = {
 	\	'__MODULE__': 'Buffer',
 	\	'Region': function('s:Region'),
@@ -683,7 +748,13 @@ let s:Buffer = {
 	\	'openfold': function('s:openfold'),
 	\	'patternofselection': function('s:patternofselection'),
 	\	}
+lockvar! s:Buffer
 "}}}
+
+function! multiselect#Buffer#_import() abort "{{{
+	return s:Buffer
+endfunction "}}}
+
 " vim:set foldmethod=marker:
 " vim:set commentstring="%s:
 " vim:set noet ts=4 sw=4 sts=-1:

@@ -7,10 +7,6 @@ let s:TRUE = 1
 let s:FALSE = 0
 let s:NULLPOS = [0, 0, 0, 0]
 
-function! multiselect#import() abort "{{{
-	return s:Multiselect
-endfunction "}}}
-
 " Multiselector class "{{{
 unlockvar! s:Multiselector
 let s:Multiselector = {
@@ -55,6 +51,8 @@ function! s:Multiselector(...) abort "{{{
 	return multiselector
 endfunction "}}}
 
+
+
 " main interfaces
 function! s:Multiselector.check(expr, ...) abort  "{{{
 	let args = [a:expr] + a:000
@@ -66,6 +64,7 @@ function! s:Multiselector.check(expr, ...) abort  "{{{
 	call self.append(newitem)
 	return newitem
 endfunction "}}}
+
 function! s:Multiselector.checkpattern(pat, ...) abort "{{{
 	if empty(a:pat)
 		return []
@@ -104,6 +103,7 @@ function! s:Multiselector.checkpattern(pat, ...) abort "{{{
 	call winrestview(view)
 	return itemlist
 endfunction "}}}
+
 function! s:Multiselector.uncheck(expr, ...) abort  "{{{
 	let args = [a:expr] + a:000
 	try
@@ -113,9 +113,11 @@ function! s:Multiselector.uncheck(expr, ...) abort  "{{{
 	endtry
 	return unchecked
 endfunction "}}}
+
 function! s:Multiselector.uncheckall() abort  "{{{
 	return self.remove(0, -1)
 endfunction "}}}
+
 function! s:Multiselector.emit(...) abort "{{{
 	if a:0 == 0
 		return self.remove(0, -1)
@@ -127,6 +129,7 @@ function! s:Multiselector.emit(...) abort "{{{
 	endif
 	return filtered
 endfunction "}}}
+
 function! s:Multiselector.emit_inside(expr, ...) abort "{{{
 	let args = [a:expr] + a:000
 	try
@@ -136,6 +139,7 @@ function! s:Multiselector.emit_inside(expr, ...) abort "{{{
 	endtry
 	return itemlist
 endfunction "}}}
+
 function! s:Multiselector.emit_touching(expr, ...) abort "{{{
 	let args = [a:expr] + a:000
 	try
@@ -145,11 +149,13 @@ function! s:Multiselector.emit_touching(expr, ...) abort "{{{
 	endtry
 	return itemlist
 endfunction "}}}
+
 function! s:Multiselector.filter(Filterexpr) abort "{{{
 	call self.emit({i1, i2 -> !a:Filterexpr(i1, i2)})
 	return self.itemlist
 endfunction
 "}}}
+
 function! s:Multiselector.sort(itemlist) abort "{{{
 	if empty(a:itemlist)
 		return a:itemlist
@@ -163,6 +169,7 @@ function! s:Multiselector.sort(itemlist) abort "{{{
 	endif
 	echoerr s:Errors.InvalidArgument('Multiselect.sort', [a:itemlist])
 endfunction "}}}
+
 function! s:sort_items(i1, i2) abort "{{{
 	if a:i1.head == a:i2.head
 		return 0
@@ -183,9 +190,12 @@ function! s:sort_items(i1, i2) abort "{{{
 	endif
 	return s:Buffer.inorderof(a:i1.head, a:i2.head) ? -1 : 1
 endfunction "}}}
+
 function! s:sort_enumerated_items(i1, i2) abort "{{{
 	return s:sort_items(a:i1[1], a:i2[1])
 endfunction "}}}
+
+
 
 " keymap interfaces
 function! s:Multiselector.keymap_check(mode) abort "{{{
@@ -209,6 +219,7 @@ function! s:Multiselector.keymap_check(mode) abort "{{{
 	call winrestview(view)
 	return newitem
 endfunction "}}}
+
 function! s:Multiselector.keymap_checkpattern(mode, pat, ...) abort "{{{
 	if a:mode is# 'x'
 		let region = s:Buffer.Region(getpos("'<"), getpos("'>"))
@@ -228,15 +239,18 @@ function! s:Multiselector.keymap_checkpattern(mode, pat, ...) abort "{{{
 	endif
 	return itemlist
 endfunction "}}}
+
 function! s:Multiselector.keymap_uncheck(mode) abort "{{{
 	if a:mode is# 'x'
 		return self.uncheck(getpos("'<"), getpos("'>"))
 	endif
 	return self.uncheck(getpos('.'))
 endfunction "}}}
+
 function! s:Multiselector.keymap_uncheckall() abort "{{{
 	return self.uncheckall()
 endfunction "}}}
+
 function! s:Multiselector.keymap_undo() abort "{{{
 	let last = self.lastevent()
 	if last.event is# 'check'
@@ -247,6 +261,7 @@ function! s:Multiselector.keymap_undo() abort "{{{
 		call self.append(last.itemlist)
 	endif
 endfunction "}}}
+
 function! s:Multiselector.keymap_next(mode) abort "{{{
 	let l:count = v:count1
 	let curpos = getpos('.')
@@ -262,6 +277,7 @@ function! s:Multiselector.keymap_next(mode) abort "{{{
 	call setpos('.', dest.head)
 	return dest.head
 endfunction "}}}
+
 function! s:Multiselector.keymap_previous(mode) abort "{{{
 	let l:count = v:count1
 	let curpos = getpos('.')
@@ -277,6 +293,7 @@ function! s:Multiselector.keymap_previous(mode) abort "{{{
 	call setpos('.', dest.head)
 	return dest.head
 endfunction "}}}
+
 function! s:Multiselector.keymap_multiselect(mode) abort "{{{
 	let itemlist = []
 	if a:mode is# 'x'
@@ -313,6 +330,7 @@ function! s:Multiselector.keymap_multiselect(mode) abort "{{{
 		call self.keymap_checkpattern(a:mode, pat, options)
 	endif
 endfunction "}}}
+
 function! s:Multiselector.keymap_broadcast(cmd, ...) abort "{{{
 	let options = get(a:000, 0, {})
 	let noremap = !!get(options, 'noremap', s:TRUE)
@@ -350,6 +368,7 @@ function! s:Multiselector.keymap_broadcast(cmd, ...) abort "{{{
 	call setpos("'>", vtail)
 	call winrestview(view)
 endfunction "}}}
+
 function! s:selector_buildcommand(noremap, countstr, cmd) abort "{{{
 	if a:noremap is s:TRUE
 		let bang = '!'
@@ -358,6 +377,7 @@ function! s:selector_buildcommand(noremap, countstr, cmd) abort "{{{
 	endif
 	return printf('noautocmd normal%s v%s%s', bang, a:countstr, a:cmd)
 endfunction "}}}
+
 function! s:try(lnum, column, command) abort "{{{
 	let line = getline(a:lnum)
 	if empty(line) || strdisplaywidth(line) < a:column
@@ -382,9 +402,12 @@ function! s:try(lnum, column, command) abort "{{{
 	endif
 	return s:Multiselect.Item(vhead, vtail, 'char')
 endfunction "}}}
+
 function! s:countstr(count) abort "{{{
 	return a:count ? string(a:count) : ''
 endfunction "}}}
+
+
 
 " low-level interfaces
 function! s:Multiselector.append(item) abort "{{{
@@ -417,6 +440,7 @@ function! s:Multiselector.append(item) abort "{{{
 	call self._checkpost(added)
 	return self.itemlist
 endfunction "}}}
+
 function! s:Multiselector.remove(...) abort "{{{
 	if self.itemnum() == 0
 		return []
@@ -443,6 +467,7 @@ function! s:Multiselector.remove(...) abort "{{{
 	endif
 	return removed
 endfunction "}}}
+
 function! s:Multiselector.enumerate(...) abort "{{{
 	let itemlist = s:enumerate(self.itemlist)
 	if a:0 == 0
@@ -450,6 +475,7 @@ function! s:Multiselector.enumerate(...) abort "{{{
 	endif
 	return filter(itemlist, {index, list -> call(a:1, [index, list[1]])})
 endfunction "}}}
+
 function! s:Multiselector.search(searched) abort "{{{
 	let i = 0
 	for item in self.itemlist
@@ -460,6 +486,7 @@ function! s:Multiselector.search(searched) abort "{{{
 	endfor
 	return -1
 endfunction "}}}
+
 function! s:Multiselector.itemnum(...) abort "{{{
 	if a:0 == 0
 		return len(self.itemlist)
@@ -467,14 +494,17 @@ function! s:Multiselector.itemnum(...) abort "{{{
 	let Filterexpr = a:1
 	return len(filter(copy(self.itemlist), Filterexpr))
 endfunction "}}}
+
 function! s:Multiselector.isempty() abort "{{{
 	return empty(self.itemlist)
 endfunction "}}}
+
 function! s:Multiselector.lastevent() abort "{{{
 	let last = copy(self._last)
 	let last.itemlist = copy(self._last.itemlist)
 	return last
 endfunction "}}}
+
 function! s:Multiselector.show(...) abort "{{{
 	if a:0 == 0
 		let itemlist = self.itemlist
@@ -486,6 +516,7 @@ function! s:Multiselector.show(...) abort "{{{
 		call item.show(self.higroup)
 	endfor
 endfunction "}}}
+
 function! s:Multiselector.quench(...) abort "{{{
 	if a:0 == 0
 		let itemlist = self.itemlist
@@ -497,6 +528,7 @@ function! s:Multiselector.quench(...) abort "{{{
 		call item.quench()
 	endfor
 endfunction "}}}
+
 function! s:percolate(iter, Filterexpr) abort "{{{
 	let t_iter = type(a:iter)
 	if t_iter is v:t_list
@@ -520,10 +552,13 @@ function! s:percolate(iter, Filterexpr) abort "{{{
 	endif
 	echoerr s:Errors.InvalidArgument('percolate', [a:iter, a:Filterexpr])
 endfunction "}}}
+
 function! s:enumerate(list, ...) abort "{{{
 	let start = get(a:000, 0, 0)
 	return map(copy(a:list), {i, item -> [start + i, item]})
 endfunction "}}}
+
+
 
 " event control
 function! s:Multiselector.event(name) abort "{{{
@@ -534,11 +569,14 @@ function! s:Multiselector.event(name) abort "{{{
 	return self._event[a:name]
 endfunction "}}}
 
+
+
 " private methods
 function! s:Multiselector._initialize() abort "{{{
 	let self.bufnr = -1
 	call self.uncheckall()
 endfunction "}}}
+
 function! s:Multiselector._suspend() abort "{{{
 	let self._pending.bufnr = self.bufnr
 	let self._pending.itemlist = self.itemlist
@@ -549,6 +587,7 @@ function! s:Multiselector._suspend() abort "{{{
 	let self._last.event = ''
 	let self._last.itemlist = []
 endfunction "}}}
+
 function! s:Multiselector._resume() abort "{{{
 	let self.bufnr = self._pending.bufnr
 	let self.itemlist = self._pending.itemlist
@@ -559,6 +598,7 @@ function! s:Multiselector._resume() abort "{{{
 	let self._pending._last.event = ''
 	let self._pending._last.itemlist = []
 endfunction "}}}
+
 function! s:Multiselector._show() abort "{{{
 	let winid = win_getid()
 	for item in self.itemlist
@@ -567,6 +607,7 @@ function! s:Multiselector._show() abort "{{{
 		endif
 	endfor
 endfunction "}}}
+
 function! s:Multiselector._checkpost(added) abort "{{{
 	if empty(a:added)
 		return
@@ -578,6 +619,7 @@ function! s:Multiselector._checkpost(added) abort "{{{
 	let self._last.itemlist = a:added
 	call s:douserautocmd(self.EVENTCHECKPOST)
 endfunction "}}}
+
 function! s:Multiselector._uncheckpost(removed) abort "{{{
 	if empty(a:removed)
 		return
@@ -589,6 +631,7 @@ function! s:Multiselector._uncheckpost(removed) abort "{{{
 	let self._last.itemlist = a:removed
 	call s:douserautocmd(self.EVENTUNCHECKPOST)
 endfunction "}}}
+
 function! s:Multiselector._abandon() abort "{{{
 	call self.uncheckall()
 	for event in values(self._event)
@@ -597,6 +640,9 @@ function! s:Multiselector._abandon() abort "{{{
 endfunction "}}}
 lockvar! s:Multiselector
 "}}}
+
+
+
 function! s:shiftenv() abort "{{{
 	let env = {}
 	if !empty(&l:indentexpr)
@@ -608,6 +654,7 @@ function! s:shiftenv() abort "{{{
 	endif
 	return env
 endfunction "}}}
+
 function! s:restoreenv(env) abort "{{{
 	if empty(a:env)
 		return
@@ -619,6 +666,7 @@ function! s:restoreenv(env) abort "{{{
 		let &l:cinkeys = a:env.cinkeys
 	endif
 endfunction "}}}
+
 function! s:douserautocmd(name) abort "{{{
 	if !exists('#User#' . a:name)
 		return
@@ -626,11 +674,14 @@ function! s:douserautocmd(name) abort "{{{
 	execute 'doautocmd <nomodeline> User ' . a:name
 endfunction "}}}
 
+
+
 " Multiselect module{{{
-unlockvar! s:Multiselect
 function! s:load() abort "{{{
 	return s:multiselector
 endfunction "}}}
+
+unlockvar! s:Multiselect
 let s:Multiselect = {
 	\	'__MODULE__': 'Multiselect',
 	\	'DEFAULTHIGROUP': s:Highlights.DEFAULTHIGROUP,
@@ -657,6 +708,11 @@ let s:Multiselect = {
 	\	}
 lockvar! s:Multiselect
 "}}}
+
+function! multiselect#import() abort "{{{
+	return s:Multiselect
+endfunction "}}}
+
 let s:multiselector = s:Multiselect.Multiselector({
 	\	'name': 'multiselect',
 	\	'higroup': s:Highlights.DEFAULTHIGROUP,

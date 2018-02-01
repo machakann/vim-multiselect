@@ -6,9 +6,6 @@ let s:OFF = 0
 let s:NULLPOS = [0, 0, 0, 0]
 let s:HIGROUP = 'MultiselectItem'
 
-function! multiselect#Highlights#_import() abort  "{{{
-	return s:Highlights
-endfunction "}}}
 " highlight group{{{
 function! s:default_highlight() abort
 	if hlexists('VisualNOS')
@@ -27,6 +24,8 @@ augroup multiselect-highlgiht
 augroup END
 "}}}
 
+
+
 " id class{{{
 let s:Id = {
 	\	'__CLASS__': 'Id',
@@ -40,6 +39,9 @@ function! s:Id(id, winid) abort "{{{
 	return id
 endfunction "}}}
 "}}}
+
+
+
 " Highlight class{{{
 unlockvar! s:Highlight
 let s:Highlight = {
@@ -55,6 +57,7 @@ let s:Highlight = {
 function! s:Highlight() abort "{{{
 	return deepcopy(s:Highlight)
 endfunction "}}}
+
 function! s:Highlight.initialize(hi_group, region) abort "{{{
 	if a:region.head == s:NULLPOS || a:region.tail == s:NULLPOS ||
 	\		s:inorderof(a:region.tail, a:region.head)
@@ -75,6 +78,7 @@ function! s:Highlight.initialize(hi_group, region) abort "{{{
 	endif
 	return initialized
 endfunction "}}}
+
 function! s:Highlight.show() dict abort "{{{
 	if empty(self.orderlist)
 		return
@@ -94,6 +98,7 @@ function! s:Highlight.show() dict abort "{{{
 	endif
 	call filter(self.idlist, 'v:val.id > 0')
 endfunction "}}}
+
 function! s:Highlight.showlocal() abort "{{{
 	let winid = win_getid()
 	if self.status(winid) is s:ON
@@ -108,6 +113,7 @@ function! s:Highlight.showlocal() abort "{{{
 	call map(idlist, 's:Id(v:val, winid)')
 	call extend(self.idlist, idlist)
 endfunction "}}}
+
 function! s:Highlight.quench() dict abort "{{{
 	if empty(self.idlist)
 		return
@@ -126,6 +132,7 @@ function! s:Highlight.quench() dict abort "{{{
 		noautocmd call win_gotoid(original_winid)
 	endif
 endfunction "}}}
+
 function! s:Highlight.quenchlocal() abort "{{{
 	let winid = win_getid()
 	for id in self.idlist
@@ -136,6 +143,7 @@ function! s:Highlight.quenchlocal() abort "{{{
 	endfor
 	call filter(self.idlist, 'v:val.id > -1')
 endfunction "}}}
+
 function! s:Highlight.status(winid) abort "{{{
 	if !empty(filter(copy(self.idlist), 'v:val.winid == a:winid'))
 		return s:ON
@@ -143,6 +151,8 @@ function! s:Highlight.status(winid) abort "{{{
 	return s:OFF
 endfunction "}}}
 lockvar! s:Highlight
+
+
 
 function! s:highlight_order(item) abort "{{{
 	if a:item.type is# 'char'
@@ -156,6 +166,7 @@ function! s:highlight_order(item) abort "{{{
 	endif
 	return s:eight_order_per_each(orderlist)
 endfunction "}}}
+
 function! s:highlight_order_charwise(region) abort "{{{
 	if a:region.head == s:NULLPOS || a:region.tail == s:NULLPOS || s:inorderof(a:region.tail, a:region.head)
 		return []
@@ -177,12 +188,14 @@ function! s:highlight_order_charwise(region) abort "{{{
 	endif
 	return orderlist
 endfunction "}}}
+
 function! s:highlight_order_linewise(region) abort "{{{
 	if a:region.head == s:NULLPOS || a:region.tail == s:NULLPOS || a:region.head[1] > a:region.tail[1]
 		return []
 	endif
 	return map(range(a:region.head[1], a:region.tail[1]), '[v:val]')
 endfunction "}}}
+
 function! s:highlight_order_blockwise(region) abort "{{{
 	if a:region.head == s:NULLPOS || a:region.tail == s:NULLPOS || s:inorderof(a:region.tail, a:region.head)
 		return []
@@ -205,9 +218,11 @@ function! s:highlight_order_blockwise(region) abort "{{{
 	call winrestview(view)
 	return orderlist
 endfunction "}}}
+
 function! s:inorderof(pos1, pos2) abort  "{{{
 	return a:pos1[1] < a:pos2[1] || (a:pos1[1] == a:pos2[1] && a:pos1[2] < a:pos2[2])
 endfunction "}}}
+
 function! s:eight_order_per_each(orderlist) abort "{{{
   if empty(a:orderlist)
     return []
@@ -230,10 +245,14 @@ function! s:eight_order_per_each(orderlist) abort "{{{
   endif
   return newlist
 endfunction "}}}
+
 function! s:in_cmdline_window() abort "{{{
 	return getcmdwintype() !=# ''
 endfunction "}}}
 "}}}
+
+
+
 " Highlight module{{{
 unlockvar! s:Highlights
 let s:Highlights = {
@@ -245,6 +264,10 @@ let s:Highlights = {
 	\	}
 lockvar! s:Highlights
 "}}}
+
+function! multiselect#Highlights#_import() abort  "{{{
+	return s:Highlights
+endfunction "}}}
 " vim:set foldmethod=marker:
 " vim:set commentstring="%s:
 " vim:set noet ts=4 sw=4 sts=-1:

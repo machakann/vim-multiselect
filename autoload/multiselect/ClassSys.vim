@@ -1,7 +1,3 @@
-function! multiselect#ClassSys#_import() abort "{{{
-	return s:ClassSys
-endfunction "}}}
-
 function! s:inherit(sub, super, ...) abort "{{{
 	if a:0 == 0
 		return s:_inherit(a:sub, a:super)
@@ -13,6 +9,7 @@ function! s:inherit(sub, super, ...) abort "{{{
 	endfor
 	return s:_inherit(a:sub, super)
 endfunction "}}}
+
 function! s:super(sub, ...) abort "{{{
 	if !has_key(a:sub, '__SUPER__')
 		return {}
@@ -36,6 +33,7 @@ function! s:super(sub, ...) abort "{{{
 	endfor
 	return super
 endfunction "}}}
+
 function! s:supercall(sub, supername, funcname) abort "{{{
 	if !has_key(a:sub, '__SUPER__')
 		return
@@ -53,6 +51,7 @@ function! s:supercall(sub, supername, funcname) abort "{{{
 	let args = get(a:000, 0, [])
 	return s:_supercall(supermethods[a:funcname], args, a:sub)
 endfunction "}}}
+
 function! s:_inherit(sub, super) abort "{{{
 	call extend(a:sub, a:super, 'keep')
 	let a:sub.__SUPER__ = {}
@@ -64,17 +63,26 @@ function! s:_inherit(sub, super) abort "{{{
 	endfor
 	return a:sub
 endfunction "}}}
+
 function! s:_supercall(sub, Funcref, ...) abort "{{{
 	return call(a:Funcref, a:000, a:sub)
 endfunction "}}}
 
+
+
 " ClassSys module {{{
+unlockvar! s:ClassSys
 let s:ClassSys = {
 	\	'__MODULE__': 'ClassSys',
 	\	'inherit': function('s:inherit'),
 	\	'super': function('s:super'),
 	\	}
+lockvar! s:ClassSys
 "}}}
+
+function! multiselect#ClassSys#_import() abort "{{{
+	return s:ClassSys
+endfunction "}}}
 " vim:set foldmethod=marker:
 " vim:set commentstring="%s:
 " vim:set noet ts=4 sw=4 sts=-1:
