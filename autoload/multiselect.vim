@@ -306,8 +306,7 @@ function! s:Multiselector.keymap_multiselect(mode) abort "{{{
 			elseif self.itemnum({_, item -> region.isinside(item)}) != 0
 				let pat = s:Buffer.patternofselection(region)
 				let item = self.emit({_, item -> region.isinside(item)})[0]
-				let options = {'region': item}
-				call self.keymap_checkpattern('n', pat, options)
+				call self.checkpattern(pat, item)
 			else
 				call self.keymap_check(a:mode)
 			endif
@@ -323,11 +322,10 @@ function! s:Multiselector.keymap_multiselect(mode) abort "{{{
 		let pat = printf('\<%s\>', expand('<cword>'))
 		if self.itemnum({_, item -> item.touches(curpos)}) != 0
 			let item = self.emit_touching(curpos)[0]
-			let options = {'region': item}
+			call self.checkpattern(pat, item)
 		else
-			let options = {}
+			call self.checkpattern(pat)
 		endif
-		call self.keymap_checkpattern(a:mode, pat, options)
 	endif
 endfunction "}}}
 
