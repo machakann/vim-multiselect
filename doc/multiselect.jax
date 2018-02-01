@@ -1,0 +1,2442 @@
+*multiselect.txt*	複数選択ライブラリ
+						Last change:02-Feb-2018.
+
+書いた人   : machakann <https://github.com/machakann>
+ライセンス : MIT license
+Copyright (c) 2017 Masaaki Nakamura {{{
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+}}}
+
+動作要件:	Vim 8.0 or higher
+
+==============================================================================
+目次
+INDEX					*multiselect-index*
+
+序 INTRODUCTION				|multiselect-introduction|
+キーマッピング KEYMAPPINGS		|multiselect-keymappings|
+ハイライトグループ HIGHLIGHT GROUPS	|multiselect-higroups|
+自動コマンドイベント AUTOCMD EVENTS	|multiselect-events|
+プラグインの作り方 HOW TO MAKE A PLUGIN	|multiselect-howtomakeaplugin|
+プログラミングインターフェース API	|multiselect-api|
+
+==============================================================================
+序
+INTRODUCTION				*multiselect-introduction*
+
+*multiselect.vim* は複数のビジュアル選択を扱うためのライブラリプラグインです。
+この複数選択は基本的に次のルールに従います。
+
+	1. 二つの選択は重ならない、常に新しいものが古いものを解除する。
+	2. 現在のバッファが編集されたとき、すべて選択は解除される。
+	3. 別のバッファへ移動したとき、すべて選択は解除される。
+	4. 別のタブへ移動したとき、すべて選択は解除される。 |tabpage|
+
+このプラグイン自体は選択と選択解除の機能のみを提供します。
+|multiselect-keymappings|
+
+編集のための機能は他のプラグインによって提供されるでしょう。これらのプラグイン
+を作るために Application Programming Interfaces (API) が利用できます。
+|multiselect-api|
+
+==============================================================================
+キーマッピング
+KEYMAPPINGS				*multiselect-keymappings*
+
+以下のキーマッピングは |:nmap| および |:xmap| コマンドにより使用できます。
+
+<Plug>(multiselect-check)		*<Plug>(multiselect-check)*
+	このキーマッピングは現在の選択範囲を複数選択のひとつとします。ノーマル
+	モードではカーソル下の単語 |word| を複数選択とします。
+
+
+<Plug>(multiselect-checksearched)	*<Plug>(multiselect-checksearched)*
+	このキーマッピングは最後に検索したパターン |@/| にマッチするテキストを
+	現在バッファ上で検索し、複数選択とします。ノーマルモードではバッファ全
+	体から検索し、ビジュアル選択モードでは選択範囲の中から検索します。
+
+	NOTE: 次のキーマッピングはカーソル下の単語にマッチするテキストを選択し
+	      ます。
+>
+	nmap <Space>v *N<Plug>(multiselect-checksearched)
+<
+
+<Plug>(multiselect-uncheck)		*<Plug>(multiselect-uncheck)*
+	このキーマッピングは複数選択を解除します。ノーマルモードではカーソル下
+	の複数選択を、ビジュアルモードでは選択範囲に含まれる複数選択を解除しま
+	す。
+
+
+<Plug>(multiselect-uncheckall)		*<Plug>(multiselect-uncheckall)*
+	このキーマッピングはすべての複数選択を解除します。
+
+
+<Plug>(multiselect-undo)		*<Plug>(multiselect-undo)*
+	このキーマッピングは最後の選択・選択解除の動作を巻き戻します。
+
+
+[count]<Plug>(multiselect-next)		*<Plug>(multiselect-next)*
+	このキーマッピングは次の複数選択位置へカーソルを動かします。
+
+
+[count]<Plug>(multiselect-previous)	*<Plug>(multiselect-previous)*
+	このキーマッピングは前の複数選択位置へカーソルを動かします。
+
+
+<Plug>(multiselect)			*<Plug>(multiselect)*
+	このキーマッピングの挙動は少し複雑ですが、便利なものです。
+	このキーマッピングはモードや条件によって動作を変え、選択と絞り込みを行
+	います。
+
+	ノーマルモード |Normal|:
+	カーソル下の単語 |word| にマッチする文字列をバッファにわたって検索して
+	選択します。もし、カーソル下が既に選択されていればその選択の中からマッ
+	チする文字列を検索して選択します。
+
+	文字単位のビジュアルモード |characterwise-visual|:
+	ビジュアル選択範囲に複数選択が含まれる場合、選択範囲の外の複数選択を選
+	択解除します。
+
+	ビジュアル選択範囲が別の複数選択範囲の中に含まれている場合、ビジュアル
+	選択されている文字列にマッチする文字列をその複数選択範囲の中から検索し
+	て選択します。
+
+	それ以外の場合はビジュアル選択されている文字列にマッチする文字列をバッ
+	ファにわたって検索して選択します。
+
+	行単位あるいは矩形ビジュアルモード
+	|linewise-visual| or |blockwise-visual|:
+	ビジュアル選択範囲に複数選択が含まれる場合、選択範囲の外の複数選択を選
+	択解除します。
+
+	それ以外の場合はビジュアル選択されている範囲を選択します。
+
+
+					*multiselect-broadcasting-textobject*
+ブロードキャストテキストオブジェクト~
+
+次のテキストオブジェクト群は基本的にそのもととなったテキストオブジェクトと同様
+に動作しますが、行単位ビジュアルモード |linewise-visual| のみにおいて少し変わ
+った動作をします。これらは行単位ビジュアルモードでは各行に対して、カーソル桁位
+置からもとのテキストオブジェクトをばらまきます。これは矩形ビジュアルモード
+|blockwise-visual| に似ていますが、もはや対象は矩形でなくても構いません。例え
+ば、次のようなバッファでは `<Plug>(multiselect-iw)` は "foo", "bar", "baz" を
+選択することができます。 >
+	foo
+	 bar
+	  baz
+<
+注意: これらのキーマッピングには既知の問題があります。テキストオブジェクトの
+      対象が一文字の場合上手く動作しない場合があります。下のバッファの二行目、
+      "a" は選択に失敗するでしょう。 >
+	foo
+	  a
+	  baz
+<
+|:xmap| とあわせて使います。
+>
+	xmap iw <Plug>(multiselect-iw)
+<
+
+<Plug>(multiselect-iw)			*<Plug>(multiselect-iw)*
+	|iw| のブロードキャストテキストオブジェクトです。
+
+<Plug>(multiselect-aw)			*<Plug>(multiselect-aw)*
+	|aw| のブロードキャストテキストオブジェクトです。
+
+<Plug>(multiselect-iW)			*<Plug>(multiselect-iW)*
+	|iW| のブロードキャストテキストオブジェクトです。
+
+<Plug>(multiselect-aW)			*<Plug>(multiselect-aW)*
+	|aW| のブロードキャストテキストオブジェクトです。
+
+<Plug>(multiselect-i')			*<Plug>(multiselect-i')*
+	|i'| のブロードキャストテキストオブジェクトです。
+
+<Plug>(multiselect-a')			*<Plug>(multiselect-a')*
+	|a'| のブロードキャストテキストオブジェクトです。
+
+<Plug>(multiselect-i")			*<Plug>(multiselect-iquote)*
+	|iquote| のブロードキャストテキストオブジェクトです。
+
+<Plug>(multiselect-a")			*<Plug>(multiselect-aquote)*
+	|aquote| のブロードキャストテキストオブジェクトです。
+
+<Plug>(multiselect-i`)			*<Plug>(multiselect-i`)*
+	|i`| のブロードキャストテキストオブジェクトです。
+
+<Plug>(multiselect-a`)			*<Plug>(multiselect-a`)*
+	|a`| のブロードキャストテキストオブジェクトです。
+
+<Plug>(multiselect-i()			*<Plug>(multiselect-i()*
+	|i(| のブロードキャストテキストオブジェクトです。
+
+<Plug>(multiselect-a()			*<Plug>(multiselect-a()*
+	|a(| のブロードキャストテキストオブジェクトです。
+
+<Plug>(multiselect-i[)			*<Plug>(multiselect-i[)*
+	|i[| のブロードキャストテキストオブジェクトです。
+
+<Plug>(multiselect-a[)			*<Plug>(multiselect-a[)*
+	|a[| のブロードキャストテキストオブジェクトです。
+
+<Plug>(multiselect-i{)			*<Plug>(multiselect-i{)*
+	|i{| のブロードキャストテキストオブジェクトです。
+
+<Plug>(multiselect-a{)			*<Plug>(multiselect-a{)*
+	|a{| のブロードキャストテキストオブジェクトです。
+
+<Plug>(multiselect-it)			*<Plug>(multiselect-it)*
+	|it| のブロードキャストテキストオブジェクトです。
+
+<Plug>(multiselect-at)			*<Plug>(multiselect-at)*
+	|at| のブロードキャストテキストオブジェクトです。
+
+
+==============================================================================
+ハイライトグループ
+HIGHLIGHT GROUPS			*multiselect-higroups*
+
+複数選択位置は通常のビジュアル選択と同じようにハイライトされます。この色は以下
+のハイライトグループによって変更が可能です。
+
+MultiselectItem				*hl-MultiselectItem*
+	複数選択位置を示すハイライトグループです。デフォルトでは
+	|hl-VisualNOS| へリンクされます。
+>
+		highlight default link MultiselectItem VisualNOS
+<
+	ただし |hl-VisualNOS| が存在しない場合 |hl-Visual| へリンクされます。
+>
+		highlight default link MultiselectItem Visual
+<
+	色は |:highlight| コマンドを使って設定することができます。 >
+		highlight MultiselectItem ctermfg=White ctermbg=Red
+		                               \ guifg=White   guibg=Red
+<
+
+==============================================================================
+自動コマンドイベント
+AUTOCMD EVENTS				*multiselect-events*
+
+MultiselectEnter			*MultiselectEnter*
+	`Multiselector` が生成された時に一度だけ発生します。対応プラグインを読
+	み込むのに便利でしょう。
+
+
+MultiselectCheckPost			*MultiselectCheckPost*
+	テキストが複数選択として加えられた時に発生します。
+>
+		autocmd User MultiselectCheckPost echom 'Check!'
+<
+	この時 `Multiselector.lastevent()` を使うことで新しく加えられた複数選
+	択位置の情報を得られるでしょう。
+	|multiselect-Multiselector.lastevent()|
+
+
+MultiselectUncheckPost			*MultiselectUncheckPost*
+	複数選択を解除したときに発生します。
+>
+		autocmd User MultiselectUncheckPost echom 'Uncheck!'
+<
+	この時 `Multiselector.lastevent()` を使うことで解除された複数選択位置
+	の情報を得られるでしょう。
+	|multiselect-Multiselector.lastevent()|
+
+
+==============================================================================
+プラグインの作り方
+HOW TO MAKE A PLUGIN			*multiselect-howtomakeaplugin*
+
+複数選択を扱うプラグインを作るのは難しくありません。ここでは複数選択位置を編集
+し、文字列 "foo" に置き換える機能を実装してみましょう。これはもちろん役にたつ
+ものではありませんが、どのようにして API をつかうのかを学ぶよい例になるでしょ
+う。 |multiselect-api| の項も参考にしてください。
+
+前準備~
+まずヘルプの |write-plugin| を読みましょう。そして実装を記述するファイルを用意
+します。 >
+	~/.vim/plugin/fooize.vim
+<
+今回は簡単のためこのファイルにすべてを記述しますが、 Vim の立ち上がりの高速化
+のために |autoload| スクリプトを使うことはプラグインを作るうえで良い習慣です。
+
+
+
+ステップ 1~
+最初にやることは `Multiselect` モジュールを読み込み、 `Multiselector` インスタ
+ンスを得ることです。
+>
+	" Multiselect module
+	let s:Multiselect = multiselect#import()
+<
+`Multiselect` モジュールはいくつかの関数や定数などを保持していますが、なかでも
+必須のものが `Multiselect.load()` 関数です。
+この関数は `Multiselector` インスタンスを返します。
+>
+	" Multiselector instance
+	let s:multiselector = s:Multiselect.load()
+<
+このインスタンスを使って複数選択を扱います。
+
+
+
+ステップ 2~
+次に、複数選択の位置を得ましょう。すでに選択されていれば、
+`Multiselector.emit()` メソッドが複数選択を解除しその情報を返します。
+>
+	function! Fooize() abort
+	  let itemlist = s:multiselector.emit()
+	  if empty(itemlist)
+	    return
+	  endif
+	endfunction
+<
+それでは一つ一つの要素を処理していきましょう。この要素は `Item` クラス
+|multiselect-class-Item| のインスタンスであり、 複数選択の位置をビジュアル選択
+しなおす `Item.select()` というメソッドを持っています。これを使って対象を順に
+処理していきます。
+
+実際のバッファの編集を開始しますが、一つコツがあります。それはバッファの末尾か
+ら開始へ向かう順番で要素を編集することです。これは、バッファの先頭付近の要素の
+編集によって末尾付近の要素の位置がずれることを避けるためです。要素の並べ替えに
+は `Multiselector.sort()` 関数と組み込みの |reverse()| が使えます。
+>
+	function! Fooize() abort
+	  let itemlist = s:multiselector.emit()
+	  if empty(itemlist)
+	    return
+	  endif
+
+	  call s:multiselector.sort(itemlist)
+	  for item in reverse(itemlist)
+	    call item.select()
+	    normal! cfoo
+	  endfor
+	endfunction
+<
+今回のようにバッファに文字列を挿入する場合、注意することがもう一つあります。
+自動インデント機能です。これもまた編集位置のずれを生む可能性があります。これを
+完全に避けることは難しいのですが 'indentkeys' (あるいは 'cinkeys') オプション
+を一時的にデフォルト値に設定することで、かなりのリスクを抑えることができます。
+|multiselect-Multiselect.shiftenv()| と |multiselect-Multiselect.restoreenv()|
+をつかうと便利です。
+>
+	let s:shiftenv = s:Multiselect.shiftenv
+	let s:restoreenv = s:Multiselect.restoreenv
+
+	function! Fooize() abort
+	  let itemlist = s:multiselector.emit()
+	  if empty(itemlist)
+	    return
+	  endif
+
+	  call s:multiselector.sort(itemlist)
+	  let env = s:shiftenv()
+	  try
+	    for item in reverse(itemlist)
+	      call item.select()
+	      normal! cfoo
+	    endfor
+	  finally
+	    call s:restoreenv(env)
+	  endtry
+	endfunction
+<
+
+
+ステップ 3~
+最後にインターフェースを実装しましょう。今回はコマンドとノーマルモード
+|Normal| のキーマッピングを用意してみます。
+>
+	command! Fooize call Fooize()
+	nnoremap <silent> <Space>f :<C-u>call Fooize()<CR>
+<
+
+最終的な成果物が以下です。
+>
+	if exists("g:loaded_fooize")
+	  finish
+	endif
+	let g:loaded_fooize = 1
+
+	let s:Multiselect = multiselect#import()
+	let s:multiselector = s:Multiselect.load()
+	let s:shiftenv = s:Multiselect.shiftenv
+	let s:restoreenv = s:Multiselect.restoreenv
+
+	function! Fooize() abort
+	  let itemlist = s:multiselector.emit()
+	  if empty(itemlist)
+	    return
+	  endif
+
+	  call s:multiselector.sort(itemlist)
+	  let env = s:shiftenv()
+	  try
+	    for item in reverse(itemlist)
+	      call item.select()
+	      normal! cfoo
+	    endfor
+	  finally
+	    call s:restoreenv(env)
+	  endtry
+	endfunction
+
+	command! Fooize call Fooize()
+	nnoremap <silent> <Space>f :<C-u>call Fooize()<CR>
+<
+これは `macros/multiselect/demo/fooize.vim` にあります。
+
+==============================================================================
+プログラミングインターフェース
+API					*multiselect-api*
+
+目次~
+
+* Multiselect モジュール~
+  Multiselect			|multiselect-module-Multiselect|
+  multiselect#import()		|multiselect#import()|
+
+  Multiselect.DEFAULTHIGROUP	|multiselect-Multiselect.DEFAULTHIGROUP|
+  Multiselect.load()		|multiselect-Multiselect.load()|
+
+  - class constructors
+  Multiselect.Region()		|multiselect-Multiselect.Region()|
+  Multiselect.Item()		|multiselect-Multiselect.Item()|
+  Multiselect.Change()		|multiselect-Multiselect.Change()|
+  Multiselect.EventTask()	|multiselect-Multiselect.EventTask()|
+  Multiselect.TimerTask()	|multiselect-Multiselect.TimerTask()|
+  Multiselect.RaceTask()	|multiselect-Multiselect.RaceTask()|
+  Multiselect.TaskChain()	|multiselect-Multiselect.TaskChain()|
+
+  - utility functions
+  Multiselect.shiftenv()	|multiselect-Multiselect.shiftenv()|
+  Multiselect.restoreenv()	|multiselect-Multiselect.restoreenv()|
+  Multiselect.str2type()	|multiselect-Multiselect.str2type()|
+  Multiselect.str2visualcmd()	|multiselect-Multiselect.str2visualcmd()|
+  Multiselect.inorderof()	|multiselect-Multiselect.inorderof()|
+  Multiselect.inbetween()	|multiselect-Multiselect.inbetween()|
+  Multiselect.isextended()	|multiselect-Multiselect.isextended()|
+
+* Multiselector クラス~
+  Multiselector			|multiselect-class-Multiselector|
+
+  - メンバ
+  Multiselector.name		|multiselect-Multiselector.name|
+  Multiselector.bufnr		|multiselect-Multiselector.bufnr|
+  Multiselector.higroup		|multiselect-Multiselector.higroup|
+  Multiselector.itemlist	|multiselect-Multiselector.itemlist|
+
+  - 主要メソッド
+  Multiselector.check()		|multiselect-Multiselector.check()|
+  Multiselector.checkpattern()	|multiselect-Multiselector.checkpattern()|
+  Multiselector.uncheck()	|multiselect-Multiselector.uncheck()|
+  Multiselector.uncheckall()	|multiselect-Multiselector.uncheckall()|
+  Multiselector.emit()		|multiselect-Multiselector.emit()|
+  Multiselector.emit_inside()	|multiselect-Multiselector.emit_inside()|
+  Multiselector.emit_touching()	|multiselect-Multiselector.emit_touching()|
+  Multiselector.filter()	|multiselect-Multiselector.filter()|
+  Multiselector.sort()		|multiselect-Multiselector.sort()|
+
+  - キーマップメソッド
+  Multiselector.keymap_check()
+				|multiselect-Multiselector.keymap_check()|
+  Multiselector.keymap_checkpattern()
+			     |multiselect-Multiselector.keymap_checkpattern()|
+  Multiselector.keymap_uncheck()
+				|multiselect-Multiselector.keymap_uncheck()|
+  Multiselector.keymap_uncheckall()
+			       |multiselect-Multiselector.keymap_uncheckall()|
+  Multiselector.keymap_undo()
+				|multiselect-Multiselector.keymap_undo()|
+  Multiselector.keymap_multiselect()
+			      |multiselect-Multiselector.keymap_multiselect()|
+  Multiselector.keymap_broadcast()
+				|multiselect-Multiselector.keymap_broadcast()|
+
+  - 基礎メソッド
+  Multiselector.append()	|multiselect-Multiselector.append()|
+  Multiselector.remove()	|multiselect-Multiselector.remove()|
+  Multiselector.enumerate()	|multiselect-Multiselector.enumerate()|
+  Multiselector.itemnum()	|multiselect-Multiselector.itemnum()|
+  Multiselector.isempty()	|multiselect-Multiselector.isempty()|
+  Multiselector.lastevent()	|multiselect-Multiselector.lastevent()|
+  Multiselector.show()		|multiselect-Multiselector.show()|
+  Multiselector.quench()	|multiselect-Multiselector.quench()|
+
+  - イベントコントロール
+  Multiselector.event()		|multiselect-Multiselector.event()|
+
+* Region クラス~
+  Region			|multiselect-class-Region|
+  Region.head			|multiselect-Region.head|
+  Region.tail			|multiselect-Region.tail|
+  Region.type			|multiselect-Region.type|
+  Region.extended		|multiselect-Region.extended|
+  Region.select()		|multiselect-Region.select()|
+  Region.yank()			|multiselect-Region.yank()|
+  Region.includes()		|multiselect-Region.includes()|
+  Region.isinside()		|multiselect-Region.isinside()|
+  Region.touches()		|multiselect-Region.touches()|
+
+* Item クラス~
+  Item				|multiselect-class-Item|
+  Item.id			|multiselect-Item.id|
+  Item.bufnr			|multiselect-Item.bufnr|
+  Item.head			|multiselect-Item.head|
+  Item.tail			|multiselect-Item.tail|
+  Item.type			|multiselect-Item.type|
+  Item.extended			|multiselect-Item.extended|
+  Item.select()			|multiselect-Item.select()|
+  Item.yank()			|multiselect-Item.yank()|
+  Item.includes()		|multiselect-Item.includes()|
+  Item.isinside()		|multiselect-Item.isinside()|
+  Item.touches()		|multiselect-Item.touches()|
+  Item.show()			|multiselect-Item.show()|
+  Item.quench()			|multiselect-Item.quench()|
+  Item.isshownin()		|multiselect-Item.isshownin()|
+
+* Change クラス~
+  Change			|multiselect-class-Change|
+  Change.beforedelete()		|multiselect-Change.beforedelete()|
+  Change.afterinsert()		|multiselect-Change.afterinsert()|
+  Change.apply()		|multiselect-Change.apply()|
+  Change.mapapply()		|multiselect-Change.mapapply()|
+
+* NeatTask クラス~
+  NeatTask			|multiselect-class-NeatTask|
+  NeatTask.call()		|multiselect-NeatTask.call()|
+  NeatTask.execute()		|multiselect-NeatTask.execute()|
+  NeatTask.append()		|multiselect-NeatTask.append()|
+  NeatTask.trigger()		|multiselect-NeatTask.trigger()|
+  NeatTask.clear()		|multiselect-NeatTask.clear()|
+  NeatTask.isactive()		|multiselect-NeatTask.isactive()|
+  NeatTask.skip()		|multiselect-NeatTask.skip()|
+  NeatTask.repeat()		|multiselect-NeatTask.repeat()|
+  NeatTask.leftcount()		|multiselect-NeatTask.leftcount()|
+  NeatTask.hasdone()		|multiselect-NeatTask.hasdone()|
+
+* EventTask クラス~
+  EventTask			|multiselect-class-EventTask|
+  EventTask.start()		|multiselect-EventTask.start()|
+  EventTask.stop()		|multiselect-EventTask.stop()|
+  EventTask.call()		|multiselect-EventTask.call()|
+  EventTask.execute()		|multiselect-EventTask.execute()|
+  EventTask.append()		|multiselect-EventTask.append()|
+  EventTask.trigger()		|multiselect-EventTask.trigger()|
+  EventTask.clear()		|multiselect-EventTask.clear()|
+  EventTask.isactive()		|multiselect-EventTask.isactive()|
+  EventTask.skip()		|multiselect-EventTask.skip()|
+  EventTask.repeat()		|multiselect-EventTask.repeat()|
+  EventTask.leftcount()		|multiselect-EventTask.leftcount()|
+  EventTask.hasdone()		|multiselect-EventTask.hasdone()|
+
+* TimerTask クラス~
+  TimerTask			|multiselect-class-TimerTask|
+  TimerTask.start()		|multiselect-TimerTask.start()|
+  TimerTask.stop()		|multiselect-TimerTask.stop()|
+  TimerTask.call()		|multiselect-TimerTask.call()|
+  TimerTask.execute()		|multiselect-TimerTask.execute()|
+  TimerTask.append()		|multiselect-TimerTask.append()|
+  TimerTask.trigger()		|multiselect-TimerTask.trigger()|
+  TimerTask.clear()		|multiselect-TimerTask.clear()|
+  TimerTask.isactive()		|multiselect-TimerTask.isactive()|
+  TimerTask.skip()		|multiselect-TimerTask.skip()|
+  TimerTask.repeat()		|multiselect-TimerTask.repeat()|
+  TimerTask.leftcount()		|multiselect-TimerTask.leftcount()|
+  TimerTask.hasdone()		|multiselect-TimerTask.hasdone()|
+
+* RaceTask クラス~
+  RaceTask			|multiselect-class-RaceTask|
+  RaceTask.start()		|multiselect-RaceTask.start()|
+  RaceTask.stop()		|multiselect-RaceTask.stop()|
+  RaceTask.call()		|multiselect-RaceTask.call()|
+  RaceTask.execute()		|multiselect-RaceTask.execute()|
+  RaceTask.append()		|multiselect-RaceTask.append()|
+  RaceTask.trigger()		|multiselect-RaceTask.trigger()|
+  RaceTask.clear()		|multiselect-RaceTask.clear()|
+  RaceTask.isactive()		|multiselect-RaceTask.isactive()|
+  RaceTask.skip()		|multiselect-RaceTask.skip()|
+  RaceTask.repeat()		|multiselect-RaceTask.repeat()|
+  RaceTask.leftcount()		|multiselect-RaceTask.leftcount()|
+  RaceTask.hasdone()		|multiselect-RaceTask.hasdone()|
+
+* TaskChain クラス~
+  TaskChain			|multiselect-class-TaskChain|
+  TaskChain.event()		|multiselect-TaskChain.event()|
+  TaskChain.timer()		|multiselect-TaskChain.timer()|
+  TaskChain.race()		|multiselect-TaskChain.race()|
+  TaskChain.trigger()		|multiselect-TaskChain.trigger()|
+  TaskChain.start()		|multiselect-TaskChain.start()|
+  TaskChain.stop()		|multiselect-TaskChain.stop()|
+  TaskChain.repeat()		|multiselect-TaskChain.repeat()|
+  TaskChain.leftcount()		|multiselect-TaskChain.leftcount()|
+  TaskChain.hasdone()		|multiselect-TaskChain.hasdone()|
+
+------------------------------------------------------------------------------
+Multiselect モジュール~
+					*multiselect-module-Multiselect*
+
+このモジュールが `Multiselector` インスタンスを返す
+|multiselect-Multiselect.load()| 関数を持っています。
+
+他にもいくつかの便利な機能が集められており、必須ではありませんがプラグインを書
+く際に便利かもしれません。
+
+
+multiselect#import()			*multiselect#import()*
+	この関数は `Multiselect` モジュールを返します。 >
+		let s:Multiselect = multiselect#import()
+<
+
+				*multiselect-Multiselect.DEFAULTHIGROUP*
+Multiselect.DEFAULTHIGROUP    [string]
+	複数選択に対するハイライトグループ名、すなわち "MultiselectItem"
+	です。
+
+
+					*multiselect-Multiselect.load()*
+Multiselect.load()    [function]
+	`Multiselector` インスタンスを返します。
+	|multiselect-class-Multiselector| の項も参照してください。 >
+		let s:multiselector = s:Multiselect.load()
+<
+	ユーザーはキーマッピングを通してこのインスタンスとやりとりをします。
+	|multiselect-keymappings|
+
+
+  - クラスコンストラクタ
+					*multiselect-Multiselect.Region()*
+Multiselect.Region({head}[, {tail}[, {type}[, {extended}]]])    [function]
+Multiselect.Region({lnum})
+Multiselect.Region({startlnum}, {endlnum})
+	`Region` クラスのコンストラクタです。そのインスタンスはバッファ上の
+	一部分を表します。 |multiselect-class-Region|
+
+	当クラスは次の `Item` クラスの親クラスです。 |multiselect-class-Item|
+
+	{head} と {tail} は範囲の先頭と終端の位置です。これは |getpos()| 関数
+	の返り値のように四要素のリストです。
+
+	{type} は部分の種類です。 Vim はバッファ上の範囲を三種類に分類します。
+	  "char" あるいは "v": 文字単位 |characterwise-visual|
+	  "line" あるいは "V": 行単位 |linewise-visual|
+	  "block" あるいは "\<C-v>": 矩形 |blockwise-visual|
+	{type} が省略された場合、文字単位とみなされます。
+
+	{extended} は {type} が矩形の場合にのみ意味を持ちます。これは真偽値
+	(0 か 1) であり、真 |TRUE| (1) の時、その選択範囲の末尾桁を行の最終桁
+	まで延伸します。これは |v_$| を使った場合と同じ意味を持ちます。
+	{extended} が省略された場合は偽 |FALSE| (0) とみなされます。 >
+		let head = [0, 1, 1, 0]
+		let tail = [0, 3, 1, 0]
+		let region = s:Multiselect.Region(head, tail, 'block', 1)
+<
+	引数が {head} のみの場合、 {head} と {tail} の等しい一文字の文字単位の
+	範囲を返します。
+
+	引数が数値 |Number| の {lnum} のみの場合、 {lnum} の指定する一行を表す
+	行単位の範囲を返します。
+
+	引数がともに数値 |Number| の {startlnum} と {endlnum} が与えられた
+	場合、 {startlnum} 行から {endlnum} 行までの範囲を表す行単位の範囲を返
+	します。
+
+
+					*multiselect-Multiselect.Item()*
+Multiselect.Item({head}[, {tail}[, {type}[, {extended}]]])   [function]
+Multiselect.Item({lnum})
+Multiselect.Item({startlnum}, {endlnum})
+	`Item` クラスのコンストラクタです。 `Region` クラスの子クラスであり、
+	複数選択のひとつを表します。 |multiselect-class-Item|
+	|multiselect-class-Region|
+
+	引数は `Multiselect.Region()` と共通です。
+	|multiselect-Multiselect.Region()| >
+		let head = [0, 1, 1, 0]
+		let tail = [0, 3, 1, 0]
+		let item = s:Multiselect.Item(head, tail, 'block', 1)
+<
+
+					*multiselect-Multiselect.Change()*
+Multiselect.Change()    [function]
+	`Change` クラスのコンストラクタです。あるバッファ上の位置の、編集後の
+	位置を追跡するために使われます。 |multiselect-class-Change|
+
+
+					*multiselect-Multiselect.NeatTask()*
+Multiselect.NeatTask()    [function]
+	`NeatTask` クラスのコンストラクタです。 |multiselect-class-NeatTask|
+
+	このクラスのインスタンスはいくつかの処理を集めておいて、後ほど一度に実
+	行するために使われます。また、当クラスは以下のクラスの親クラスです。
+	|multiselect-class-EventTask|
+	|multiselect-class-TimerTask|
+	|multiselect-class-RaceTask|
+
+
+					*multiselect-Multiselect.EventTask()*
+Multiselect.EventTask()    [function]
+	`EventTask` クラスのコンストラクタです。 |multiselect-class-EventTask|
+	自動コマンド |autocmd-events| に処理を予約するために使われます。
+
+
+					*multiselect-Multiselect.TimerTask()*
+Multiselect.TimerTask()    [function]
+	`TimerTask` クラスのコンストラクタです。 |multiselect-class-TimerTask|
+	一定時間後に実行される処理を予約するために使われます。
+
+
+					*multiselect-Multiselect.RaceTask()*
+Multiselect.RaceTask()    [function]
+	`RaceTask` クラスのコンストラクタです。 |multiselect-class-RaceTask|
+	自動コマンド、および経過時間のいずれかによって実行される処理を予約する
+	ために使われます。
+
+
+					*multiselect-Multiselect.TaskChain()*
+Multiselect.TaskChain()    [function]
+	`TaskChain` クラスのコンストラクタです。 |multiselect-class-TaskChain|
+	自動コマンド、および経過時間によって設定された順序で、数珠繋ぎとなった
+	一連の処理を実行していくために使われます。
+
+
+  - その他の関数
+					*multiselect-Multiselect.shiftenv()*
+Multiselect.shiftenv({expr}, {Filterexpr})    [function]
+	'indentkeys' あるいは 'cinkeys' オプションをデフォルト値に設定し、ユー
+	ザー設定を復元するための情報を返します。これは、
+	|multiselect-Multiselect.restoreenv()| 関数の引数として使います。
+	|multiselect-howtomakeaplugin| の項も参照してください。 >
+		let s:shiftenv = s:Multiselect.shiftenv
+		let s:restoreenv = s:Multiselect.restoreenv
+
+		let indentopt = s:shiftenv()
+		" do something
+		call s:restoreenv(indentopt)
+<
+
+					*multiselect-Multiselect.restoreenv()*
+Multiselect.restoreenv({expr}, {Filterexpr})    [function]
+	|multiselect-Multiselect.shiftenv()| 関数の返り値を引数として受け取
+	り、設定を復元します。
+	|multiselect-howtomakeaplugin| の項も参照してください。 >
+		let s:shiftenv = s:Multiselect.shiftenv
+		let s:restoreenv = s:Multiselect.restoreenv
+
+		let indentopt = s:shiftenv()
+		" do something
+		call s:restoreenv(indentopt)
+<
+
+					*multiselect-Multiselect.str2type()*
+Multiselect.str2type({str})    [function]
+	範囲 `Region` の種類を表す文字列を返します。
+	{str} が "char" か "v" なら "char" を返します。
+	{str} が "line" か "V" なら "line" を返します。
+	{str} が "block" か "\<C-v>" なら "block" を返します。
+	|visualmode()| の項も確認してください。 >
+		let s:str2type = s:Multiselect.str2type
+
+		let type = str2type('char')
+		" type ==# 'char'
+
+		let type = str2type('v')
+		" type ==# 'char'
+
+		let type = str2type('line')
+		" type ==# 'line'
+
+		let type = str2type('V')
+		" type ==# 'line'
+
+		let type = str2type('block')
+		" type ==# 'block'
+
+		let type = str2type("\<C-v>")
+		" type ==# 'block'
+<
+	この関数は "\<C-v>" の後に続く数字を無視します。 このため、
+	|getregtype()| の返り値は引数として有効です。 >
+		let type = str2type("\<C-v>10")
+		" type ==# 'block'
+<
+
+				*multiselect-Multiselect.str2visualcmd()*
+Multiselect.str2visualcmd({str})    [function]
+	範囲の種類を表す文字列を受け取り、特定のビジュアルモードへ入るためのコ
+	マンドを返します。
+	{str} が "char" か "v" の場合は "v" を返します。
+	{str} が "line" か "V" の場合は "V" を返します。
+	{str} が "block" か "\<C-v>" の場合は "\<C-v>" を返します。
+	|visualmode()| の項も確認してください。 >
+		let s:str2visualcmd = s:Multiselect.str2visualcmd
+
+		let type = str2visualcmd('char')
+		" type ==# 'v'
+
+		let type = str2visualcmd('v')
+		" type ==# 'v'
+
+		let type = str2visualcmd('line')
+		" type ==# 'V'
+
+		let type = str2visualcmd('V')
+		" type ==# 'V'
+
+		let type = str2visualcmd('block')
+		" type ==# "\<C-v>"
+
+		let type = str2visualcmd("\<C-v>")
+		" type ==# "\<C-v>"
+<
+	この関数は "\<C-v>" の後に続く数字を無視します。 このため、
+	|getregtype()| の返り値は引数として有効です。 >
+		let type = str2visualcmd("\<C-v>10")
+		" type ==# "\<C-v>"
+<
+
+					*multiselect-Multiselect.inorderof()*
+Multiselect.inorderof({pos1}, {pos2})    [function]
+	{pos1} が {pos2} よりバッファ開始方向に位置していれば真 |TRUE| を、
+	そうでなければ偽 |FALSE| を返します。
+>
+		let s:inorderof = s:Multiselect.inorderof
+
+		let bool = s:inorderof([0, 2, 3, 0], [0, 2, 4, 0])
+		" bool is TRUE
+
+		let bool = s:inorderof([0, 2, 3, 0], [0, 3, 1, 0])
+		" bool is TRUE
+
+		let bool = s:inorderof([0, 2, 3, 0], [0, 1, 1, 0])
+		" bool is FALSE
+
+		let bool = s:inorderof([0, 2, 3, 0], [0, 2, 2, 0])
+		" bool is FALSE
+
+		let bool = s:inorderof([0, 2, 3, 0], [0, 2, 3, 0])
+		" bool is FALSE
+<
+
+					*multiselect-Multiselect.inbetween()*
+Multiselect.inbetween({pos}, {head}, {tail})    [function]
+	This function returns |TRUE| is {pos} is in between {head} and {tail}.
+	{pos} が {head} と {tail} の間に位置していれば真 |TRUE| を、そうでなけ
+	れば偽 |FALSE| を返します。
+
+	{head} と {tail} が {pos} と重なっている場合も真が返ります。
+>
+		let s:inbetween = s:Multiselect.inbetween
+		let pos = [0, 2, 3, 0]
+
+		let bool = s:inbetween(pos, [0, 2, 2, 0], [0, 2, 4, 0])
+		" bool is TRUE
+
+		let bool = s:inbetween(pos, [0, 2, 3, 0], [0, 2, 4, 0])
+		" bool is TRUE
+
+		let bool = s:inbetween(pos, [0, 2, 2, 0], [0, 2, 3, 0])
+		" bool is TRUE
+
+		let bool = s:inbetween(pos, [0, 2, 3, 0], [0, 2, 3, 0])
+		" bool is TRUE
+
+		let bool = s:inbetween(pos, [0, 1, 1, 0], [0, 3, 1, 0])
+		" bool is TRUE
+
+		let bool = s:inbetween(pos, [0, 2, 1, 0], [0, 2, 2, 0])
+		" bool is FALSE
+
+		let bool = s:inbetween(pos, [0, 2, 4, 0], [0, 2, 5, 0])
+		" bool is FALSE
+<
+
+					*multiselect-Multiselect.isextended()*
+Multiselect.isextended()    [function]
+	最後に使ったビジュアルモードが矩形ビジュアルモード |blockwise-visual|
+	であり、さらに |v_$| が使われていた場合にのみ真 |TRUE| が返ります。 >
+		let s:isextended = s:Multiselect.isextended
+
+		execute "normal! \<C-v>2j$"
+		execute "normal! \<Esc>"
+		let bool = s:isextended()
+		" bool is TRUE
+
+		execute "normal! \<C-v>2j"
+		execute "normal! \<Esc>"
+		let bool = s:isextended()
+		" bool is FALSE
+<
+
+
+------------------------------------------------------------------------------
+Multiselector class~
+					*multiselect-class-Multiselector*
+
+`Multiselector` インスタンスは `Multiselect` モジュールの `Multiselect.load()`
+関数で得られます。
+
+  - メンバ
+					*multiselect-Multiselector.name*
+Multiselector.name    [string]
+	`Multiselector` インスタンスの識別子です。機能に影響は及ぼしません。
+
+
+					*multiselect-Multiselector.bufnr*
+Multiselector.bufnr    [number]
+	現在属しているバッファ番号です。どこにも属していなければ -1 になりま
+	す。
+
+
+					*multiselect-Multiselector.higroup*
+Multiselector.higroup    [string]
+	複数選択に対して適用されるハイライトグループの名前です。
+
+
+					*multiselect-Multiselector.itemlist*
+Multiselector.itemlist    [list]
+	現在の複数選択要素を表す `Item` クラスインスタンスのリストです。
+
+	NOTE: このリストは直接変更しないでください。 `Multiselector` クラスの
+	      メソッドを使いましょう。
+
+
+  - 主要メソッド
+					*multiselect-Multiselector.check()*
+Multiselector.check({head}[, {tail}[, {type}[, {extended}]]])    [method]
+Multiselector.check({lnum})
+Multiselector.check({startlnum}, {endlnum})
+Multiselector.check({region})
+	指定されたバッファの一範囲を複数選択として `Multiselector.itemlist` に
+	加えます。この新しく生成された `Item` インスタンスが返されます。
+	|multiselect-Multiselector.itemlist|
+	|multiselect-class-Item|
+
+	引数は `Multiselect.Region()` と共通ですが、これに加えてひとつの
+	`Region` クラスかその子クラスのインスタンスも有効です。
+	|multiselect-Multiselect.Region()| >
+		let head = [0, 1, 1, 0]
+		let tail = [0, 3, 3, 0]
+		let region = s:Multiselect.Region(head, tail, 'block', 1)
+		call s:multiselector.check(region)
+<
+
+				    *multiselect-Multiselector.checkpattern()*
+Multiselector.checkpattern({pat}[, {region}])    [method]
+	正規表現 {pat} にマッチするテキストをバッファから検索し、複数選択とし
+	て、 `Multiselect.itemlist` に加えます。新しく加えられた複数選択要素の
+	リストが返されます。
+	|multiselect-Multiselector.itemlist|
+
+
+					*multiselect-Multiselector.uncheck()*
+Multiselector.uncheck({head}[, {tail}[, {type}[, {extended}]]])    [method]
+Multiselector.uncheck({lnum})
+Multiselector.uncheck({startlnum}, {endlnum})
+Multiselector.uncheck({region})
+	指定された範囲に触れている複数選択要素を選択解除します。
+
+	引数は `Multiselect.Region()` と共通ですが、これに加えてひとつの
+	`Region` クラスかその子クラスのインスタンスも有効です。
+	|multiselect-Multiselect.Region()| >
+		let head = [0, 1, 1, 0]
+		let tail = [0, 3, 1, 0]
+		let region = s:Multiselect.Region(head, tail, 'line')
+		call s:multiselector.uncheck(region)
+<
+
+				*multiselect-Multiselector.uncheckall()*
+Multiselector.uncheckall()    [method]
+	すべての複数選択を解除します。 >
+		call s:multiselector.uncheckall()
+<
+
+					*multiselect-Multiselector.emit()*
+Multiselector.emit([{Filterexpr}])    [method]
+	複数選択を解除し、その要素のリストを返します。
+
+	{Filterexpr} が省略された場合、すべての複数選択を解除しその要素のリス
+	トを返します。 >
+		let itemlist = s:multiselector.emit()
+<
+	{Filterexpr} は二つの引数を取る関数参照 |Funcref| です。{Filterexpr}
+	が与えられた場合、すべての複数選択要素に対して要素のインデックスと要素
+	自体を引数にあたえて評価し、{Filterexpr} が真 |TRUE| を返す要素につい
+	て選択解除し返り値に返します。
+	  - 例1: ビジュアル選択範囲内の要素を得る >
+		let head = getpos("'<")
+		let tail = getpos("'>")
+		let type = visualmode()
+		let region = s:Multiselect.Region(head, tail, type)
+		let itemlist = s:multiselector.emit(
+			\ {_, item -> item.isinside(region)})
+<
+	  NOTE: この用途にはかわりに `Multiselector.emit_inside()` を使うこと
+	        ができます。
+	        |multiselect-Multiselector.emit_inside()|
+
+	  - 例2: カーソルに触れている要素を得る >
+		let curpos = getpos('.')
+		let itemlist = s:multiselector.emit(
+			\ {_, item -> item.touches(curpos)})
+<
+	  NOTE: この用途にはかわりに `Multiselector.emit_touching()` を使うこ
+	        とができます。
+	        |multiselect-Multiselector.emit_touching()|
+
+
+				*multiselect-Multiselector.emit_inside()*
+Multiselector.emit_inside({head}[, {tail}[, {type}[, {extended}]]])   [method]
+Multiselector.emit_inside({lnum})
+Multiselector.emit_inside({startlnum}, {endlnum})
+Multiselector.emit_inside({region})
+	引数で指定された範囲の中に含まれている複数選択を解除し、その要素のリス
+	トを返します。
+
+	引数は `Multiselect.Region()` と共通ですが、これに加えてひとつの
+	`Region` クラスかその子クラスのインスタンスも有効です。
+	|multiselect-Multiselect.Region()| >
+		let head = getpos("'<")
+		let tail = getpos("'>")
+		let type = visualmode()
+		let region = s:Multiselect.Region(head, tail, type)
+		let itemlist = s:multiselector.emit_inside(region)
+<
+	このメソッドは上の `Multiselector.emit()` の例1に示されている場合のエ
+	イリアスです。
+	|multiselect-Multiselector.emit()|
+
+
+				*multiselect-Multiselector.emit_touching()*
+Multiselector.emit_touching({head}[, {tail}[, {type}[, {extended}]]]) [method]
+Multiselector.emit_touching({lnum})
+Multiselector.emit_touching({startlnum}, {endlnum})
+Multiselector.emit_touching({region})
+	引数で指定された範囲に触れている複数選択を解除し、その要素のリストを返
+	します。
+
+	引数は `Multiselect.Region()` と共通ですが、これに加えてひとつの
+	`Region` クラスかその子クラスのインスタンスも有効です。
+	|multiselect-Multiselect.Region()| >
+		let curpos = getpos('.')
+		let itemlist = s:multiselector.emit_touching(curpos)
+<
+	このメソッドは上の `Multiselector.emit()` の例2に示されている場合のエ
+	イリアスです。
+	|multiselect-Multiselector.emit()|
+
+
+					*multiselect-Multiselector.filter()*
+Multiselector.filter({Filterexpr})    [method]
+	このメソッドは与えられたフィルタ関数の関数参照 |Funcref| を使って
+	`Multiselector.itemlist` 内の要素をフィルタします。
+	|multiselect-Multiselector.itemlist|
+
+	{Filterexpr} は二つの引数を取る関数参照 |Funcref| です。これはすべての
+	複数選択要素に対して要素のインデックスと要素自体を引数にあたえて評価さ
+	れ、{Filterexpr} が偽 |FALSE| を返す要素について選択解除します。
+
+	返り値はフィルタ後の `Multiselector.itemlist` です。
+
+	  - 例1: 五行目以外に存在する複数選択を解除する >
+		let pos = [0, 5, 1, 0]
+		let line5 = s:Multiselect.Region(pos, pos, 'V')
+		call s:multiselector.filter(
+			\ {_, item -> item.isinside(line5)})
+<
+	|multiselect-Multiselect.Region()|
+	|multiselect-class-Region| |multiselect-class-Item|
+	|multiselect-Region.isinside()|
+
+	  - Example2: ビジュアル選択の外の複数選択を解除する >
+		let vhead = getpos("'<")
+		let vtail = getpos("'>")
+		let vmode = visualmode()
+		let visual = s:Multiselect.Region(vhead, vtail, vmode)
+		call s:multiselector.filter(
+			\ {_, item -> item.isinside(visual)})
+<
+	|multiselect-Multiselect.Region()|
+	|multiselect-class-Region| |multiselect-class-Item|
+	|multiselect-Region.isinside()|
+
+
+					*multiselect-Multiselector.sort()*
+Multiselector.sort({itemlist})    [function]
+	与えられた複数選択要素のリスト {itemlist} をバッファ内の位置によって並
+	べ替えます。バッファの開始に近い要素がリストの先頭に来ます。ただし、矩
+	形の要素と文字単位の要素が同じ行にある場合は画面上の桁位置によって以下
+	のように並べ替えられます。 >
+		"#" represents selection and the number is the order in the
+		sorted list
+
+		##1##	#####	##4##
+			##3##
+		##2##	#####	##5##
+<
+	並べ替えは破壊的 (in-place) に行われます。必要であればもとのリストのコ
+	ピーを取ってください。 >
+		let copied = copy(itemlist)
+		call s:multiselector.sort(copied)
+<
+	`Multiselector.enumerate()` メソッドの返り値も {itemlist} として有効で
+	す。 >
+		let itemlist = s:multiselector.enumerate()
+		call s:multiselector.sort(itemlist)
+<
+
+  - キーマッピングメソッド
+				*multiselect-Multiselector.keymap_check()*
+Multiselector.keymap_check({mode})    [method]
+	この関数はキーマッピング |<Plug>(multiselect-check)| の関数版です。
+
+	ビジュアル選択範囲を複数選択に加えます。ノーマルモードではカーソル下の
+	単語 |word| を加えます。
+
+	{mode} は動作するモードを表す一文字です。ノーマル |Normal| モードなら
+	'n' を、ビジュアル |Visual| モードなら 'x' を指定してください。
+
+
+			     *multiselect-Multiselector.keymap_checkpattern()*
+Multiselector.keymap_checkpattern({mode}, {pat})    [method]
+	キーマッピング |<Plug>(multiselect-checksearched)| の基礎となる関数で
+	す。
+
+	正規表現 {pat} にマッチするテキストを検索し、複数選択として加えます。
+	ビジュアルモードで使用すると、ビジュアル選択範囲の中から検索します。
+
+	{mode} は動作するモードを表す一文字です。ノーマル |Normal| モードなら
+	'n' を、ビジュアル |Visual| モードなら 'x' を指定してください。
+
+
+				*multiselect-Multiselector.keymap_uncheck()*
+Multiselector.keymap_uncheck({mode})    [method]
+	キーマッピング |<Plug>(multiselect-uncheck)| の関数版です。
+
+	ノーマルモードではカーソル下の複数選択要素を解除します。ビジュアルモー
+	ドではビジュアル選択範囲に触れている複数選択要素を解除します。
+
+	{mode} は動作するモードを表す一文字です。ノーマル |Normal| モードなら
+	'n' を、ビジュアル |Visual| モードなら 'x' を指定してください。
+
+
+			       *multiselect-Multiselector.keymap_uncheckall()*
+Multiselector.keymap_uncheckall()    [method]
+	キーマッピング |<Plug>(multiselect-uncheckall)| の関数版です。
+
+	すべての複数選択を解除します。
+
+
+				*multiselect-Multiselector.keymap_undo()*
+Multiselector.keymap_undo()    [method]
+	キーマッピング |<Plug>(multiselect-undo)| の関数版です。
+
+	最後の選択・選択解除を取り消します。この取り消し可能な深さは現在一回だ
+	けです。
+
+
+			      *multiselect-Multiselector.keymap_next()*
+Multiselector.keymap_next({mode})    [method]
+	キーマッピング |<Plug>(multiselect-next)| の関数版です。
+
+	カーソルを次の複数選択要素へ移動します。
+
+	{mode} は動作するモードを表す一文字です。ノーマル |Normal| モードなら
+	'n' を、ビジュアル |Visual| モードなら 'x' を指定してください。
+
+
+			      *multiselect-Multiselector.keymap_previous()*
+Multiselector.keymap_previous({mode})    [method]
+	キーマッピング |<Plug>(multiselect-previous)| の関数版です。
+
+	カーソルを前の複数選択要素へ移動します。
+
+	{mode} は動作するモードを表す一文字です。ノーマル |Normal| モードなら
+	'n' を、ビジュアル |Visual| モードなら 'x' を指定してください。
+
+
+			      *multiselect-Multiselector.keymap_multiselect()*
+Multiselector.keymap_multiselect({mode})    [method]
+	キーマッピング |<Plug>(multiselect)| の関数版です。
+
+	ノーマルモード |Normal|:
+	カーソル下の単語 |word| にマッチする文字列をバッファにわたって検索して
+	選択します。もし、カーソル下が既に選択されていればその選択の中からマッ
+	チする文字列を検索して選択します。
+
+	文字単位のビジュアルモード |characterwise-visual|:
+	ビジュアル選択範囲に複数選択が含まれる場合、選択範囲の外の複数選択を選
+	択解除します。
+
+	ビジュアル選択範囲が別の複数選択範囲の中に含まれている場合、ビジュアル
+	選択されている文字列にマッチする文字列をその複数選択範囲の中から検索し
+	て選択します。
+
+	それ以外の場合はビジュアル選択されている文字列にマッチする文字列をバッ
+	ファにわたって検索して選択します。
+
+	行単位あるいは矩形ビジュアルモード
+	|linewise-visual| or |blockwise-visual|:
+	ビジュアル選択範囲に複数選択が含まれる場合、選択範囲の外の複数選択を選
+	択解除します。
+
+	{mode} は動作するモードを表す一文字です。ノーマル |Normal| モードなら
+	'n' を、ビジュアル |Visual| モードなら 'x' を指定してください。
+
+
+				*multiselect-Multiselector.keymap_broadcast()*
+Multiselector.keymap_broadcast({cmd})   [method]
+	ブロードキャストテキストオブジェクトを生成する関数です。
+
+	{cmd} はモーション {motion} コマンドか、テキストオブジェクト
+	|text-objects| です。このメソッドはビジュアルモードでのみ動作し、文字
+	単位 |characterwise-visual| あるいは矩形 |blockwise-visual| ビジュアル
+	モードではもとの {cmd} と同じように働きます。
+	
+	行単位 |linewise-visual| ビジュアルモードで使われた場合、カーソル桁を
+	起点に各行に対して {cmd} を試行し、成功した部分を複数選択に加えます。
+	例えば、次のようなバッファを考えます。 >
+		fooo
+		  bar
+		 bazzzz
+<
+	三行を行指向選択し、カーソルを3桁目か4桁目において {cmd} に |iw| を与
+	えると、 "fooo", "bar", "bazzzz" を複数選択に加えます。
+
+
+  - 基礎メソッド
+					*multiselect-Multiselector.append()*
+Multiselector.append({item})    [method]
+	複数選択要素 {item} を `Multiselector.itemlist` の末尾に加えます。
+	{item} は `Item` クラスのインスタンスです。返り値は
+	`Multiselector.itemlist` です。
+	|multiselect-Multiselector.itemlist|
+>
+		call s:multiselector.uncheckall()
+		let item1 = s:Multiselect.Item([0, 1, 1, 0], [0, 1, 1, 0])
+		let item2 = s:Multiselect.Item([0, 1, 2, 0], [0, 1, 2, 0])
+		let item3 = s:Multiselect.Item([0, 1, 3, 0], [0, 1, 3, 0])
+		let itemlist = [item1, item2, item3]
+
+		call s:multiselector.append(itemlist)
+		" s:multiselector.itemlist == [item1, item2, item3]
+<
+	|multiselect-Multiselector.uncheckall()|
+	|multiselect-Multiselect.Item()|
+
+
+					*multiselect-Multiselector.remove()*
+Multiselector.remove({idx}[, {end}])    [method]
+Multiselector.remove({indexlist})
+	指定された複数選択要素を選択解除し、 `Multiselector.itemlist` から取り
+	除きます。
+	|multiselect-Multiselector.itemlist|
+
+	{end} を指定しない場合:
+	`Multiselector.itemlist` から {idx} 位置の要素を選択解除し、この要素を
+	返します。 >
+		call s:multiselector.uncheckall()
+		let item1 = s:Multiselect.Item([0, 1, 1, 0], [0, 1, 1, 0])
+		let item2 = s:Multiselect.Item([0, 1, 2, 0], [0, 1, 2, 0])
+		let item3 = s:Multiselect.Item([0, 1, 3, 0], [0, 1, 3, 0])
+		let itemlist = [item1, item2, item3]
+		call s:multiselector.append(itemlist)
+
+		let lastitem = s:multiselector.remove(-1)
+		" lastitem is item3
+<
+	|multiselect-Multiselector.uncheckall()|
+	|multiselect-Multiselect.Item()|
+	|multiselect-Multiselector.append()|
+
+	{end} を指定する場合:
+	{idx} から {end} までの要素を選択解除し、この要素からなるリストを返し
+	ます。 >
+		call s:multiselector.uncheckall()
+		let item1 = s:Multiselect.Item([0, 1, 1, 0], [0, 1, 1, 0])
+		let item2 = s:Multiselect.Item([0, 1, 2, 0], [0, 1, 2, 0])
+		let item3 = s:Multiselect.Item([0, 1, 3, 0], [0, 1, 3, 0])
+		let itemlist = [item1, item2, item3]
+		call s:multiselector.append(itemlist)
+
+		let removeditems = s:multiselector.remove(0, 1)
+		" removeditems == [item1, item2]
+<
+	{idx} と {end} に指定できる値については |list-index| を参照してくださ
+	い。
+
+	インデックスのリストを与えた場合は指定の位置の要素を選択解除し、この要
+	素からなるリストを返します >
+		call s:multiselector.uncheckall()
+		let item1 = s:Multiselect.Item([0, 1, 1, 0], [0, 1, 1, 0])
+		let item2 = s:Multiselect.Item([0, 1, 2, 0], [0, 1, 2, 0])
+		let item3 = s:Multiselect.Item([0, 1, 3, 0], [0, 1, 3, 0])
+		let itemlist = [item1, item2, item3]
+		call s:multiselector.append(itemlist)
+
+		let removed = s:multiselector.remove([0, 2])
+		" removed is [item1, item3]
+<
+	|multiselect-Multiselector.uncheckall()|
+	|multiselect-Multiselect.Item()|
+	|multiselect-Multiselector.append()|
+
+
+				*multiselect-Multiselector.enumerate()*
+Multiselector.enumerate([{Filterexpr}])    [method]
+	複数選択要素のインデックスと要素自体のリストを要素に持つリストを返しま
+	す。このメソッドは `Multiselector.emit()` と違い選択解除を行いません。
+	|multiselect-Multiselector.emit()| >
+		call s:multiselector.uncheckall()
+		let item1 = s:Multiselect.Item([0, 1, 1, 0], [0, 1, 1, 0])
+		let item2 = s:Multiselect.Item([0, 1, 2, 0], [0, 1, 2, 0])
+		let item3 = s:Multiselect.Item([0, 1, 3, 0], [0, 1, 3, 0])
+		let itemlist = [item1, item2, item3]
+		call s:multiselector.append(itemlist)
+
+		let list = s:multiselector.enumerate()
+		" list == [[0, item1], [1, item2], [2, item3]]
+<
+	{Filterexpr} は二つの引数を取る関数参照 |Funcref| です。{Filterexpr}
+	が与えられた場合、すべての複数選択要素に対して要素のインデックスと要素
+	自体を引数にあたえて評価し、{Filterexpr} が真 |TRUE| を返す要素のみを
+	返します。 >
+		let list = s:multiselector.enumerate(
+		         \ {index, item -> item.head[2] != 2})
+		" list == [[0, item1], [2, item3]]
+<
+
+					*multiselect-Multiselector.itemnum()*
+Multiselector.itemnum([{Filterexpr}])    [method]
+	現在の複数選択の数を返します。 >
+		call s:multiselector.uncheckall()
+		let item1 = s:Multiselect.Item([0, 1, 1, 0], [0, 1, 1, 0])
+		let item2 = s:Multiselect.Item([0, 1, 2, 0], [0, 1, 2, 0])
+		let item3 = s:Multiselect.Item([0, 1, 3, 0], [0, 1, 3, 0])
+		let itemlist = [item1, item2, item3]
+		call s:multiselector.append(itemlist)
+
+		let nr = s:multiselector.itemnum()
+		" nr == 3
+<
+	{Filterexpr} は二つの引数を取る関数参照 |Funcref| です。{Filterexpr}
+	が与えられた場合、すべての複数選択要素に対して要素のインデックスと要素
+	自体を引数にあたえて評価し、{Filterexpr} が真 |TRUE| を返す要素の数を
+	返します。 >
+		" 1行目に存在する複数選択の数を返す
+		call s:multiselector.itemnum({i, item -> item.head[1] == 1})
+<
+
+					*multiselect-Multiselector.isempty()*
+Multiselector.isempty()    [method]
+	複数選択が存在しなければ真 |TRUE| が、存在すれば偽 |FALSE| が返りま
+	す。 >
+		call s:multiselector.uncheckall()
+		let bool = s:multiselector.isempty()
+		" bool is 1
+
+		let item1 = s:Multiselect.Item([0, 1, 1, 0], [0, 1, 1, 0])
+		let item2 = s:Multiselect.Item([0, 1, 2, 0], [0, 1, 2, 0])
+		let item3 = s:Multiselect.Item([0, 1, 3, 0], [0, 1, 3, 0])
+		let itemlist = [item1, item2, item3]
+		call s:multiselector.append(itemlist)
+
+		let bool = s:multiselector.isempty()
+		" bool is 0
+<
+
+				*multiselect-Multiselector.lastevent()*
+Multiselector.lastevent()    [method]
+	最後に行った複数選択の選択・選択解除の情報を返します。情報は以下のキー
+	をもつ辞書 |Dictionary| です。
+	  event: 最後に行われた操作 "check" か "uncheck" です
+	  itemlist: 最後に選択・解除された要素のリストです
+>
+		call s:multiselector.uncheckall()
+		let item1 = s:Multiselect.Item([0, 1, 1, 0], [0, 1, 1, 0])
+		let item2 = s:Multiselect.Item([0, 1, 2, 0], [0, 1, 2, 0])
+		let item3 = s:Multiselect.Item([0, 1, 3, 0], [0, 1, 3, 0])
+		let itemlist = [item1, item2, item3]
+		call s:multiselector.append(itemlist)
+
+		let last = s:multiselector.lastevent()
+		" last.event ==# 'check'
+		" last.itemlist == [item1, item2, item3]
+
+		call s:multiselector.remove(-1)
+
+		let last = s:multiselector.lastevent()
+		" last.event ==# 'uncheck'
+		" last.itemlist == [item3]
+<
+	|multiselect-Multiselector.uncheckall()|
+	|multiselect-Multiselect.Item()|
+	|multiselect-Multiselector.append()|
+	|multiselect-Multiselector.remove()|
+
+
+					*multiselect-Multiselector.show()*
+Multiselector.show()    [method]
+	複数選択要素をすべてハイライトします。
+
+	`Multiselector.quench()` メソッドでハイライトを消さなければ使う必要は
+	ありません。 |multiselect-Multiselector.quench()|
+>
+		" 複数選択をかくす
+		call s:multiselector.quench()
+
+		" もう一度ハイライトする
+		call s:multiselector.show()
+<
+
+					*multiselect-Multiselector.quench()*
+Multiselector.quench()    [method]
+	複数選択のハイライトをすべて消します。選択を解除するわけではありませ
+	ん。 |multiselect-Multiselector.show()| メソッドでもう一度ハイライトで
+	きます。
+>
+		" 複数選択をかくす
+		call s:multiselector.quench()
+
+		" もう一度ハイライトする
+		call s:multiselector.show()
+<
+
+  - イベントコントロール
+					*multiselect-Multiselector.event()*
+Multiselector.event({event})    [method]
+	{event} で指定された自動コマンドイベントに紐づけられた `EventTask` ク
+	ラスインスタンスを返します。これは `Multiselector` インスタンス自身の
+	制御のために使われます。 |multiselect-class-EventTask|
+
+	`Multiselector` インスタンスの制御のために次の自動コマンドイベントに対
+	して `EventTask` インスタンスを準備します。
+	 |BufLeave|, |TabLeave|, |CmdwinEnter|, |CmdwinLeave|, |TextChanged|,
+	|InsertEnter|, |WinNew|
+
+	|BufLeave| イベントで初期化処理が実行されます。すべての複数選択を解除
+	し、 |multiselect-Multiselector.bufnr| を -1 に設定します。
+
+	|TabLeave| イベントで初期化処理が実行されます。すべての複数選択を解除
+	し、 |multiselect-Multiselector.bufnr| を -1 に設定します。
+
+	|CmdwinEnter| イベントで中断処理が実行されます。今までの複数選択は保存
+	され、コマンドラインウィンドウ　|command-line-window| 用の
+	`Multiselector.itemlist` に切り替わります。
+
+	|CmdwinLeave| イベントでは初期化処理が走ったのちに復帰処理が実行されま
+	す。中断処理で保存された情報を復元します。
+
+	|TextChanged| イベントですべての複数選択を選択解除します。
+
+	|InsertEnter| イベントですべての複数選択を選択解除します。
+
+	新しいウィンドウが開かれ、現在と同じバッファを表示している場合、
+	|WinNew| イベントで選択位置ハイライトの同期処理が実行されます。
+
+
+
+------------------------------------------------------------------------------
+Region クラス~
+					*multiselect-class-Region*
+
+The constructor of `Region` class is available with `Multiselect` module.
+|multiselect-Multiselect.Region()|
+
+					*multiselect-Region.head*
+Region.head    [list]
+	This is the head position of the `Region` on a buffer. It is an
+	four-item list and can be used for the argument of |setpos()|. >
+		let head = [0, 1, 1, 0]
+		let tail = [0, 1, 3, 0]
+		let region = s:Multiselect.Region(head, tail, 'char')
+
+		call setpos('.', region.head)
+		" getpos('.') == head
+<
+
+					*multiselect-Region.tail*
+Region.tail    [list]
+	This is the tail position of the `Region` on a buffer. It is an
+	four-item list and can be used for the argument of |setpos()|. >
+		let head = [0, 1, 1, 0]
+		let tail = [0, 1, 3, 0]
+		let region = s:Multiselect.Region(head, tail, 'char')
+
+		call setpos('.', region.tail)
+		" getpos('.') == tail
+<
+
+					*multiselect-Region.type*
+Region.type    [string]
+	This is a string standing for the type of the `Region`; "char", "line"
+	or "block".
+
+
+					*multiselect-Region.extended*
+Region.extended    [boolean]
+	This is a boolean which is effective only when the `Region` is
+	block-wise. It is |TRUE| if the end column of each line is extended to
+	the end of line, otherwise |FALSE| (0). See |v_$|.
+
+
+					*multiselect-Region.select()*
+Region.select()    [method]
+	This method selects the area of `Region`.
+	  - Example: Delete a Region >
+		let head = [0, 1, 1, 0]
+		let tail = [0, 1, 3, 0]
+		let region = s:Multiselect.Region(head, tail, 'char')
+
+		call region.select()
+		normal! d
+<
+	  This is almost same as: >
+		normal! v
+		call setpos('.', [0, 1, 1, 0])
+		normal! o
+		call setpos('.', [0, 1, 3, 0])
+		normal! d
+<
+	This method can handle also line-wise and block-wise region
+	appropriately.
+
+
+					*multiselect-Region.yank()*
+Region.yank()    [method]
+	This method yank the text of the `Region` and return the string. >
+		call setline(1, 'foo bar baz')
+		let head = [0, 1, 5, 0]
+		let tail = [0, 1, 7, 0]
+		let region = s:Multiselect.Region(head, tail, 'char')
+		let text = region.yank()
+		echo text   " bar
+<
+
+					*multiselect-Region.includes()*
+Region.includes({head}[, {tail}[, {type}[, {extended}]]])    [method]
+Region.includes({lnum})
+Region.includes({startlnum}, {endlnum})
+Region.includes({region})
+	This method returns |TRUE| if the `Region` instance includes an
+	assigned region, otherwise |FALSE|.
+
+	The arguments are common with `Multiselect.Region()`, and additionally
+	an instance of `Region` class or its subclasses is also acceptable.
+	|multiselect-Multiselect.Region()| >
+		let head = [0, 1, 2, 0]
+		let tail = [0, 1, 4, 0]
+		let region1 = s:Multiselect.Region(head, tail, 'char')
+
+		let bool = region1.includes([0, 1, 1, 0])
+		" bool is FALSE
+
+		let bool = region1.includes([0, 1, 2, 0])
+		" bool is TRUE
+
+		let bool = region1.includes(region1)
+		" bool is TRUE
+
+		let head = [0, 1, 1, 0]
+		let tail = [0, 1, 3, 0]
+		let region2 = s:Multiselect.Region(head, tail, 'char')
+		let bool = region1.includes(region2)
+		" bool is FALSE
+
+		let head = [0, 1, 2, 0]
+		let tail = [0, 1, 3, 0]
+		let region3 = s:Multiselect.Region(head, tail, 'char')
+		let bool = region1.includes(region3)
+		" bool is TRUE
+<
+
+					*multiselect-Region.isinside()*
+Region.isinside({head}[, {tail}[, {type}[, {extended}]]])    [method]
+Region.isinside({lnum})
+Region.isinside({startlnum}, {endlnum})
+Region.isinside({region})
+	This method returns |TRUE| if the `Region` instance is inside an
+	assigned region, otherwise |FALSE|.
+
+	The arguments are common with `Multiselect.Region()`, and additionally
+	an instance of `Region` class or its subclasses is also acceptable.
+	|multiselect-Multiselect.Region()| >
+		let head = [0, 1, 2, 0]
+		let tail = [0, 1, 4, 0]
+		let region1 = s:Multiselect.Region(head, tail, 'char')
+
+		let bool = region1.isinside(region1)
+		" bool is TRUE
+
+		let head = [0, 1, 1, 0]
+		let tail = [0, 1, 3, 0]
+		let region2 = s:Multiselect.Region(head, tail, 'char')
+		let bool = region1.isinside(region2)
+		" bool is FALSE
+
+		let head = [0, 1, 2, 0]
+		let tail = [0, 1, 3, 0]
+		let region3 = s:Multiselect.Region(head, tail, 'char')
+		let bool = region1.isinside(region3)
+		" bool is FALSE
+
+		let head = [0, 1, 1, 0]
+		let tail = [0, 1, 5, 0]
+		let region4 = s:Multiselect.Region(head, tail, 'char')
+		let bool = region1.isinside(region4)
+		" bool is TRUE
+<
+
+					*multiselect-Region.touches()*
+Region.touches({head}[, {tail}[, {type}[, {extended}]]])    [method]
+Region.touches({lnum})
+Region.touches({startlnum}, {endlnum})
+Region.touches({region})
+	This method returns |TRUE| if the `Region` instance is touching an
+	assigned region, otherwise |FALSE|.
+
+	The arguments are common with `Multiselect.Region()`, and additionally
+	an instance of `Region` class or its subclasses is also acceptable.
+	|multiselect-Multiselect.Region()| >
+		let head = [0, 1, 2, 0]
+		let tail = [0, 1, 4, 0]
+		let region1 = s:Multiselect.Region(head, tail, 'char')
+
+		let bool = region1.touches([0, 1, 1, 0])
+		" bool is FALSE
+
+		let bool = region1.touches([0, 1, 2, 0])
+		" bool is TRUE
+
+		let bool = region1.touches([0, 1, 4, 0])
+		" bool is TRUE
+
+		let bool = region1.touches([0, 1, 5, 0])
+		" bool is FALSE
+
+		let bool = region1.touches(region1)
+		" bool is TRUE
+
+		let head = [0, 1, 1, 0]
+		let tail = [0, 1, 2, 0]
+		let region2 = s:Multiselect.Region(head, tail, 'char')
+		let bool = region1.touches(region2)
+		" bool is FALSE
+
+		let head = [0, 1, 1, 0]
+		let tail = [0, 1, 3, 0]
+		let region3 = s:Multiselect.Region(head, tail, 'char')
+		let bool = region1.touches(region3)
+		" bool is TRUE
+
+		let head = [0, 1, 4, 0]
+		let tail = [0, 1, 6, 0]
+		let region4 = s:Multiselect.Region(head, tail, 'char')
+		let bool = region1.touches(region4)
+		" bool is TRUE
+
+		let head = [0, 1, 5, 0]
+		let tail = [0, 1, 6, 0]
+		let region5 = s:Multiselect.Region(head, tail, 'char')
+		let bool = region1.touches(region5)
+		" bool is FALSE
+<
+
+
+------------------------------------------------------------------------------
+Item class~
+					*multiselect-class-Item*
+
+The constructor of `Item` class is available with `Multiselect` module.
+|multiselect-Multiselect.Item()|
+
+`Item` class is a subclass of `Region` class, thus `Item` class inherites all
+the properties of `Region` class.
+
+					*multiselect-Item.id*
+Item.id    [number]
+	This is a number specific for each item.
+
+
+					*multiselect-Item.bufnr*
+Item.bufnr    [number]
+	This is a buffer number of the item belonging to.
+
+
+					*multiselect-Item.head*
+Item.head    [list]
+	See |multiselect-Region.head|.
+
+
+					*multiselect-Item.tail*
+Item.tail    [list]
+	See |multiselect-Region.tail|.
+
+
+					*multiselect-Item.type*
+Item.type    [string]
+	See |multiselect-Region.type|.
+
+
+					*multiselect-Item.extended*
+Item.extended    [boolean]
+	See |multiselect-Region.extended|.
+
+
+					*multiselect-Item.select()*
+Item.select()    [method]
+	See |multiselect-Region.select()|.
+
+
+					*multiselect-Item.yank()*
+Item.yank()    [method]
+	See |multiselect-Region.yank()|.
+
+
+					*multiselect-Item.includes()*
+Item.includes()    [method]
+	See |multiselect-Region.includes()|.
+
+
+					*multiselect-Item.isinside()*
+Item.isinside()    [method]
+	See |multiselect-Region.isinside()|.
+
+
+					*multiselect-Item.touches()*
+Item.touches()    [method]
+	See |multiselect-Region.touches()|.
+
+
+					*multiselect-Item.show()*
+Item.show({higroup})    [method]
+	This is a method to highlight the item region on a buffer. It will be
+	highlighted by {higroup}. |highlight-groups|
+
+
+					*multiselect-Item.quench()*
+Item.quench()    [method]
+	This is a method to turn off the highlight of the item.
+
+
+					*multiselect-Item.isshownin()*
+Item.isshownin([{winid}])    [method]
+	This method returns |TRUE| if the item is highlighted in the window
+	pointed by {winid}. {winid} is a return value of |win_getid()|. If it
+	is omitted, it returns the status of the current window.
+
+
+
+------------------------------------------------------------------------------
+Change class~
+					*multiselect-class-Change*
+
+This is an utility class to track a position after deletions and additions of
+texts into the current buffer. It might be useful when a plugin developer
+makes a new plugin to do well with |multiselect.vim|
+
+Note that the `Change` class instance cannot track the change by 'autoindent'
+option and its relatives ('smartindent', 'cindent', 'indentexpr') perfectly.
+
+					*multiselect-Change.beforedelete()*
+Change.beforedelete({head}[, {tail}[, {type}[, {extended}]]])    [method]
+Change.beforedelete({lnum})
+Change.beforedelete({startlnum}, {endlnum})
+Change.beforedelete({region})
+	This method should be called before deleting a text on the current
+	buffer to record the region. The deletion is regarded as an
+	|inclusive| delete action. Thus the last character pointed by {tail}
+	is included.
+
+	This method returns the `Change` instance itself.
+
+
+					*multiselect-Change.afterinsert()*
+Change.afterinsert({head}[, {tail}[, {type}[, {extended}]]])    [method]
+Change.afterinsert({lnum})
+Change.afterinsert({startlnum}, {endlnum})
+Change.afterinsert({region})
+	This method should be called after adding a text into the current
+	buffer to record the region. The {tail} should point the ending edge
+	of the insertion.
+
+	This method returns the `Change` instance itself.
+
+
+					*multiselect-Change.apply()*
+Change.apply({pos})    [method]
+Change.apply({region})
+	This method calculates the position after a series of editings.
+	This method updates the position (or a `Region` instance) in-place and
+	returns it.
+
+	NOTE: Change.apply() may not be effective with a lot of items.
+	      Use Change.mapapply() for the case.
+	      |multiselect-Change.mapapply()|
+
+
+					*multiselect-Change.mapapply()*
+Change.mapapply({itemlist})    [method]
+	This method returns the same result with: >
+		call map({itemlist}, 'change.apply(v:val)')
+<
+	but faster if the number of items in {itemlist} is larger. {itemlist}
+	should be a list of positions or `Region` class instances.
+
+
+  - Usage
+The current buffer is like this. >
+	foo bar baz
+<
+For example, if you want to track the cursor position after an edit, you
+need to save the cursor position. >
+	let curpos = getpos('.')
+<
+The cursor is on the 'z' of "baz" and then you are going to delete "bar" and
+insert "x" instead.
+Before deleting, you need to call `Change.beforedelete()`. >
+	let bar = s:Multiselect.Region([0, 1, 5, 0], [0, 1, 7, 0], 'char')
+	let change = s:Multiselect.Change()
+	call change.beforedelete(bar)
+<
+Edit the buffer. >
+	call bar.select()
+	normal! cx
+<
+Now the buffer is: >
+	foo x baz
+<
+After inserting a text, you need to call `Change.afterinsert()`. >
+	call change.afterinsert(getpos("'["), getpos("']"), 'char')
+<
+After those processes, use `Change.apply()` to update the cursor position. >
+	call change.apply(curpos)
+	" curpos == [0, 1, 9, 0]
+<
+Finally you can move the cursor to the new position taking into account the
+last edit. >
+	call setpos('.', curpos)
+<
+
+
+------------------------------------------------------------------------------
+NeatTask class~
+					*multiselect-class-NeatTask*
+
+`NeatTask` class is used to assemble several processes and trigger them all at
+onece. The processes are registered via |multiselect-NeatTask.call()|,
+|multiselect-NeatTask.execute()| and |multiselect-NeatTask.append()|. >
+	function! s:sayfoo() abort
+		echo 'foo'
+	endfunction
+
+	let task = s:Multiselect.NeatTask()
+	call task.call(function('s:sayfoo'), [])
+	call task.execute('echo "foo"')
+<
+
+Those tasks are executed to call |multiselect-NeatTask.trigger()|, it executes
+them in the order of registration. >
+	call task.trigger()
+<
+
+`NeatTask` can have its life time. |multiselect-NeatTask.repeat()| sets the
+number of executions, and after the number of executions
+|multiselect-NeatTask.trigger()| does nothing. >
+	let neattask = s:Multiselect.NeatTask()
+	call neattask.execute('echo "foo"').repeat(1)
+
+	" echo 'foo'
+	call neattask.trigger()
+
+	" does nothing
+	call neattask.trigger()
+<
+
+`NeatTask` has its internal switch and it can be temporary off by
+|multiselect-NeatTask.skip()|. >
+	let neattask = s:Multiselect.NeatTask()
+	call neattask.execute('echo "foo"').skip(1)
+
+	" does nothing
+	call neattask.trigger()
+
+	" echo 'foo'
+	call neattask.trigger()
+<
+
+					*multiselect-NeatTask.call()*
+NeatTask.call({Funcref}, {args}[, {dict}])    [method]
+	This method registers a task to call a |Funcref| with a |List| of
+	{args} as arguments and set it for the event. {dict} is for functions
+	with the "dict" attribute. It will be used to set the local variable
+	"self". |Dictionary-function| This method returns the task itself.
+>
+		function! s:sayfoo() abort
+		    echo 'foo'
+		endfunction
+
+		" make a new task
+		let neattask = s:Multiselect.NeatTask()
+		call neattask.call(function('s:sayfoo'), [])
+
+		" trigger the task
+		call task.trigger()
+<
+
+					*multiselect-NeatTask.execute()*
+NeatTask.execute({cmd})    [method]
+	This method registers a task to execute an Ex command. This method
+	returns the task itself.  >
+		" make a new task
+		let neattask = s:Multiselect.NeatTask().execute('echo "foo"')
+
+		" trigger the task
+		call task.trigger()
+<
+
+					*multiselect-NeatTask.append()*
+NeatTask.append({task})    [method]
+	This method registers a task to trigger other tasks. {task} should be
+	an instance of `NeatTask` class or its subclasses. This method returns
+	the task itself. >
+		" make new tasks
+		let task = s:Multiselect.NeatTask().execute('echo "foo"')
+		let neattask = s:Multiselect.NeatTask().append(task)
+
+		" trigger the task
+		call neattask.trigger()
+<
+
+					*multiselect-NeatTask.trigger()*
+NeatTask.trigger([{forcibly}])    [method]
+	This method executes all the registered tasks.
+	This method returns the `NeatTask` instance itself.
+
+	If {forcibly} is given and it is |TRUE|, this method triggers the
+	registered task even if the task has already done.
+	|multiselect-NeatTask.hasdone()|
+
+
+					*multiselect-NeatTask.clear()*
+NeatTask.clear()    [method]
+	This method clears all registered tasks. This method returns the
+	`NeatTask` instance itself.
+
+
+					*multiselect-NeatTask.clone()*
+NeatTask.clone()    [method]
+	This method returns another `NeatTask` instance which have the same
+	task with itself.
+
+
+					*multiselect-NeatTask.isactive()*
+NeatTask.isactive()    [method]
+	This method returns |TRUE| if the `NeatTask` is active, |FALSE|
+	if it is not active.
+
+
+					*multiselect-NeatTask.skip()*
+NeatTask.skip([{count}])    [method]
+	If this method is called, the following `NeatTask` is skipped
+	(not executed) {count} times. {count} is 1 if omitted. If {count} is
+	less than 1, the skip count would be reset and the task will not skip
+	after that. This method returns the `NeatTask` itself. >
+		let neattask = s:Multiselect.NeatTask()
+		call neattask.execute('echo "foo"').skip(1)
+
+		" does nothing
+		call neattask.trigger()
+
+		" echo 'foo'
+		call neattask.trigger()
+<
+
+
+					*multiselect-NeatTask.repeat()*
+NeatTask.repeat([{count}])    [method]
+	This method sets the number of execution. If {count} is negative, the
+	`NeatTask` will be persistent. An `NeatTask` instance is produced as
+	it is 1 in default. If {count} is omitted, it will reset the number
+	of execution to the one last set. >
+		" 'foo' will be displayed three times
+		let neattask = s:Multiselect.NeatTask()
+					   \.execute('echo "foo"')
+					   \.repeat(3)
+
+		call neattask.trigger()
+		call neattask.trigger()
+		call neattask.trigger()
+		call neattask.trigger() " does nothing
+<
+	This method returns the task itself.
+
+
+					*multiselect-NeatTask.leftcount()*
+NeatTask.leftcount()    [method]
+	This method returns the left number of execution.
+	See |multiselect-NeatTask.repeat()|.
+
+
+					*multiselect-NeatTask.hasdone()*
+NeatTask.hasdone()    [method]
+	This method returns |TRUE| if the task has done {count} times
+	specified by |multiselect-NeatTask.repeat()|, otherwise |FALSE|.
+
+
+
+------------------------------------------------------------------------------
+EventTask class~
+					*multiselect-class-EventTask*
+
+`EventTask` class is used to hook processes for |autocmd-events|. It is a
+subclass of `NeatTask` class and automatically triggered by an autocmd event.
+|multiselect-class-NeatTask|
+
+`EventTask` class instance has the same methods with that of `NeatTask` class,
+and additionally |multiselect-EventTask.start()| and
+|multiselect-EventTask.stop()|.
+
+|multiselect-EventTask.start()| sets the task to an autocmd event. An
+`EventTask` is repeated forever in default.
+
+Its life time can be set by |multiselect-EventTask.repeat()|.
+
+If the purpose of the task has achieved, use |multiselect-EventTask.stop()|. >
+	function! s:sayfoo() abort
+		echo 'foo'
+	endfunction
+
+	let eventtask = s:Multiselect.EventTask()
+	call eventtask.call(function('s:sayfoo'), [])
+	call eventtask.execute('echo "foo"')
+	call eventtask.start('TextChanged')
+
+	" finish the task
+	call eventtask.stop()
+<
+
+					*multiselect-EventTask.start()*
+EventTask.start({name})    [method]
+	This method sets the task itself to an autocmd event. {name} should be
+	an autocmd event name. An `EventTask` instance can be bound to only an
+	event. If you need multiple triggers, use
+	|multiselect-class-RaceTask|.
+
+	If you have achieved the purpose of the task, you can
+	stop the task by calling |multiselect-EventTask.stop()|. >
+		function! s:sayfoo() abort
+		    echo 'foo'
+		endfunction
+
+		" make and set a new task to 'TextChanged' event
+		let task = s:Multiselect.EventTask()
+					\.call(function('s:sayfoo'), [])
+					\.start('TextChanged')
+
+		" finish the task
+		call task.stop()
+<
+	Or use |multiselect-EventTask.repeat()| to finish after a certain
+	number of callings. >
+		" it will be abandoned after three times callings
+		let task = s:Multiselect.EventTask()
+					\.execute('echo "foo"')
+					\.repeat(3)
+					\.start('TextChanged')
+<
+	This method returns the task itself.
+
+
+					*multiselect-EventTask.stop()*
+EventTask.stop()    [method]
+	This method stops the execution of the event task.
+
+
+					*multiselect-EventTask.call()*
+EventTask.call({Funcref}, {args}[, {dict}])    [method]
+	See |multiselect-NeatTask.call()|.
+
+
+					*multiselect-EventTask.execute()*
+EventTask.execute({cmd})    [method]
+	See |multiselect-NeatTask.execute()|.
+
+
+					*multiselect-EventTask.append()*
+EventTask.append({task})    [method]
+	See |multiselect-NeatTask.append()|.
+
+
+					*multiselect-EventTask.trigger()*
+EventTask.trigger([{forcibly}])    [method]
+	See |multiselect-NeatTask.trigger()|.
+
+
+					*multiselect-EventTask.clear()*
+EventTask.clear()    [method]
+	See |multiselect-NeatTask.clear()|.
+
+
+					*multiselect-EventTask.clone()*
+EventTask.clone()    [method]
+	See |multiselect-NeatTask.clone()|.
+
+
+					*multiselect-EventTask.isactive()*
+EventTask.isactive()    [method]
+	See |multiselect-NeatTask.isactive()|.
+
+
+					*multiselect-EventTask.skip()*
+EventTask.skip([{count}])    [method]
+	See |multiselect-NeatTask.skip()|.
+
+
+					*multiselect-EventTask.repeat()*
+EventTask.repeat([{count}])    [method]
+	See |multiselect-NeatTask.repeat()|.
+
+
+					*multiselect-EventTask.leftcount()*
+EventTask.leftcount()    [method]
+	See |multiselect-NeatTask.leftcount()|.
+
+
+					*multiselect-EventTask.hasdone()*
+EventTask.hasdone()    [method]
+	See |multiselect-NeatTask.hasdone()|.
+
+
+
+------------------------------------------------------------------------------
+TimerTask class~
+					*multiselect-class-TimerTask*
+
+`TimerTask` is used to delay the execution of tasks. It is a subclass of
+`NeatTask` class and automatically triggered by a delay time.
+See |multiselect-class-NeatTask|.
+
+`TimerTask` class instance has the same methods with that of `NeatTask` class,
+and additionally |multiselect-TimerTask.start()| and
+|multiselect-TimerTask.stop()|.
+
+|multiselect-TimerTask.start()| sets the delay time and start counting down,
+after the delay time the registered tasks are executed. `TimerTask` finishes
+after an action in default, this number of execution can be changed by
+|multiselect-TimerTask.repeat()|. If you want to stop a started `TimerTask`
+before the last execution, you can use |multiselect-TimerTask.stop()|. >
+	function! s:sayfoo() abort
+		echo 'foo'
+	endfunction
+
+	let timertask = s:Multiselect.TimerTask()
+	call timertask.call(function('s:sayfoo'), [])
+	call timertask.execute('echo "foo"')
+	call timertask.start(100)
+<
+
+					*multiselect-TimerTask.start()*
+TimerTask.start({time})    [method]
+	This method sets the delay time and start counting down.
+	This method returns the task itself. >
+		function! s:sayfoo() abort
+			echo 'foo'
+		endfunction
+
+		" make and start a new task executed after 100 millisecond
+		let task  = s:Multiselect.TimerTask()
+					\.call(function('s:sayfoo'), [])
+					\.start(100)
+<
+
+					*multiselect-TimerTask.stop()*
+TimerTask.stop()    [method]
+	This method stops to cancell the delayed task.
+	This method returns the task itself.
+
+
+					*multiselect-TimerTask.call()*
+TimerTask.call({Funcref}, {args}[, {dict}])    [method]
+	See |multiselect-NeatTask.call()|.
+
+
+					*multiselect-TimerTask.execute()*
+TimerTask.execute({cmd})    [method]
+	See |multiselect-NeatTask.execute()|.
+
+
+					*multiselect-TimerTask.append()*
+TimerTask.append({task})    [method]
+	See |multiselect-NeatTask.append()|.
+
+
+					*multiselect-TimerTask.trigger()*
+TimerTask.trigger([{forcibly}])    [method]
+	See |multiselect-NeatTask.trigger()|.
+
+
+					*multiselect-TimerTask.clear()*
+TimerTask.clear()    [method]
+	See |multiselect-NeatTask.clear()|.
+
+
+					*multiselect-TimerTask.clone()*
+TimerTask.clone()    [method]
+	See |multiselect-NeatTask.clone()|.
+
+
+					*multiselect-TimerTask.isactive()*
+TimerTask.isactive()    [method]
+	See |multiselect-NeatTask.isactive()|.
+
+
+					*multiselect-TimerTask.skip()*
+TimerTask.skip([{count}])    [method]
+	See |multiselect-NeatTask.skip()|.
+
+
+					*multiselect-TimerTask.repeat()*
+TimerTask.repeat([{count}])    [method]
+	See |multiselect-NeatTask.repeat()|.
+
+
+					*multiselect-TimerTask.leftcount()*
+TimerTask.leftcount()    [method]
+	See |multiselect-NeatTask.leftcount()|.
+
+
+					*multiselect-TimerTask.hasdone()*
+TimerTask.hasdone()    [method]
+	See |multiselect-NeatTask.hasdone()|.
+
+
+
+------------------------------------------------------------------------------
+RaceTask class~
+					*multiselect-class-RaceTask*
+
+`RaceTask` class is a subclass of `NeatTask` class which can have multiple
+automatic triggers, autocmd events and a delay time.
+See also |multiselect-class-NeatTask|
+	 |multiselect-class-EventTask|
+	 |multiselect-class-TimerTask|.
+
+`RaceTask` class instance has the same methods with that of `NeatTask` class,
+and additionally |multiselect-RaceTask.start()| and
+|multiselect-RaceTask.stop()|.
+
+`RaceTask` will be executed once by either one of registered auto-triggers in
+default. The number of execution can be changed by
+|multiselect-RaceTask.repeat()|.
+
+
+					*multiselect-RaceTask.start()*
+RaceTask.start({triggers})    [method]
+	This method starts to wait for an auto-trigger. {triggers} is a list
+	of trigger names. If one of the item is |String|, it is regarded as an
+	autocmd event. If it is |Number|, it is regarded as an delay time. >
+		let task = s:Multiselect.RaceTask().execute('echo "foo"')
+		call task.start(['TextChanged', 100])
+<
+	This method returns the task itself. However, note that if
+	{triggerlist} does not contain any valid trigger item, this method
+	returns an empty dictionary.
+
+
+					*multiselect-RaceTask.stop()*
+RaceTask.stop()    [method]
+	This method stops to execute the registered tasks.
+
+
+					*multiselect-RaceTask.call()*
+RaceTask.call({Funcref}, {args}[, {dict}])    [method]
+	See |multiselect-NeatTask.call()|.
+
+
+					*multiselect-RaceTask.execute()*
+RaceTask.execute({cmd})    [method]
+	See |multiselect-NeatTask.execute()|.
+
+
+					*multiselect-RaceTask.append()*
+RaceTask.append({task})    [method]
+	See |multiselect-NeatTask.append()|.
+
+
+					*multiselect-RaceTask.trigger()*
+RaceTask.trigger([{forcibly}])    [method]
+	See |multiselect-NeatTask.trigger()|.
+
+
+					*multiselect-RaceTask.clear()*
+RaceTask.clear()    [method]
+	See |multiselect-NeatTask.clear()|.
+
+
+					*multiselect-RaceTask.isactive()*
+RaceTask.isactive()    [method]
+	See |multiselect-NeatTask.isactive()|.
+
+
+					*multiselect-RaceTask.skip()*
+RaceTask.skip([{count}])    [method]
+	See |multiselect-NeatTask.skip()|.
+
+
+					*multiselect-RaceTask.repeat()*
+RaceTask.repeat([{count}])    [method]
+	See |multiselect-NeatTask.repeat()|.
+
+
+					*multiselect-RaceTask.leftcount()*
+RaceTask.leftcount()    [method]
+	See |multiselect-NeatTask.leftcount()|.
+
+
+					*multiselect-RaceTask.hasdone()*
+RaceTask.hasdone()    [method]
+	See |multiselect-NeatTask.hasdone()|.
+
+
+
+------------------------------------------------------------------------------
+TaskChain class~
+					*multiselect-class-TaskChain*
+
+`TaskChain` class makes a task triggered by a successive sequence of autocmd
+events and timers.
+
+Use |multiselect-TaskChain.event()|, |multiselect-TaskChain.timer()| and
+|multiselect-TaskChain.race()| to make a sequence, and set tasks to the
+return value of these method. These method returns a `NeatTask` instance to
+set tasks for a step of sequence. Its number of execution is set as 1 in
+default but you can change it by |multiselect-NeatTask.repeat()|. >
+	let taskchain = s:Multiselect.TaskChain()
+	let task1 = taskchain.event('InsertLeave')
+	let task2 = taskchain.event('CursorMoved')
+	call task2.execute('echo "foo"')
+	call taskchain.start()
+<
+This example shows a message "foo" after leaving insert mode and then moving
+cursor. You can write shorter: >
+	let taskchain = s:Multiselect.TaskChain()
+	call taskchain.event('InsertLeave')
+	call taskchain.event('CursorMoved').execute('echo "foo"')
+	call taskchain.start()
+<
+
+					*multiselect-TaskChain.event()*
+TaskChain.event({event})    [method]
+	This method registers a task to the autocmd event. {event} should be
+	a name of autocmd event. |autocmd-events| This method returns a
+	`NeatTask` instance bound to the autocmd event. Its number of
+	execution is set as 1 in default >
+		let taskchain = s:Multiselect.TaskChain()
+		let task1 = taskchain.event('InsertEnter')
+		let task2 = taskchain.event('CursorMoved')
+		call task1.execute('echo "InsertEnter"')
+		call task2.execute('echo "CursorMoved"')
+		call taskchain.start()
+<
+	"InsertEnter" will be echoed at the first |InsertEnter| event, then
+	wait for |CursorMovedI| event to echo "CursorMovedI".
+	|multiselect-class-NeatTask|
+	|multiselect-NeatTask.repeat()|
+
+
+					*multiselect-TaskChain.timer()*
+TaskChain.timer({time})    [method]
+	This method registers a timer task. {time} is a delay time duration.
+	This method returns a `NeatTask` instance triggered after {time}
+	millisecond later. Its number of execution is set as 1 in default. >
+		let taskchain = s:Multiselect.TaskChain()
+		let task1 = taskchain.timer(1000)
+		let task2 = taskchain.timer(5000)
+		call task1.execute('echo "1s passed"')
+		call task2.execute('echo "6s passed"')
+		call taskchain.start()
+<
+	You will see the message "1s passed" 1 second later and then "6s
+	passed" will displayed after an additional 5 seconds.
+	|multiselect-class-NeatTask|
+	|multiselect-NeatTask.repeat()|
+
+
+					*multiselect-TaskChain.race()*
+TaskChain.race({triggerlist})    [method]
+	This method registers a multiple-triggered task. {triggers} is a list
+	of trigger names. If one of the item is |String|, it is regarded as an
+	autocmd event. If it is |Number|, it is regarded as an delay time.
+	This method returns a `NeatTask` instance to be called by either one
+	of those triggers. Its number of execution is set as 1 in default.
+	Note that if {triggerlist} does not contain any valid trigger item,
+	this method returns an empty dictionary. >
+		let taskchain = s:Multiselect.TaskChain()
+		let task1 = taskchain.event('CmdwinLeave')
+		let task2 = taskchain.race(['CursorMoved', 1000])
+		call task2.execute('echo "original buffer"')
+		call taskchain.start()
+<
+	After leaving |cmdline-window|, you will see the message "original
+	buffer" if you move cursor or wait for 1 second.
+	|multiselect-class-NeatTask|
+	|multiselect-NeatTask.repeat()|
+
+
+					*multiselect-TaskChain.trigger()*
+TaskChain.trigger()    [method]
+	This method executes the next task. This method returns the taskchain
+	itself.
+
+
+					*multiselect-TaskChain.start()*
+TaskChain.start()    [method]
+	This method starts the taskchain, after calling this method it waits
+	for the first trigger to move for the next task.
+
+
+					*multiselect-TaskChain.stop()*
+TaskChain.stop()    [method]
+	This method stops an execution of the taskchain.
+
+
+					*multiselect-TaskChain.repeat()*
+TaskChain.repeat()    [method]
+	This method sets the number of execution. The default value is 1.
+
+
+					*multiselect-TaskChain.leftcount()*
+TaskChain.leftcount()    [method]
+	This method returns the left number of execution.
+	See |multiselect-TaskChain.repeat()|.
+
+
+					*multiselect-TaskChain.hasdone()*
+TaskChain.hasdone()    [method]
+	This method returns |TRUE| if the task has done {count} times
+	specified by |multiselect-TaskChain.repeat()|, otherwise |FALSE|.
+
+
+
+==============================================================================
+vim:tw=78:ts=8:ft=help:norl:noet::fdl=0:fen:fdm=marker:noet:
