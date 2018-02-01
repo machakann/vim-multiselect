@@ -699,6 +699,7 @@ Multiselect.RaceTask()    [function]
 Multiselect.TaskChain()    [function]
 	This is the constructor of `TaskChain` class. It makes a successive
 	sequence of autocmd events and timers.
+	See |multiselect-class-TaskChain|.
 
 
   - utility functions
