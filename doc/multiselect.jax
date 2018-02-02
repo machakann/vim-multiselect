@@ -931,8 +931,7 @@ Multiselector.check({region})
 	|multiselect-Multiselector.itemlist|
 	|multiselect-class-Item|
 
-	引数は `Multiselect.Region()` と共通ですが、これに加えてひとつの
-	`Region` クラスかその子クラスのインスタンスも有効です。
+	引数は `Multiselect.Region()` と共通です。
 	|multiselect-Multiselect.Region()| >
 		let head = [0, 1, 1, 0]
 		let tail = [0, 3, 3, 0]
@@ -955,8 +954,7 @@ Multiselector.uncheck({startlnum}, {endlnum})
 Multiselector.uncheck({region})
 	指定された範囲に触れている複数選択要素を選択解除します。
 
-	引数は `Multiselect.Region()` と共通ですが、これに加えてひとつの
-	`Region` クラスかその子クラスのインスタンスも有効です。
+	引数は `Multiselect.Region()` と共通です。
 	|multiselect-Multiselect.Region()| >
 		let head = [0, 1, 1, 0]
 		let tail = [0, 3, 1, 0]
@@ -1012,8 +1010,7 @@ Multiselector.emit_inside({region})
 	引数で指定された範囲の中に含まれている複数選択を解除し、その要素のリス
 	トを返します。
 
-	引数は `Multiselect.Region()` と共通ですが、これに加えてひとつの
-	`Region` クラスかその子クラスのインスタンスも有効です。
+	引数は `Multiselect.Region()` と共通です。
 	|multiselect-Multiselect.Region()| >
 		let head = getpos("'<")
 		let tail = getpos("'>")
@@ -1034,8 +1031,7 @@ Multiselector.emit_touching({region})
 	引数で指定された範囲に触れている複数選択を解除し、その要素のリストを返
 	します。
 
-	引数は `Multiselect.Region()` と共通ですが、これに加えてひとつの
-	`Region` クラスかその子クラスのインスタンスも有効です。
+	引数は `Multiselect.Region()` と共通です。
 	|multiselect-Multiselect.Region()| >
 		let curpos = getpos('.')
 		let itemlist = s:multiselector.emit_touching(curpos)
@@ -1459,13 +1455,13 @@ Multiselector.event({event})    [method]
 Region クラス~
 					*multiselect-class-Region*
 
-The constructor of `Region` class is available with `Multiselect` module.
+`Region` クラスのコンストラクタは `Multiselect` モジュールにあります。
 |multiselect-Multiselect.Region()|
 
 					*multiselect-Region.head*
 Region.head    [list]
-	This is the head position of the `Region` on a buffer. It is an
-	four-item list and can be used for the argument of |setpos()|. >
+	そのインスタンスの表す範囲の先頭位置です。 |setpos()| 関数の引数として
+	有効な形式です。 >
 		let head = [0, 1, 1, 0]
 		let tail = [0, 1, 3, 0]
 		let region = s:Multiselect.Region(head, tail, 'char')
@@ -1476,8 +1472,8 @@ Region.head    [list]
 
 					*multiselect-Region.tail*
 Region.tail    [list]
-	This is the tail position of the `Region` on a buffer. It is an
-	four-item list and can be used for the argument of |setpos()|. >
+	そのインスタンスの表す範囲の末尾位置です。 |setpos()| 関数の引数として
+	有効な形式です。 >
 		let head = [0, 1, 1, 0]
 		let tail = [0, 1, 3, 0]
 		let region = s:Multiselect.Region(head, tail, 'char')
@@ -1488,21 +1484,22 @@ Region.tail    [list]
 
 					*multiselect-Region.type*
 Region.type    [string]
-	This is a string standing for the type of the `Region`; "char", "line"
-	or "block".
+	そのインスタンスの表す範囲の種類を表す文字列です。 "char", "line",
+	"block" のどれかで、それぞれ |characterwise-visual|,
+	|linewise-visual|, |blockwise-visual| に相当します。
 
 
 					*multiselect-Region.extended*
 Region.extended    [boolean]
-	This is a boolean which is effective only when the `Region` is
-	block-wise. It is |TRUE| if the end column of each line is extended to
-	the end of line, otherwise |FALSE| (0). See |v_$|.
+	このプロパティはそのインスタンスが矩形範囲を表すときにのみ意味を持ちま
+	す。この値が真 |TRUE| なら、各行の末尾位置は行末へ拡張されます。これは
+	|v_$| が使われた場合に相当します。
 
 
 					*multiselect-Region.select()*
 Region.select()    [method]
-	This method selects the area of `Region`.
-	  - Example: Delete a Region >
+	そのインスタンスの表す範囲をビジュアル選択します。
+	  - Example: 範囲を削除 >
 		let head = [0, 1, 1, 0]
 		let tail = [0, 1, 3, 0]
 		let region = s:Multiselect.Region(head, tail, 'char')
@@ -1510,20 +1507,19 @@ Region.select()    [method]
 		call region.select()
 		normal! d
 <
-	  This is almost same as: >
+	  これは次の操作とほぼ等しくなります。 >
 		normal! v
 		call setpos('.', [0, 1, 1, 0])
 		normal! o
 		call setpos('.', [0, 1, 3, 0])
 		normal! d
 <
-	This method can handle also line-wise and block-wise region
-	appropriately.
+	行単位や矩形範囲についても同様に使用できます。
 
 
 					*multiselect-Region.yank()*
 Region.yank()    [method]
-	This method yank the text of the `Region` and return the string. >
+	そのインスタンスの表す範囲をヤンク |yank| し、その文字列を返します。 >
 		call setline(1, 'foo bar baz')
 		let head = [0, 1, 5, 0]
 		let tail = [0, 1, 7, 0]
@@ -1537,11 +1533,10 @@ Region.includes({head}[, {tail}[, {type}[, {extended}]]])    [method]
 Region.includes({lnum})
 Region.includes({startlnum}, {endlnum})
 Region.includes({region})
-	This method returns |TRUE| if the `Region` instance includes an
-	assigned region, otherwise |FALSE|.
+	そのインスタンスが指定された範囲を内包していれば真 |TRUE| が、そうでな
+	ければ偽 |FALSE| が返ります。
 
-	The arguments are common with `Multiselect.Region()`, and additionally
-	an instance of `Region` class or its subclasses is also acceptable.
+	引数は `Multiselect.Region()` と共通です。
 	|multiselect-Multiselect.Region()| >
 		let head = [0, 1, 2, 0]
 		let tail = [0, 1, 4, 0]
@@ -1574,11 +1569,10 @@ Region.isinside({head}[, {tail}[, {type}[, {extended}]]])    [method]
 Region.isinside({lnum})
 Region.isinside({startlnum}, {endlnum})
 Region.isinside({region})
-	This method returns |TRUE| if the `Region` instance is inside an
-	assigned region, otherwise |FALSE|.
+	そのインスタンスが指定された範囲に内包されていれば真 |TRUE| が、そうで
+	なければ偽 |FALSE| が返ります。
 
-	The arguments are common with `Multiselect.Region()`, and additionally
-	an instance of `Region` class or its subclasses is also acceptable.
+	引数は `Multiselect.Region()` と共通です。
 	|multiselect-Multiselect.Region()| >
 		let head = [0, 1, 2, 0]
 		let tail = [0, 1, 4, 0]
@@ -1611,11 +1605,10 @@ Region.touches({head}[, {tail}[, {type}[, {extended}]]])    [method]
 Region.touches({lnum})
 Region.touches({startlnum}, {endlnum})
 Region.touches({region})
-	This method returns |TRUE| if the `Region` instance is touching an
-	assigned region, otherwise |FALSE|.
+	そのインスタンスが指定された範囲に触れていれば真 |TRUE| が、そうでなけ
+	れば偽 |FALSE| が返ります。
 
-	The arguments are common with `Multiselect.Region()`, and additionally
-	an instance of `Region` class or its subclasses is also acceptable.
+	引数は `Multiselect.Region()` と共通です。
 	|multiselect-Multiselect.Region()| >
 		let head = [0, 1, 2, 0]
 		let tail = [0, 1, 4, 0]
@@ -1663,111 +1656,109 @@ Region.touches({region})
 
 
 ------------------------------------------------------------------------------
-Item class~
+Item クラス~
 					*multiselect-class-Item*
 
-The constructor of `Item` class is available with `Multiselect` module.
+`Item` クラスのコンストラクタは `Multiselect` モジュールにあります。
 |multiselect-Multiselect.Item()|
 
-`Item` class is a subclass of `Region` class, thus `Item` class inherites all
-the properties of `Region` class.
+`Item` クラスは `Region` クラスの子クラスであり、そのすべてのプロパティを継承
+しています。
 
 					*multiselect-Item.id*
 Item.id    [number]
-	This is a number specific for each item.
+	各インスタンスに特有の数字です。
 
 
 					*multiselect-Item.bufnr*
 Item.bufnr    [number]
-	This is a buffer number of the item belonging to.
+	そのインスタンスの所属するバッファ番号です。
 
 
 					*multiselect-Item.head*
 Item.head    [list]
-	See |multiselect-Region.head|.
+	|multiselect-Region.head| をご覧ください。
 
 
 					*multiselect-Item.tail*
 Item.tail    [list]
-	See |multiselect-Region.tail|.
+	|multiselect-Region.tail| をご覧ください。
 
 
 					*multiselect-Item.type*
 Item.type    [string]
-	See |multiselect-Region.type|.
+	|multiselect-Region.type| をご覧ください。
 
 
 					*multiselect-Item.extended*
 Item.extended    [boolean]
-	See |multiselect-Region.extended|.
+	|multiselect-Region.extended| をご覧ください。
 
 
 					*multiselect-Item.select()*
 Item.select()    [method]
-	See |multiselect-Region.select()|.
+	|multiselect-Region.select()| をご覧ください。
 
 
 					*multiselect-Item.yank()*
 Item.yank()    [method]
-	See |multiselect-Region.yank()|.
+	|multiselect-Region.yank()| をご覧ください。
 
 
 					*multiselect-Item.includes()*
 Item.includes()    [method]
-	See |multiselect-Region.includes()|.
+	|multiselect-Region.includes()| をご覧ください。
 
 
 					*multiselect-Item.isinside()*
 Item.isinside()    [method]
-	See |multiselect-Region.isinside()|.
+	|multiselect-Region.isinside()| をご覧ください。
 
 
 					*multiselect-Item.touches()*
 Item.touches()    [method]
-	See |multiselect-Region.touches()|.
+	|multiselect-Region.touches()| をご覧ください。
 
 
 					*multiselect-Item.show()*
 Item.show({higroup})    [method]
-	This is a method to highlight the item region on a buffer. It will be
-	highlighted by {higroup}. |highlight-groups|
+	ハイライトグループ {higroup} でバッファ上の該当位置をハイライトしま
+	す。 |highlight-groups|
 
 
 					*multiselect-Item.quench()*
 Item.quench()    [method]
-	This is a method to turn off the highlight of the item.
+	バッファ上の該当位置をハイライトを消します。
 
 
 					*multiselect-Item.isshownin()*
 Item.isshownin([{winid}])    [method]
-	This method returns |TRUE| if the item is highlighted in the window
-	pointed by {winid}. {winid} is a return value of |win_getid()|. If it
-	is omitted, it returns the status of the current window.
+	ウィンドウid {winid} によって指定されるウィンドウにそのインスタンスの
+	ハイライトが存在すれば真 |TRUE| が、そうでなければ偽 |FALSE| が返りま
+	す。 {winid} は |win_getid()| 関数によって取得できます。 {winid} が省
+	略された場合はカレントウィンドウの情報が返ります。
 
 
 
 ------------------------------------------------------------------------------
-Change class~
+Change クラス~
 					*multiselect-class-Change*
 
-This is an utility class to track a position after deletions and additions of
-texts into the current buffer. It might be useful when a plugin developer
-makes a new plugin to do well with |multiselect.vim|
+`Change` クラスはバッファを編集した場合の、バッファ上のある位置の移動を追跡す
+るために使われます。これは必須ではありませんが、プラグインを作る際に便利かもし
+れません。
 
-Note that the `Change` class instance cannot track the change by 'autoindent'
-option and its relatives ('smartindent', 'cindent', 'indentexpr') perfectly.
 
 					*multiselect-Change.beforedelete()*
 Change.beforedelete({head}[, {tail}[, {type}[, {extended}]]])    [method]
 Change.beforedelete({lnum})
 Change.beforedelete({startlnum}, {endlnum})
 Change.beforedelete({region})
-	This method should be called before deleting a text on the current
-	buffer to record the region. The deletion is regarded as an
-	|inclusive| delete action. Thus the last character pointed by {tail}
-	is included.
+	このメソッドはバッファ編集の直前に呼ぶ必要があります。引数には削除しよ
+	うとしている範囲を与えてください。これは |inclusive| な削除範囲とみな
+	されます、すなわち {tail} は削除の対象に含まれます。
 
-	This method returns the `Change` instance itself.
+	このメソッドはインスタンス自身を返します。
 
 
 					*multiselect-Change.afterinsert()*
@@ -1775,78 +1766,79 @@ Change.afterinsert({head}[, {tail}[, {type}[, {extended}]]])    [method]
 Change.afterinsert({lnum})
 Change.afterinsert({startlnum}, {endlnum})
 Change.afterinsert({region})
-	This method should be called after adding a text into the current
-	buffer to record the region. The {tail} should point the ending edge
-	of the insertion.
+	このメソッドはバッファ編集の直後に呼ぶ必要があります。引数には挿入した
+	文字列の範囲を指定してください。{tail} は挿入文字列の終端 (= 続く文字
+	列の開始位置) です。
 
-	This method returns the `Change` instance itself.
+	このメソッドはインスタンス自身を返します。
 
 
 					*multiselect-Change.apply()*
 Change.apply({pos})    [method]
 Change.apply({region})
-	This method calculates the position after a series of editings.
-	This method updates the position (or a `Region` instance) in-place and
-	returns it.
+	{pos} あるいは {region} の編集後の位置を計算します。{pos}, {region} は
+	破壊的 (in-place) 変更を受けます。
 
-	NOTE: Change.apply() may not be effective with a lot of items.
-	      Use Change.mapapply() for the case.
+	NOTE: `Change.apply()` は大量の対象を処理する場合、あまり効率的ではあ
+	       りません。 `Change.mapapply()` の仕様を検討してください。
 	      |multiselect-Change.mapapply()|
 
 
 					*multiselect-Change.mapapply()*
 Change.mapapply({itemlist})    [method]
-	This method returns the same result with: >
+	このメソッドは次の操作と同じ結果を得ます。 >
 		call map({itemlist}, 'change.apply(v:val)')
 <
-	but faster if the number of items in {itemlist} is larger. {itemlist}
-	should be a list of positions or `Region` class instances.
+	ただし、 {itemlist} の要素数が多いときより効率的に結果を得られます。
+	{itemlist} の要素は位置を表すリストか、 `Region` クラスのインスタンス
+	でなければいけません。
 
 
-  - Usage
-The current buffer is like this. >
+  - 使用方法
+次のようなバッファがあるとします >
 	foo bar baz
 <
-For example, if you want to track the cursor position after an edit, you
-need to save the cursor position. >
+例えば、現在のカーソル位置を追跡するとしましょう。まず、追跡する位置を保存しま
+す。 >
 	let curpos = getpos('.')
 <
-The cursor is on the 'z' of "baz" and then you are going to delete "bar" and
-insert "x" instead.
-Before deleting, you need to call `Change.beforedelete()`. >
+カーソルは "baz" の 'z' にあったとします。これから "bar" を削除して "x" を挿入
+した後の位置の移動を計算します。
+まず、削除前に `Change.beforedelete()` を呼びます。 >
 	let bar = s:Multiselect.Region([0, 1, 5, 0], [0, 1, 7, 0], 'char')
 	let change = s:Multiselect.Change()
 	call change.beforedelete(bar)
 <
-Edit the buffer. >
+バッファを編集します。 >
 	call bar.select()
 	normal! cx
 <
-Now the buffer is: >
+今、バッファはこのようになっています。 >
 	foo x baz
 <
-After inserting a text, you need to call `Change.afterinsert()`. >
+文字の挿入後には `Change.afterinsert()` を呼びます。 |`[| マークがそのまま使え
+ます。 >
 	call change.afterinsert(getpos("'["), getpos("']"), 'char')
 <
-After those processes, use `Change.apply()` to update the cursor position. >
+準備は整いました。 `Change.apply()` メソッドで編集後の位置を計算しましょう。 >
 	call change.apply(curpos)
 	" curpos == [0, 1, 9, 0]
 <
-Finally you can move the cursor to the new position taking into account the
-last edit. >
+|setpos()| 関数で編集後のカーソル位置へ移動できます。 >
 	call setpos('.', curpos)
 <
 
 
 ------------------------------------------------------------------------------
-NeatTask class~
+NeatTask クラス~
 					*multiselect-class-NeatTask*
 
-`NeatTask` class is used to assemble several processes and trigger them all at
-onece. The processes are registered via |multiselect-NeatTask.call()|,
-|multiselect-NeatTask.execute()| and |multiselect-NeatTask.append()|. >
+`NeatTask` クラスはいくつかの処理をまとめておいて、後ほど一度に実行するために
+使われます。処理は |multiselect-NeatTask.call()|,
+|multiselect-NeatTask.execute()|, |multiselect-NeatTask.append()| を使って登録
+できます。 >
 	function! s:sayfoo() abort
-		echo 'foo'
+	  echo 'foo'
 	endfunction
 
 	let task = s:Multiselect.NeatTask()
@@ -1854,131 +1846,132 @@ onece. The processes are registered via |multiselect-NeatTask.call()|,
 	call task.execute('echo "foo"')
 <
 
-Those tasks are executed to call |multiselect-NeatTask.trigger()|, it executes
-them in the order of registration. >
+登録しておいた処理は |multiselect-NeatTask.trigger()| を使って実行します。処理
+は登録した順番で実行されます。 >
 	call task.trigger()
 <
 
-`NeatTask` can have its life time. |multiselect-NeatTask.repeat()| sets the
-number of executions, and after the number of executions
-|multiselect-NeatTask.trigger()| does nothing. >
+`NeatTask` は時に寿命を持ちます。 |multiselect-NeatTask.repeat()| を使うことで
+何回実行されうるかを制御できます。回数を超えると、
+|multiselect-NeatTask.trigger()| は何も実行しなくなります。 >
 	let neattask = s:Multiselect.NeatTask()
 	call neattask.execute('echo "foo"').repeat(1)
 
-	" echo 'foo'
+	" 'foo' を出力
 	call neattask.trigger()
 
-	" does nothing
+	" 何もしない
 	call neattask.trigger()
 <
 
-`NeatTask` has its internal switch and it can be temporary off by
-|multiselect-NeatTask.skip()|. >
+`NeatTask` は内部スイッチをもち、 |multiselect-NeatTask.skip()| メソッドによっ
+て一次的に機能停止できます。 >
 	let neattask = s:Multiselect.NeatTask()
 	call neattask.execute('echo "foo"').skip(1)
 
-	" does nothing
+	" 何もしない
 	call neattask.trigger()
 
-	" echo 'foo'
+	" 'foo' を出力
 	call neattask.trigger()
 <
 
 					*multiselect-NeatTask.call()*
 NeatTask.call({Funcref}, {args}[, {dict}])    [method]
-	This method registers a task to call a |Funcref| with a |List| of
-	{args} as arguments and set it for the event. {dict} is for functions
-	with the "dict" attribute. It will be used to set the local variable
-	"self". |Dictionary-function| This method returns the task itself.
+	リスト |List| {args} の要素を引数として関数参照 {Funcref} の指す関数を
+	呼ぶタスクを登録します。 {dict} は "dict" 属性つきの関数用で、これがロ
+	ーカル変数 "self" に代入されます。 |Dictionary-function|
+	このメソッドはインスタンス自身を返します。
 >
 		function! s:sayfoo() abort
 		    echo 'foo'
 		endfunction
 
-		" make a new task
+		" 新しいタスクの生成
 		let neattask = s:Multiselect.NeatTask()
 		call neattask.call(function('s:sayfoo'), [])
 
-		" trigger the task
+		" 実行
 		call task.trigger()
 <
 
 					*multiselect-NeatTask.execute()*
 NeatTask.execute({cmd})    [method]
-	This method registers a task to execute an Ex command. This method
-	returns the task itself.  >
-		" make a new task
+	Ex コマンド {cmd} を実行するタスクを登録します。
+	このメソッドはインスタンス自身を返します。 >
+		" 新しいタスクの生成
 		let neattask = s:Multiselect.NeatTask().execute('echo "foo"')
 
-		" trigger the task
+		" 実行
 		call task.trigger()
 <
 
 					*multiselect-NeatTask.append()*
 NeatTask.append({task})    [method]
-	This method registers a task to trigger other tasks. {task} should be
-	an instance of `NeatTask` class or its subclasses. This method returns
-	the task itself. >
-		" make new tasks
+	他のタスクインスタンス {task} を実行するタスクを登録します。 {task} は
+	`NeatTask` クラスかその子クラスのインスタンスでなければいけません。
+	このメソッドはインスタンス自身を返します。 >
+		" 新しいタスクの生成
 		let task = s:Multiselect.NeatTask().execute('echo "foo"')
 		let neattask = s:Multiselect.NeatTask().append(task)
 
-		" trigger the task
+		" 実行
 		call neattask.trigger()
 <
 
 					*multiselect-NeatTask.trigger()*
 NeatTask.trigger([{forcibly}])    [method]
-	This method executes all the registered tasks.
-	This method returns the `NeatTask` instance itself.
+	登録されたタスクを実行します。
+	このメソッドはインスタンス自身を返します。
 
-	If {forcibly} is given and it is |TRUE|, this method triggers the
-	registered task even if the task has already done.
+	{forcibly} があたえられ、それが真 |TRUE| なら、設定された実行回数を超
+	えていても処理を実行します。
 	|multiselect-NeatTask.hasdone()|
 
 
 					*multiselect-NeatTask.clear()*
 NeatTask.clear()    [method]
-	This method clears all registered tasks. This method returns the
-	`NeatTask` instance itself.
+	登録されたタスクをすべて除去します。
+	このメソッドはインスタンス自身を返します。
 
 
 					*multiselect-NeatTask.clone()*
 NeatTask.clone()    [method]
-	This method returns another `NeatTask` instance which have the same
-	task with itself.
+	自身のクローンを生成します。クローンは別のインスタンスですが同じ登録タ
+	スクを持っています。
 
 
 					*multiselect-NeatTask.isactive()*
 NeatTask.isactive()    [method]
-	This method returns |TRUE| if the `NeatTask` is active, |FALSE|
-	if it is not active.
+	自身が実行可能なら |TRUE| を返します。 |multiselect-NeatTask.skip()|
+	で一時的に停止されていれば偽 |FALSE| を返します。
 
 
 					*multiselect-NeatTask.skip()*
 NeatTask.skip([{count}])    [method]
-	If this method is called, the following `NeatTask` is skipped
-	(not executed) {count} times. {count} is 1 if omitted. If {count} is
-	less than 1, the skip count would be reset and the task will not skip
-	after that. This method returns the `NeatTask` itself. >
+	次の {count} 回、 |multiselect-NeatTask.trigger()| が呼ばれても処理が
+	実行されなくなります。 {count} が省略されれば 1 回スキップします。
+	{count} が 0 なら再び実行されるようになります。
+	このメソッドはインスタンス自身を返します。 >
 		let neattask = s:Multiselect.NeatTask()
 		call neattask.execute('echo "foo"').skip(1)
 
-		" does nothing
+		" 何もしない
 		call neattask.trigger()
 
-		" echo 'foo'
+		" 'foo' を出力
 		call neattask.trigger()
 <
 
 
 					*multiselect-NeatTask.repeat()*
 NeatTask.repeat([{count}])    [method]
-	This method sets the number of execution. If {count} is negative, the
-	`NeatTask` will be persistent. An `NeatTask` instance is produced as
-	it is 1 in default. If {count} is omitted, it will reset the number
-	of execution to the one last set. >
-		" 'foo' will be displayed three times
+	{count} 回の実行の後、処理が実行されなくなります。 {count} が負の
+	場合、回数に制限がなくなります。 `NeatTask` の場合、デフォルトでは -1
+	になっており、回数に制限はありません。 {count} が省略された場合、
+	今までの実行回数はリセットされ、再び最後に設定された {count} が始まり
+	ます。 >
+		" 'foo' が三回だけ出力される
 		let neattask = s:Multiselect.NeatTask()
 					   \.execute('echo "foo"')
 					   \.repeat(3)
@@ -1986,44 +1979,43 @@ NeatTask.repeat([{count}])    [method]
 		call neattask.trigger()
 		call neattask.trigger()
 		call neattask.trigger()
-		call neattask.trigger() " does nothing
+		call neattask.trigger() " 何も起こらない
 <
-	This method returns the task itself.
+	このメソッドはインスタンス自身を返します。
 
 
 					*multiselect-NeatTask.leftcount()*
 NeatTask.leftcount()    [method]
-	This method returns the left number of execution.
-	See |multiselect-NeatTask.repeat()|.
+	残りの実行回数を返します。 |multiselect-NeatTask.repeat()| をご覧くだ
+	さい。
 
 
 					*multiselect-NeatTask.hasdone()*
 NeatTask.hasdone()    [method]
-	This method returns |TRUE| if the task has done {count} times
-	specified by |multiselect-NeatTask.repeat()|, otherwise |FALSE|.
+	|multiselect-NeatTask.repeat()| によって設定された実行回数終了後には真
+	|TRUE| が返ります。それ以外では偽が返ります。
 
 
 
 ------------------------------------------------------------------------------
-EventTask class~
+EventTask クラス~
 					*multiselect-class-EventTask*
 
-`EventTask` class is used to hook processes for |autocmd-events|. It is a
-subclass of `NeatTask` class and automatically triggered by an autocmd event.
+`EventTask` クラスは自動コマンドイベント |autocmd-events| に処理をフックするた
+めに使われます。 `EventTask` クラスは `NeatTask` クラスの子クラスです。
 |multiselect-class-NeatTask|
 
-`EventTask` class instance has the same methods with that of `NeatTask` class,
-and additionally |multiselect-EventTask.start()| and
-|multiselect-EventTask.stop()|.
+`EventTask` クラスは `NeatTask` クラスのメソッドに加え、
+|multiselect-EventTask.start()|, |multiselect-EventTask.stop()| メソッドを持ち
+ます。
 
-|multiselect-EventTask.start()| sets the task to an autocmd event. An
-`EventTask` is repeated forever in default.
+|multiselect-EventTask.start()| メソッドはタスクを自動コマンドに設定します。
 
-Its life time can be set by |multiselect-EventTask.repeat()|.
-
-If the purpose of the task has achieved, use |multiselect-EventTask.stop()|. >
+`EventTask` はデフォルトでは停止しない限り実行され続けます。実行回数は
+|multiselect-EventTask.repeat()| メソッドで設定できます。また、
+|multiselect-EventTask.stop()| メソッドで実行を停止できます。 >
 	function! s:sayfoo() abort
-		echo 'foo'
+	  echo 'foo'
 	endfunction
 
 	let eventtask = s:Multiselect.EventTask()
@@ -2031,122 +2023,122 @@ If the purpose of the task has achieved, use |multiselect-EventTask.stop()|. >
 	call eventtask.execute('echo "foo"')
 	call eventtask.start('TextChanged')
 
-	" finish the task
+	" タスクを終了
 	call eventtask.stop()
 <
 
 					*multiselect-EventTask.start()*
 EventTask.start({name})    [method]
-	This method sets the task itself to an autocmd event. {name} should be
-	an autocmd event name. An `EventTask` instance can be bound to only an
-	event. If you need multiple triggers, use
-	|multiselect-class-RaceTask|.
+	自動コマンドにタスクを設定します。 {name} は自動コマンドイベントの名前
+	です。ひとつの `EventTask` はひとつのイベントに紐づけられます。複数の
+	イベントを使う必要があれば、複数の `EventTask` インスタンスを用意する
+	か、 `RaceTask` をつかってください。 |multiselect-class-RaceTask|
 
-	If you have achieved the purpose of the task, you can
-	stop the task by calling |multiselect-EventTask.stop()|. >
+	目的を達成したら、 |multiselect-EventTask.stop()| メソッドで終了できま
+	す。 >
 		function! s:sayfoo() abort
 		    echo 'foo'
 		endfunction
 
-		" make and set a new task to 'TextChanged' event
+		" 'TextChanged' イベントにタスクを設定
 		let task = s:Multiselect.EventTask()
 					\.call(function('s:sayfoo'), [])
 					\.start('TextChanged')
 
-		" finish the task
+		" タスクを終了
 		call task.stop()
 <
-	Or use |multiselect-EventTask.repeat()| to finish after a certain
-	number of callings. >
-		" it will be abandoned after three times callings
+	あるいは、事前に |multiselect-EventTask.repeat()| メソッドによって実行
+	回数を設定することもできます。 >
+		" 3回実行されたのち、自動的に破棄されます
 		let task = s:Multiselect.EventTask()
 					\.execute('echo "foo"')
 					\.repeat(3)
 					\.start('TextChanged')
 <
-	This method returns the task itself.
+	このメソッドはインスタンス自身を返します。
 
 
 					*multiselect-EventTask.stop()*
 EventTask.stop()    [method]
-	This method stops the execution of the event task.
+	タスクの実行を停止します。このメソッドはインスタンス自身を返します。
 
 
 					*multiselect-EventTask.call()*
 EventTask.call({Funcref}, {args}[, {dict}])    [method]
-	See |multiselect-NeatTask.call()|.
+	|multiselect-NeatTask.call()| をご覧ください。
 
 
 					*multiselect-EventTask.execute()*
 EventTask.execute({cmd})    [method]
-	See |multiselect-NeatTask.execute()|.
+	|multiselect-NeatTask.execute()| をご覧ください。
 
 
 					*multiselect-EventTask.append()*
 EventTask.append({task})    [method]
-	See |multiselect-NeatTask.append()|.
+	|multiselect-NeatTask.append()| をご覧ください。
 
 
 					*multiselect-EventTask.trigger()*
 EventTask.trigger([{forcibly}])    [method]
-	See |multiselect-NeatTask.trigger()|.
+	|multiselect-NeatTask.trigger()| をご覧ください。
 
 
 					*multiselect-EventTask.clear()*
 EventTask.clear()    [method]
-	See |multiselect-NeatTask.clear()|.
+	|multiselect-NeatTask.clear()| をご覧ください。
 
 
 					*multiselect-EventTask.clone()*
 EventTask.clone()    [method]
-	See |multiselect-NeatTask.clone()|.
+	|multiselect-NeatTask.clone()| をご覧ください。
 
 
 					*multiselect-EventTask.isactive()*
 EventTask.isactive()    [method]
-	See |multiselect-NeatTask.isactive()|.
+	|multiselect-NeatTask.isactive()| をご覧ください。
 
 
 					*multiselect-EventTask.skip()*
 EventTask.skip([{count}])    [method]
-	See |multiselect-NeatTask.skip()|.
+	|multiselect-NeatTask.skip()| をご覧ください。
 
 
 					*multiselect-EventTask.repeat()*
 EventTask.repeat([{count}])    [method]
-	See |multiselect-NeatTask.repeat()|.
+	|multiselect-NeatTask.repeat()| をご覧ください。
 
 
 					*multiselect-EventTask.leftcount()*
 EventTask.leftcount()    [method]
-	See |multiselect-NeatTask.leftcount()|.
+	|multiselect-NeatTask.leftcount()| をご覧ください。
 
 
 					*multiselect-EventTask.hasdone()*
 EventTask.hasdone()    [method]
-	See |multiselect-NeatTask.hasdone()|.
+	|multiselect-NeatTask.hasdone()| をご覧ください。
 
 
 
 ------------------------------------------------------------------------------
-TimerTask class~
+TimerTask クラス~
 					*multiselect-class-TimerTask*
 
-`TimerTask` is used to delay the execution of tasks. It is a subclass of
-`NeatTask` class and automatically triggered by a delay time.
-See |multiselect-class-NeatTask|.
+`TimerTask` クラスは一定時間後に処理を実行するために使われます。 `TimerTask`
+クラスは `NeatTask` クラスの子クラスです。 |multiselect-class-NeatTask|
 
-`TimerTask` class instance has the same methods with that of `NeatTask` class,
-and additionally |multiselect-TimerTask.start()| and
-|multiselect-TimerTask.stop()|.
+`TimerTask` クラスは `NeatTask` クラスのメソッドに加え、
+|multiselect-TimerTask.start()|, |multiselect-TimerTask.stop()| メソッドを持ち
+ます。
 
-|multiselect-TimerTask.start()| sets the delay time and start counting down,
-after the delay time the registered tasks are executed. `TimerTask` finishes
-after an action in default, this number of execution can be changed by
-|multiselect-TimerTask.repeat()|. If you want to stop a started `TimerTask`
-before the last execution, you can use |multiselect-TimerTask.stop()|. >
+|multiselect-TimerTask.start()| メソッドは遅延時間を設定し、タイマーを開始しま
+す。この設定された時間が経過後に処理が実行されます。
+
+`TimerTask` はデフォルトでは一度の実行の後、破棄されます。実行回数は
+|multiselect-TimerTask.repeat()| メソッドで変更できます。また、実行前に破棄す
+る為には、 |multiselect-TimerTask.stop()| メソッドが使用できます。 >
 	function! s:sayfoo() abort
-		echo 'foo'
+	  echo 'foo'
 	endfunction
 
 	let timertask = s:Multiselect.TimerTask()
@@ -2157,13 +2149,13 @@ before the last execution, you can use |multiselect-TimerTask.stop()|. >
 
 					*multiselect-TimerTask.start()*
 TimerTask.start({time})    [method]
-	This method sets the delay time and start counting down.
-	This method returns the task itself. >
+	遅延時間を設定し、カウントダウンを開始します。
+	このメソッドはインスタンス自身を返します。 >
 		function! s:sayfoo() abort
 			echo 'foo'
 		endfunction
 
-		" make and start a new task executed after 100 millisecond
+		" 100 ミリ秒後に処理を実行する
 		let task  = s:Multiselect.TimerTask()
 					\.call(function('s:sayfoo'), [])
 					\.start(100)
@@ -2171,174 +2163,175 @@ TimerTask.start({time})    [method]
 
 					*multiselect-TimerTask.stop()*
 TimerTask.stop()    [method]
-	This method stops to cancell the delayed task.
-	This method returns the task itself.
+	タスクを停止します。このメソッドはインスタンス自身を返します。
 
 
 					*multiselect-TimerTask.call()*
 TimerTask.call({Funcref}, {args}[, {dict}])    [method]
-	See |multiselect-NeatTask.call()|.
+	|multiselect-NeatTask.call()| をご覧ください。
 
 
 					*multiselect-TimerTask.execute()*
 TimerTask.execute({cmd})    [method]
-	See |multiselect-NeatTask.execute()|.
+	|multiselect-NeatTask.execute()| をご覧ください。
 
 
 					*multiselect-TimerTask.append()*
 TimerTask.append({task})    [method]
-	See |multiselect-NeatTask.append()|.
+	|multiselect-NeatTask.append()| をご覧ください。
 
 
 					*multiselect-TimerTask.trigger()*
 TimerTask.trigger([{forcibly}])    [method]
-	See |multiselect-NeatTask.trigger()|.
+	|multiselect-NeatTask.trigger()| をご覧ください。
 
 
 					*multiselect-TimerTask.clear()*
 TimerTask.clear()    [method]
-	See |multiselect-NeatTask.clear()|.
+	|multiselect-NeatTask.clear()| をご覧ください。
 
 
 					*multiselect-TimerTask.clone()*
 TimerTask.clone()    [method]
-	See |multiselect-NeatTask.clone()|.
+	|multiselect-NeatTask.clone()| をご覧ください。
 
 
 					*multiselect-TimerTask.isactive()*
 TimerTask.isactive()    [method]
-	See |multiselect-NeatTask.isactive()|.
+	|multiselect-NeatTask.isactive()| をご覧ください。
 
 
 					*multiselect-TimerTask.skip()*
 TimerTask.skip([{count}])    [method]
-	See |multiselect-NeatTask.skip()|.
+	|multiselect-NeatTask.skip()| をご覧ください。
 
 
 					*multiselect-TimerTask.repeat()*
 TimerTask.repeat([{count}])    [method]
-	See |multiselect-NeatTask.repeat()|.
+	|multiselect-NeatTask.repeat()| をご覧ください。
 
 
 					*multiselect-TimerTask.leftcount()*
 TimerTask.leftcount()    [method]
-	See |multiselect-NeatTask.leftcount()|.
+	|multiselect-NeatTask.leftcount()| をご覧ください。
 
 
 					*multiselect-TimerTask.hasdone()*
 TimerTask.hasdone()    [method]
-	See |multiselect-NeatTask.hasdone()|.
+	|multiselect-NeatTask.hasdone()| をご覧ください。
 
 
 
 ------------------------------------------------------------------------------
-RaceTask class~
+RaceTask クラス~
 					*multiselect-class-RaceTask*
 
-`RaceTask` class is a subclass of `NeatTask` class which can have multiple
-automatic triggers, autocmd events and a delay time.
-See also |multiselect-class-NeatTask|
-	 |multiselect-class-EventTask|
-	 |multiselect-class-TimerTask|.
+`RaceTask` は自動コマンドイベントや、タイマーなど複数のトリガーをもつタスクで
+す。 `RaceTask` クラスは `NeatTask` の子クラスです。
+|multiselect-class-NeatTask|
+|multiselect-class-EventTask|
+|multiselect-class-TimerTask|
 
-`RaceTask` class instance has the same methods with that of `NeatTask` class,
-and additionally |multiselect-RaceTask.start()| and
-|multiselect-RaceTask.stop()|.
+`RaceTask` クラスは `NeatTask` クラスのメソッドに加え、
+|multiselect-RaceTask.start()|, |multiselect-RaceTask.stop()| メソッドを持ち
+ます。
 
-`RaceTask` will be executed once by either one of registered auto-triggers in
-default. The number of execution can be changed by
-|multiselect-RaceTask.repeat()|.
+`RaceTask` は設定されたトリガーのうちどれかが発火した時に処理を実行します。
+デフォルトでは一度処理を実行したのちに破棄されます。実行回数は
+|multiselect-RaceTask.repeat()| メソッドで変更できます。
 
 
 					*multiselect-RaceTask.start()*
 RaceTask.start({triggers})    [method]
-	This method starts to wait for an auto-trigger. {triggers} is a list
-	of trigger names. If one of the item is |String|, it is regarded as an
-	autocmd event. If it is |Number|, it is regarded as an delay time. >
+	インスタンスにトリガーを設定し、どれかが発火するのを待ちます。
+	{triggerlist} はトリガー名のリスト |List| で、要素が文字列 |String| な
+	ら、自動コマンドイベント名、要素が数字 |Number| なら遅延時間とみなされ
+	ます。 >
 		let task = s:Multiselect.RaceTask().execute('echo "foo"')
 		call task.start(['TextChanged', 100])
 <
-	This method returns the task itself. However, note that if
-	{triggerlist} does not contain any valid trigger item, this method
-	returns an empty dictionary.
+	このメソッドはインスタンス自身を返しますが、 {triggerlist} が有効な
+	要素を含まない場合、空の辞書 |Dictionary| を返します。
 
 
 					*multiselect-RaceTask.stop()*
 RaceTask.stop()    [method]
-	This method stops to execute the registered tasks.
+	タスクを停止します。このメソッドはインスタンス自身を返します。
 
 
 					*multiselect-RaceTask.call()*
 RaceTask.call({Funcref}, {args}[, {dict}])    [method]
-	See |multiselect-NeatTask.call()|.
+	|multiselect-NeatTask.call()| をご覧ください。
 
 
 					*multiselect-RaceTask.execute()*
 RaceTask.execute({cmd})    [method]
-	See |multiselect-NeatTask.execute()|.
+	|multiselect-NeatTask.execute()| をご覧ください。
 
 
 					*multiselect-RaceTask.append()*
 RaceTask.append({task})    [method]
-	See |multiselect-NeatTask.append()|.
+	|multiselect-NeatTask.append()| をご覧ください。
 
 
 					*multiselect-RaceTask.trigger()*
 RaceTask.trigger([{forcibly}])    [method]
-	See |multiselect-NeatTask.trigger()|.
+	|multiselect-NeatTask.trigger()| をご覧ください。
 
 
 					*multiselect-RaceTask.clear()*
 RaceTask.clear()    [method]
-	See |multiselect-NeatTask.clear()|.
+	|multiselect-NeatTask.clear()| をご覧ください。
 
 
 					*multiselect-RaceTask.isactive()*
 RaceTask.isactive()    [method]
-	See |multiselect-NeatTask.isactive()|.
+	|multiselect-NeatTask.isactive()| をご覧ください。
 
 
 					*multiselect-RaceTask.skip()*
 RaceTask.skip([{count}])    [method]
-	See |multiselect-NeatTask.skip()|.
+	|multiselect-NeatTask.skip()| をご覧ください。
 
 
 					*multiselect-RaceTask.repeat()*
 RaceTask.repeat([{count}])    [method]
-	See |multiselect-NeatTask.repeat()|.
+	|multiselect-NeatTask.repeat()| をご覧ください。
 
 
 					*multiselect-RaceTask.leftcount()*
 RaceTask.leftcount()    [method]
-	See |multiselect-NeatTask.leftcount()|.
+	|multiselect-NeatTask.leftcount()| をご覧ください。
 
 
 					*multiselect-RaceTask.hasdone()*
 RaceTask.hasdone()    [method]
-	See |multiselect-NeatTask.hasdone()|.
+	|multiselect-NeatTask.hasdone()| をご覧ください。
 
 
 
 ------------------------------------------------------------------------------
-TaskChain class~
+TaskChain クラス~
 					*multiselect-class-TaskChain*
 
-`TaskChain` class makes a task triggered by a successive sequence of autocmd
-events and timers.
+`TaskChain` クラスは自動コマンドやタイマーによって順番に実行される数珠つなぎの
+処理を作るために使われます。
 
-Use |multiselect-TaskChain.event()|, |multiselect-TaskChain.timer()| and
-|multiselect-TaskChain.race()| to make a sequence, and set tasks to the
-return value of these method. These method returns a `NeatTask` instance to
-set tasks for a step of sequence. Its number of execution is set as 1 in
-default but you can change it by |multiselect-NeatTask.repeat()|. >
+|multiselect-TaskChain.event()|, |multiselect-TaskChain.timer()|,
+|multiselect-TaskChain.race()| メソッドによってトリガーの流れをつくります。
+それぞれのメソッドは紐づけられた `NeatTask` インスタンスを返すので、このインス
+タンスに処理を登録すれば、順番に実行されます。この `NeatTask` インスタンスは
+デフォルトでは実行回数を1回に設定されていますが、
+|multiselect-NeatTask.repeat()| メソッドで変更できます。紐づけられたタスクが終
+了し次第、次のトリガーを待ちます。 >
 	let taskchain = s:Multiselect.TaskChain()
 	let task1 = taskchain.event('InsertLeave')
 	let task2 = taskchain.event('CursorMoved')
 	call task2.execute('echo "foo"')
 	call taskchain.start()
 <
-This example shows a message "foo" after leaving insert mode and then moving
-cursor. You can write shorter: >
+この例ではインサートモードを抜けた後、カーソルを移動したときに "foo" と表示し
+ます。これは次のようにより短く書けます。 >
 	let taskchain = s:Multiselect.TaskChain()
 	call taskchain.event('InsertLeave')
 	call taskchain.event('CursorMoved').execute('echo "foo"')
@@ -2347,10 +2340,10 @@ cursor. You can write shorter: >
 
 					*multiselect-TaskChain.event()*
 TaskChain.event({event})    [method]
-	This method registers a task to the autocmd event. {event} should be
-	a name of autocmd event. |autocmd-events| This method returns a
-	`NeatTask` instance bound to the autocmd event. Its number of
-	execution is set as 1 in default >
+	自動コマンドによるトリガーを予約します。 {event} は待つ自動コマンド名
+	です。 |autocmd-events| このメソッドは実行回数を 1 に設定された
+	`NeatTask` インスタンスを返します。この `NeatTask` インスタンスに処理
+	を設定することで {event} 発火の際に処理を実行できます。 >
 		let taskchain = s:Multiselect.TaskChain()
 		let task1 = taskchain.event('InsertEnter')
 		let task2 = taskchain.event('CursorMoved')
@@ -2358,17 +2351,18 @@ TaskChain.event({event})    [method]
 		call task2.execute('echo "CursorMoved"')
 		call taskchain.start()
 <
-	"InsertEnter" will be echoed at the first |InsertEnter| event, then
-	wait for |CursorMovedI| event to echo "CursorMovedI".
+	上の例では最初に |InsertEnter| イベントを待って "InsertEnter" と表示し
+	た後、 |CursorMovedI| イベントによって "CursorMovedI" と表示します。
 	|multiselect-class-NeatTask|
 	|multiselect-NeatTask.repeat()|
 
 
 					*multiselect-TaskChain.timer()*
 TaskChain.timer({time})    [method]
-	This method registers a timer task. {time} is a delay time duration.
-	This method returns a `NeatTask` instance triggered after {time}
-	millisecond later. Its number of execution is set as 1 in default. >
+	遅延時間によるトリガーを予約します。 {time} は遅延時間です。このメソッ
+	ドは実行回数を 1 に設定された `NeatTask` インスタンスを返します。この
+	`NeatTask` インスタンスに処理を設定することで {time} の経過後に処理を
+	実行できます。 >
 		let taskchain = s:Multiselect.TaskChain()
 		let task1 = taskchain.timer(1000)
 		let task2 = taskchain.timer(5000)
@@ -2376,65 +2370,64 @@ TaskChain.timer({time})    [method]
 		call task2.execute('echo "6s passed"')
 		call taskchain.start()
 <
-	You will see the message "1s passed" 1 second later and then "6s
-	passed" will displayed after an additional 5 seconds.
+	上の例では一秒後に "1s passed" というメッセージを、さらに五秒後に
+	"6s passed" というメッセージが表示されます。
 	|multiselect-class-NeatTask|
 	|multiselect-NeatTask.repeat()|
 
 
 					*multiselect-TaskChain.race()*
 TaskChain.race({triggerlist})    [method]
-	This method registers a multiple-triggered task. {triggers} is a list
-	of trigger names. If one of the item is |String|, it is regarded as an
-	autocmd event. If it is |Number|, it is regarded as an delay time.
-	This method returns a `NeatTask` instance to be called by either one
-	of those triggers. Its number of execution is set as 1 in default.
-	Note that if {triggerlist} does not contain any valid trigger item,
-	this method returns an empty dictionary. >
+	自動コマンドあるいは遅延時間のどれかによるトリガーを予約します。
+	{triggerlist} については |multiselect-RaceTask.start()| と共通です。
+	このメソッドは実行回数を 1 に設定された `NeatTask` インスタンスを返し
+	ます。この `NeatTask` インスタンスに処理を設定することでいずれかのトリ
+	ガー発火時に処理を実行できます。{triggerlist} が有効なトリガーを含まな
+	い場合は空の辞書 |Dictionary| が返ります。 >
 		let taskchain = s:Multiselect.TaskChain()
 		let task1 = taskchain.event('CmdwinLeave')
 		let task2 = taskchain.race(['CursorMoved', 1000])
 		call task2.execute('echo "original buffer"')
 		call taskchain.start()
 <
-	After leaving |cmdline-window|, you will see the message "original
-	buffer" if you move cursor or wait for 1 second.
+	コマンドラインウィンドウ |cmdline-window| を抜けた後、カーソルを動かす
+	か、一秒経過するかすると "original buffer" というメッセージが表示され
+	ます。
 	|multiselect-class-NeatTask|
 	|multiselect-NeatTask.repeat()|
 
 
 					*multiselect-TaskChain.trigger()*
 TaskChain.trigger()    [method]
-	This method executes the next task. This method returns the taskchain
-	itself.
+	現在トリガーを待っている処理を発火し、次のトリガーを待ちます。
+	このメソッドはインスタンス自身を返します。
 
 
 					*multiselect-TaskChain.start()*
 TaskChain.start()    [method]
-	This method starts the taskchain, after calling this method it waits
-	for the first trigger to move for the next task.
+	タスクチェーンを開始し、最初のトリガーを待ちます。
 
 
 					*multiselect-TaskChain.stop()*
 TaskChain.stop()    [method]
-	This method stops an execution of the taskchain.
+	タスクチェーンを停止します。
 
 
 					*multiselect-TaskChain.repeat()*
 TaskChain.repeat()    [method]
-	This method sets the number of execution. The default value is 1.
+	タスクチェーンの実行回数を設定します。デフォルト値は 1 です。
 
 
 					*multiselect-TaskChain.leftcount()*
 TaskChain.leftcount()    [method]
-	This method returns the left number of execution.
-	See |multiselect-TaskChain.repeat()|.
+	残りの実行回数を返します。|multiselect-TaskChain.repeat()| をご覧くだ
+	さい。
 
 
 					*multiselect-TaskChain.hasdone()*
 TaskChain.hasdone()    [method]
-	This method returns |TRUE| if the task has done {count} times
-	specified by |multiselect-TaskChain.repeat()|, otherwise |FALSE|.
+	タスクチェーンに設定された実行回数が終了していれば真 |TRUE| を、そうで
+	なければ偽 |FALSE| を返します。
 
 
 
