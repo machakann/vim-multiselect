@@ -1,5 +1,5 @@
 *multiselect.txt*	A library for multiple selection
-						Last change:01-Feb-2018.
+						Last change:02-Feb-2018.
 
 Author  : machakann <https://github.com/machakann>
 License : MIT license
@@ -614,6 +614,7 @@ Multiselect.load()    [function]
 Multiselect.Region({head}[, {tail}[, {type}[, {extended}]]])    [function]
 Multiselect.Region({lnum})
 Multiselect.Region({startlnum}, {endlnum})
+Multiselect.Region({region})
 	This is the constructor of `Region` class, it is a class to represent
 	a region of a buffer. See |multiselect-class-Region|.
 
@@ -642,6 +643,11 @@ Multiselect.Region({startlnum}, {endlnum})
 
 	With {startlnum} and {endlnum}, it returns an line-wise `Region`
 	instance representing the range from {startlnum} to {endlnum}.
+
+	With {region}, {region} is an instance of `Region` class or its
+	subclasses, it returns an `Region` instance points the same region
+	with {region}. The returned value is not same instance with {region},
+	that is, `{region} isnot# Multiselect.Region({retion})` is true.
 
 
 					*multiselect-Multiselect.Item()*
@@ -906,8 +912,7 @@ Multiselector.check({region})
 	|multiselect-Multiselector.itemlist|
 	|multiselect-class-Item|
 
-	The arguments are common with `Multiselect.Region()`, and additionally
-	an instance of `Region` class or its subclasses is also acceptable.
+	The arguments are common with `Multiselect.Region()`.
 	|multiselect-Multiselect.Region()| >
 		let head = [0, 1, 1, 0]
 		let tail = [0, 3, 3, 0]
@@ -932,8 +937,7 @@ Multiselector.uncheck({region})
 	items touching with the assigned region.
 	|multiselect-Multiselector.itemlist|
 
-	The arguments are common with `Multiselect.Region()`, and additionally
-	an instance of `Region` class or its subclasses is also acceptable.
+	The arguments are common with `Multiselect.Region()`.
 	|multiselect-Multiselect.Region()| >
 		let head = [0, 1, 1, 0]
 		let tail = [0, 3, 1, 0]
@@ -990,8 +994,7 @@ Multiselector.emit_inside({region})
 	assigned region will be removed to return.
 	|multiselect-Multiselector.itemlist|
 
-	The arguments are common with `Multiselect.Region()`, and additionally
-	an instance of `Region` class or its subclasses is also acceptable.
+	The arguments are common with `Multiselect.Region()`.
 	|multiselect-Multiselect.Region()| >
 		let head = getpos("'<")
 		let tail = getpos("'>")
@@ -1013,8 +1016,7 @@ Multiselector.emit_touching({region})
 	assigned region will be removed to return.
 	|multiselect-Multiselector.itemlist|
 
-	The arguments are common with `Multiselect.Region()`, and additionally
-	an instance of `Region` class or its subclasses is also acceptable.
+	The arguments are common with `Multiselect.Region()`.
 	|multiselect-Multiselect.Region()| >
 		let curpos = getpos('.')
 		let itemlist = s:multiselector.emit_touching(curpos)
@@ -1535,8 +1537,7 @@ Region.includes({region})
 	This method returns |TRUE| if the `Region` instance includes an
 	assigned region, otherwise |FALSE|.
 
-	The arguments are common with `Multiselect.Region()`, and additionally
-	an instance of `Region` class or its subclasses is also acceptable.
+	The arguments are common with `Multiselect.Region()`.
 	|multiselect-Multiselect.Region()| >
 		let head = [0, 1, 2, 0]
 		let tail = [0, 1, 4, 0]
@@ -1572,8 +1573,7 @@ Region.isinside({region})
 	This method returns |TRUE| if the `Region` instance is inside an
 	assigned region, otherwise |FALSE|.
 
-	The arguments are common with `Multiselect.Region()`, and additionally
-	an instance of `Region` class or its subclasses is also acceptable.
+	The arguments are common with `Multiselect.Region()`.
 	|multiselect-Multiselect.Region()| >
 		let head = [0, 1, 2, 0]
 		let tail = [0, 1, 4, 0]
@@ -1609,8 +1609,7 @@ Region.touches({region})
 	This method returns |TRUE| if the `Region` instance is touching an
 	assigned region, otherwise |FALSE|.
 
-	The arguments are common with `Multiselect.Region()`, and additionally
-	an instance of `Region` class or its subclasses is also acceptable.
+	The arguments are common with `Multiselect.Region()`.
 	|multiselect-Multiselect.Region()| >
 		let head = [0, 1, 2, 0]
 		let tail = [0, 1, 4, 0]
