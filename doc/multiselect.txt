@@ -1837,7 +1837,7 @@ NeatTask class~
 					*multiselect-class-NeatTask*
 
 `NeatTask` class is used to assemble several processes and trigger them all at
-onece. The processes are registered via |multiselect-NeatTask.call()|,
+once. The processes are registered via |multiselect-NeatTask.call()|,
 |multiselect-NeatTask.execute()| and |multiselect-NeatTask.append()|. >
 	function! s:sayfoo() abort
 		echo 'foo'
@@ -1881,9 +1881,9 @@ number of executions, and after the number of executions
 					*multiselect-NeatTask.call()*
 NeatTask.call({Funcref}, {args}[, {dict}])    [method]
 	This method registers a task to call a |Funcref| with a |List| of
-	{args} as arguments and set it for the event. {dict} is for functions
-	with the "dict" attribute. It will be used to set the local variable
-	"self". |Dictionary-function| This method returns the task itself.
+	{args} as arguments and. {dict} is for functions with the "dict"
+	attribute. It will be used to set the local variable "self".
+	|Dictionary-function| This method returns the task itself.
 >
 		function! s:sayfoo() abort
 		    echo 'foo'
@@ -2033,8 +2033,8 @@ If the purpose of the task has achieved, use |multiselect-EventTask.stop()|. >
 EventTask.start({name})    [method]
 	This method sets the task itself to an autocmd event. {name} should be
 	an autocmd event name. An `EventTask` instance can be bound to only an
-	event. If you need multiple triggers, use
-	|multiselect-class-RaceTask|.
+	event. If you need multiple triggers, use number of `EventTask`
+	instances or |multiselect-class-RaceTask|.
 
 	If you have achieved the purpose of the task, you can
 	stop the task by calling |multiselect-EventTask.stop()|. >
