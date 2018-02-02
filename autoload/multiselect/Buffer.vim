@@ -30,6 +30,11 @@ function! s:Region(expr, ...) abort "{{{
 			let head = copy(pos)
 			let tail = copy(pos)
 			let type = 'char'
+		elseif t_expr is v:t_dict
+			let head = a:expr.head
+			let tail = a:expr.tail
+			let type = a:expr.type
+			let extended = a:expr.extended
 		else
 			echoerr s:Errors.InvalidArgument('Region', [a:expr] + a:000)
 		endif
@@ -64,7 +69,11 @@ function! s:Region(expr, ...) abort "{{{
 	let region.tail = tail
 	let region.type = type
 	if region.type is# 'block'
-		let region.extended = !!get(a:000, 2, s:FALSE)
+		if exists('extended')
+			let region.extended = extended
+		else
+			let region.extended = !!get(a:000, 2, s:FALSE)
+		endif
 	endif
 	return region
 endfunction "}}}
@@ -361,16 +370,12 @@ function! s:Change() abort "{{{
 endfunction "}}}
 
 function! s:Change.beforedelete(expr, ...) abort "{{{
-	if a:0 == 0 && type(a:expr) is v:t_dict
-		let deletion = deepcopy(a:expr)
-	else
-		let args = [a:expr] + a:000
-		try
-			let deletion = call('s:Item', args)
-		catch /^Vim(echoerr):multiselect: Invalid argument: /
-			echoerr s:Errors.InvalidArgument('Change.beforedelete', args)
-		endtry
-	endif
+	let args = [a:expr] + a:000
+	try
+		let deletion = call('s:Item', args)
+	catch /^Vim(echoerr):multiselect: Invalid argument: /
+		echoerr s:Errors.InvalidArgument('Change.beforedelete', args)
+	endtry
 
 	if deletion.type is# 'char'
 		if deletion.tail[2] == col([deletion.tail[1], '$'])
@@ -391,16 +396,12 @@ function! s:Change.beforedelete(expr, ...) abort "{{{
 endfunction "}}}
 
 function! s:Change.afterinsert(expr, ...) abort "{{{
-	if a:0 == 0 && type(a:expr) is v:t_dict
-		let insertion = deepcopy(a:expr)
-	else
-		let args = [a:expr] + a:000
-		try
-			let insertion = call('s:Item', args)
-		catch /^Vim(echoerr):multiselect: Invalid argument: /
-			echoerr s:Errors.InvalidArgument('Change.afterinsert', args)
-		endtry
-	endif
+	let args = [a:expr] + a:000
+	try
+		let insertion = call('s:Item', args)
+	catch /^Vim(echoerr):multiselect: Invalid argument: /
+		echoerr s:Errors.InvalidArgument('Change.afterinsert', args)
+	endtry
 
 	if insertion.type is# 'char'
 		call add(self._changelist, ['insert', insertion])

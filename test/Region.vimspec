@@ -39,6 +39,14 @@ Describe Region
 			Assert Equals(region.tail, pos)
 			Assert NotSame(region.head, pos)
 			Assert NotSame(region.tail, pos)
+
+			let pos = [0, 1, 1, 0]
+			let region = Region(pos)
+			let newregion = Region(region)
+			Assert Equals(newregion.type, 'char')
+			Assert Equals(newregion.head, pos)
+			Assert Equals(newregion.tail, pos)
+			Assert NotSame(newregion, region)
 		End
 
 		It can construct a linewise-instance
@@ -72,6 +80,14 @@ Describe Region
 			Assert Equals(region.type, 'line')
 			Assert Equals(region.head[1], startlnum)
 			Assert Equals(region.tail[1], endlnum)
+
+			let lnum = 1
+			let region = Region(lnum)
+			let newregion = Region(region)
+			Assert Equals(newregion.type, 'line')
+			Assert Equals(newregion.head[1], lnum)
+			Assert Equals(newregion.tail[1], lnum)
+			Assert NotSame(newregion, region)
 		End
 
 		It can construct a blockwise-instance
@@ -97,10 +113,29 @@ Describe Region
 			let tail = [0, 1, 7, 0]
 			let region = Region(head, tail, "\<C-v>", 1)
 			Assert True(region.extended)
+
+			let head = [0, 1, 1, 0]
+			let tail = [0, 1, 7, 0]
+			let region = Region(head, tail, 'block', 0)
+			let newregion = Region(region)
+			Assert Equals(newregion.type, 'block')
+			Assert Equals(newregion.head, head)
+			Assert Equals(newregion.tail, tail)
+			Assert Equals(newregion.extended, 0)
+			Assert NotSame(newregion, region)
+
+			let head = [0, 1, 1, 0]
+			let tail = [0, 1, 7, 0]
+			let region = Region(head, tail, 'block', 1)
+			let newregion = Region(region)
+			Assert Equals(newregion.type, 'block')
+			Assert Equals(newregion.head, head)
+			Assert Equals(newregion.tail, tail)
+			Assert Equals(newregion.extended, 1)
+			Assert NotSame(newregion, region)
 		End
 
 		It throws an exception with inappropriate arguments
-			Throws /^Vim(echoerr):multiselect: Invalid argument: Region({})/ Region({})
 			Throws /^Vim(echoerr):multiselect: Invalid argument: Region('')/ Region('')
 			Throws /^Vim(echoerr):multiselect: Invalid argument: Region(1, \[0, 1, 1, 0\])/ Region(1, [0, 1, 1, 0])
 			Throws /^Vim(echoerr):multiselect: Invalid argument: Region(\[0, 1, 1, 0\], 1)/ Region([0, 1, 1, 0], 1)
