@@ -1358,7 +1358,7 @@ Multiselector.isempty()    [method]
 Multiselector.lastevent()    [method]
 	This method returns a history of the last event; check or uncheck. The
 	return value is a dictionary which have the following keys.
-	  event: "check" of "uncheck"
+	  event: "check" or "uncheck"
 	  itemlist: a list of checked or unchecked items
 >
 		call s:multiselector.uncheckall()
