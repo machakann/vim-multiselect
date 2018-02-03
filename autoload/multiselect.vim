@@ -92,14 +92,7 @@ function! s:Multiselector.checkpattern(pat, ...) abort "{{{
 	endwhile
 
 	" It is sure that the items in 'itemlist' has no overlap
-	" FIXME: Should I add this as an API? Like 'Multiselector.unsafe_append()'
-	if !empty(itemlist)
-		for newitem in itemlist
-			call self.filter({_, olditem -> !newitem.touches(olditem)})
-		endfor
-		call extend(self.itemlist, itemlist)
-		call self._checkpost(itemlist)
-	endif
+	call self.unsafe_append(itemlist)
 	call winrestview(view)
 	return itemlist
 endfunction "}}}
@@ -525,6 +518,39 @@ function! s:Multiselector.quench(...) abort "{{{
 	for item in self.itemlist
 		call item.quench()
 	endfor
+endfunction "}}}
+
+function! s:Multiselector.unsafe_append(item) abort "{{{
+	if empty(a:item)
+		return self.itemlist
+	endif
+
+	if self.bufnr == -1
+		let self.bufnr = bufnr('%')
+	endif
+
+	let t_item = type(a:item)
+	if t_item is v:t_dict
+		let itemlist = [a:item]
+	elseif t_item is v:t_list
+		let itemlist = a:item
+	else
+		call s:Errors.InvalidArgument('Multiselector.unsafe_append', [a:item])
+	endif
+
+	if empty(itemlist)
+		return self.itemlist
+	endif
+
+	for newitem in itemlist
+		if empty(newitem) || newitem.bufnr != self.bufnr
+			continue
+		endif
+		call self.filter({_, olditem -> !newitem.touches(olditem)})
+	endfor
+	call extend(self.itemlist, itemlist)
+	call self._checkpost(itemlist)
+	return self.itemlist
 endfunction "}}}
 
 function! s:percolate(iter, Filterexpr) abort "{{{

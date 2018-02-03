@@ -1,5 +1,5 @@
 *multiselect.txt*	A library for multiple selection
-						Last change:02-Feb-2018.
+						Last change:03-Feb-2018.
 
 Author  : machakann <https://github.com/machakann>
 License : MIT license
@@ -466,6 +466,7 @@ List of contents~
   Multiselector.lastevent()	|multiselect-Multiselector.lastevent()|
   Multiselector.show()		|multiselect-Multiselector.show()|
   Multiselector.quench()	|multiselect-Multiselector.quench()|
+  Multiselector.unsafe_append()	|multiselect-Multiselector.unsafe_append()|
 
   - event controls
   Multiselector.event()		|multiselect-Multiselector.event()|
@@ -1415,6 +1416,18 @@ Multiselector.quench()    [method]
 		" show up again
 		call s:multiselector.show()
 <
+
+				*multiselect-Multiselector.unsafe_append()*
+Multiselector.unsafe_append({item})    [method]
+	This method append items in {item} into `Multiselector.itemlist` like
+	|multiselect-Multiselector.append()| but this method does not carry
+	out the overlapping check for the items in {item}. Thus it works
+	faster than |multiselect-Multiselector.append()| but possibly causes
+	problems. Basically you should keep using
+	|multiselect-Multiselector.append()| for safe, if you are really sure
+	that no overlapping items in {item} and have performance problems,
+	then use this method.
+
 
   - event controls
 					*multiselect-Multiselector.event()*

@@ -1,5 +1,5 @@
 *multiselect.txt*	複数選択ライブラリ
-						Last change:02-Feb-2018.
+						Last change:03-Feb-2018.
 
 書いた人   : machakann <https://github.com/machakann>
 ライセンス : MIT license
@@ -481,6 +481,7 @@ API					*multiselect-api*
   Multiselector.lastevent()	|multiselect-Multiselector.lastevent()|
   Multiselector.show()		|multiselect-Multiselector.show()|
   Multiselector.quench()	|multiselect-Multiselector.quench()|
+  Multiselector.unsafe_append()	|multiselect-Multiselector.unsafe_append()|
 
   - イベントコントロール
   Multiselector.event()		|multiselect-Multiselector.event()|
@@ -1416,6 +1417,16 @@ Multiselector.quench()    [method]
 		" もう一度ハイライトする
 		call s:multiselector.show()
 <
+
+				*multiselect-Multiselector.unsafe_append()*
+Multiselector.unsafe_append({item})    [method]
+	このメソッドは |multiselect-Multiselector.append()| メソッドのように
+	複数選択要素を `Multiselector.itemlist` に加えますが、要素同士の重複
+	チェックを省くのでより高速に動作します。ただし、同時に問題を起こす可能
+	性もあるので、基本的には |multiselect-Multiselector.append()| メソッド
+	を使ってください。 {item} 内の要素に重複がないと確信でき、パフォーマン
+	スに問題を抱えている時にのみ使用してください。
+
 
   - イベントコントロール
 					*multiselect-Multiselector.event()*
