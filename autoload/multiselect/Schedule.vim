@@ -19,8 +19,7 @@ unlockvar! s:Switch
 let s:Switch = {
 	\	'__CLASS__': 'Switch',
 	\	'__switch__': {
-	\		'state': s:ON,
-	\		'skipcount': -1,
+	\		'skipcount': 0,
 	\		}
 	\	}
 function! s:Switch() abort "{{{
@@ -28,30 +27,22 @@ function! s:Switch() abort "{{{
 endfunction "}}}
 
 function! s:Switch._on() abort "{{{
-	let self.__switch__.state = s:ON
-	let self.__switch__.skipcount = -1
+	let self.__switch__.skipcount = 0
 	return self
 endfunction "}}}
 
 function! s:Switch._off() abort "{{{
-	let self.__switch__.state = s:OFF
 	let self.__switch__.skipcount = -1
 	return self
 endfunction "}}}
 
 function! s:Switch.skip(...) abort "{{{
-	let n = get(a:000, 0, 1)
-	if n <= 0
-		call self._on()
-		return self
-	endif
-	call self._off()
-	let self.__switch__.skipcount = n
+	let self.__switch__.skipcount = max([get(a:000, 0, 1), -1])
 	return self
 endfunction "}}}
 
 function! s:Switch._isactive() abort "{{{
-	return self.__switch__.state
+	return self.__switch__.skipcount == 0
 endfunction "}}}
 
 function! s:Switch._skipsthistime() abort "{{{
