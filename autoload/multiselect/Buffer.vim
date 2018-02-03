@@ -535,13 +535,18 @@ function! s:mappush(poslist, head, tail, linewise) abort "{{{
 		let shift = [0, a:tail[1] - a:head[1] + 1, 0, 0]
 		call map(poslist, 's:shift(v:val, shift)')
 	else
-		let poslist0 = filter(copy(a:poslist), '!s:inorderof(v:val, a:head)')
-		let poslist1 = filter(copy(poslist0), 'a:head[1] == v:val[1]')
+		if a:head[1] == a:tail[1]
+			let poslist0 = filter(copy(a:poslist), 'a:head[1] == v:val[1] && a:head[2] <= v:val[2]')
 
-		let shift = [0, 0, a:tail[2] - a:head[2], 0]
-		call map(poslist1, 's:shift(v:val, shift)')
+			let shift = [0, 0, a:tail[2] - a:head[2], 0]
+			call map(poslist0, 's:shift(v:val, shift)')
+		else
+			let poslist0 = filter(copy(a:poslist), '!s:inorderof(v:val, a:head)')
+			let poslist1 = filter(copy(poslist0), 'a:head[1] == v:val[1]')
 
-		if a:head[1] != a:tail[1]
+			let shift = [0, 0, a:tail[2] - a:head[2], 0]
+			call map(poslist1, 's:shift(v:val, shift)')
+
 			let shift = [0, a:tail[1] - a:head[1], 0, 0]
 			call map(poslist0, 's:shift(v:val, shift)')
 		endif
@@ -560,31 +565,42 @@ function! s:mappull(poslist, head, tail, linewise) abort "{{{
 		let set = [0, a:head[1], 1, 0]
 		call map(poslist1, 's:setpos(v:val, set)')
 	else
-		let poslist0 = filter(copy(a:poslist), 'v:val[1] <= a:tail[1] && s:inorderof(a:head, v:val)')
-		let poslist1 = filter(copy(poslist0), 's:inorderof(a:tail, v:val)')
-		let poslist2 = filter(copy(poslist1), 'a:head[1] == v:val[1]')
-		let poslist3 = filter(copy(poslist1), 'a:head[1] != v:val[1]')
-		let poslist4 = filter(copy(poslist0), '!s:inorderof(a:tail, v:val)')
+		if a:head[1] == a:tail[1]
+			let poslist0 = filter(copy(a:poslist), 'a:head[1] == v:val[1] && a:head[2] < v:val[2]')
+			let poslist1 = filter(copy(poslist0), 'v:val[2] <= a:tail[2]')
+			let poslist2 = filter(copy(poslist0), 'v:val[2] > a:tail[2]')
 
-		" col
-		let shift = [0, 0, a:head[2] - a:tail[2] - 1, 0]
-		call map(poslist2, 's:shift(v:val, shift)')
+			call map(poslist1, 's:setcol(v:val, a:head[2])')
 
-		let shift = [0, 0, -a:tail[2], 0]
-		call map(poslist3, 's:shift(v:val, shift)')
+			let shift = [0, 0, a:head[2] - a:tail[2] - 1, 0]
+			call map(poslist2, 's:shift(v:val, shift)')
+		else
+			let poslist0 = filter(copy(a:poslist), 'v:val[1] <= a:tail[1] && s:inorderof(a:head, v:val)')
+			let poslist1 = filter(copy(poslist0), 's:inorderof(a:tail, v:val)')
+			let poslist2 = filter(copy(poslist1), 'a:head[1] == v:val[1]')
+			let poslist3 = filter(copy(poslist1), 'a:head[1] != v:val[1]')
+			let poslist4 = filter(copy(poslist0), '!s:inorderof(a:tail, v:val)')
 
-		call map(poslist4, 's:setcol(v:val, a:head[2])')
+			" col
+			let shift = [0, 0, a:head[2] - a:tail[2] - 1, 0]
+			call map(poslist2, 's:shift(v:val, shift)')
 
-		" lnum
-		if a:head[1] != a:tail[1]
-			let poslist5 = filter(copy(a:poslist), 'v:val[1] > a:head[1]')
-			let poslist6 = filter(copy(poslist5), 'v:val[1] <= a:tail[1]')
-			let poslist7 = filter(copy(poslist5), 'v:val[1] > a:tail[1]')
+			let shift = [0, 0, -a:tail[2], 0]
+			call map(poslist3, 's:shift(v:val, shift)')
 
-			call map(poslist6, 's:setlnum(v:val, a:head[1])')
+			call map(poslist4, 's:setcol(v:val, a:head[2])')
 
-			let shift = [0, a:head[1] - a:tail[1], 0, 0]
-			call map(poslist7, 's:shift(v:val, shift)')
+			" lnum
+			if a:head[1] != a:tail[1]
+				let poslist5 = filter(copy(a:poslist), 'v:val[1] > a:head[1]')
+				let poslist6 = filter(copy(poslist5), 'v:val[1] <= a:tail[1]')
+				let poslist7 = filter(copy(poslist5), 'v:val[1] > a:tail[1]')
+
+				call map(poslist6, 's:setlnum(v:val, a:head[1])')
+
+				let shift = [0, a:head[1] - a:tail[1], 0, 0]
+				call map(poslist7, 's:shift(v:val, shift)')
+			endif
 		endif
 	endif
 	return a:poslist
