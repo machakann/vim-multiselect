@@ -41,7 +41,7 @@ xmap @/ <Plug>(multiselect-checksearched)
 ```
 
 ### Broadcasting textobjects
-Another way is to use a series of wrapped textobjects, **broadcasting textobjects**. These textobjects works just as an original textobjects only except in linewise-visual mode. In line-wise visual mode, it tries to use the original textobject for each lines of selection at the cursor column. If it is succeeded, the region will be multiselected. `:help multiselect-broadcasting-textobject`
+Another way is to use a series of wrapped textobjects, **broadcasting textobjects**. This textobject works just as the original textobject does, except in only linewise-visual mode. In line-wise visual mode, it tries to use the original textobject for each lines of selection at the cursor column. If it is succeeded, the region will be multiselected. `:help multiselect-broadcasting-textobject`
 
 ```vim
 xmap iw <Plug>(multiselect-iw)
