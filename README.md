@@ -14,11 +14,7 @@ To explore a new ability of Vim to edit texts, here is a conceptual implementati
 
 # Usage
 
-This plugin does not define default keymappings. Thus you should make your keymappings as you prefer. However, there are examples in `macros/multiselect/keymap/` directry. You also can use them by copying them into your vimrc or by `:runtime` command.
-
-```vim
-runtime macros/multiselect/keymap/example1.vim
-```
+This plugin does not define default keymappings. Thus you should make your keymappings as you prefer.
 
 ## Check
 Use **\<Plug\>(multiselect)**, **\<Plug\>(multiselect-check)**, **\<Plug\>(multiselect-checksearched)** to select regions on a buffer.
@@ -40,8 +36,8 @@ xmap <Space>v <Plug>(multiselect-check)
 **\<Plug\>(multiselect-checksearched)** selects texts matching with the last searched pattern.
 
 ```vim
-nmap <Space>v <Plug>(multiselect-checksearched)
-xmap <Space>v <Plug>(multiselect-checksearched)
+nmap @/ <Plug>(multiselect-checksearched)
+xmap @/ <Plug>(multiselect-checksearched)
 ```
 
 ### Broadcasting textobjects
@@ -71,6 +67,28 @@ xmap <Space>V <Plug>(multiselect-uncheck)
 ```vim
 nmap <Space>V <Plug>(multiselect-uncheckall)
 xmap <Space>V <Plug>(multiselect-uncheckall)
+```
+
+
+## Example
+
+There is an example in `macros/multiselect/keymap/` directry. You also can use it by copying the lines into your vimrc or by `:runtime` command.
+
+```vim
+runtime macros/multiselect/keymap/example1.vim
+```
+
+It defines the keymappings like:
+
+```vim
+nmap <Space>v <Plug>(multiselect)
+xmap <Space>v <Plug>(multiselect)
+nmap <Space>V <Plug>(multiselect-uncheckall)
+xmap <Space>V <Plug>(multiselect-uncheck)
+nmap @/ <Plug>(multiselect-checksearched)
+xmap @/ <Plug>(multiselect-checksearched)
+map [v <Plug>(multiselect-previous)
+map ]v <Plug>(multiselect-next)
 ```
 
 
