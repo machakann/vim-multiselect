@@ -554,27 +554,9 @@ function! s:Multiselector.unsafe_append(item) abort "{{{
 endfunction "}}}
 
 function! s:percolate(iter, Filterexpr) abort "{{{
-	let t_iter = type(a:iter)
-	if t_iter is v:t_list
-		let filtered = []
-		let i = len(a:iter) - 1
-		while i >= 0
-			if call(a:Filterexpr, [i, a:iter[i]])
-				call add(filtered, remove(a:iter, i))
-			endif
-			let i -= 1
-		endwhile
-		return reverse(filtered)
-	elseif t_iter is v:t_dict
-		let filtered = {}
-		for [key, val] in items(a:iter)
-			if call(a:Filterexpr, [key, val])
-				let filtered[key] = remove(a:iter, key)
-			endif
-		endfor
-		return filtered
-	endif
-	echoerr s:Errors.InvalidArgument('percolate', [a:iter, a:Filterexpr])
+	let percolated = filter(copy(a:iter), {i1, i2 -> a:Filterexpr(i1, i2)})
+	call filter(a:iter, {i1, i2 -> !a:Filterexpr(i1, i2)})
+	return percolated
 endfunction "}}}
 
 function! s:enumerate(list, ...) abort "{{{
