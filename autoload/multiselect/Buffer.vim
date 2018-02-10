@@ -31,8 +31,8 @@ function! s:Region(expr, ...) abort "{{{
 			let tail = copy(pos)
 			let type = 'char'
 		elseif t_expr is v:t_dict
-			let head = a:expr.head
-			let tail = a:expr.tail
+			let head = copy(a:expr.head)
+			let tail = copy(a:expr.tail)
 			let type = a:expr.type
 			let extended = a:expr.extended
 		else
