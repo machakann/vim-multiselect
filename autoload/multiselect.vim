@@ -2,7 +2,7 @@
 let s:Errors = multiselect#Errors#_import()
 let s:Buffer = multiselect#Buffer#_import()
 let s:Highlights = multiselect#Highlights#_import()
-let s:Schedule = multiselect#Schedule#_import()
+let s:Schedule = multiselect#Schedule#_import().augroup('multiselect')
 let s:TRUE = 1
 let s:FALSE = 0
 let s:NULLPOS = [0, 0, 0, 0]
@@ -569,8 +569,8 @@ endfunction "}}}
 " event control
 function! s:Multiselector.event(name) abort "{{{
 	if !has_key(self._event, a:name)
-		let self._event[a:name] = s:Schedule.EventTask()
-		call self._event[a:name].start(a:name)
+		let self._event[a:name] = s:Schedule.Task().repeat(-1)
+		call self._event[a:name].waitfor([a:name])
 	endif
 	return self._event[a:name]
 endfunction "}}}
@@ -641,7 +641,7 @@ endfunction "}}}
 function! s:Multiselector._abandon() abort "{{{
 	call self.uncheckall()
 	for event in values(self._event)
-		call event.stop()
+		call event.cancel()
 	endfor
 endfunction "}}}
 lockvar! s:Multiselector
@@ -696,11 +696,9 @@ let s:Multiselect = {
 	\	'Region': s:Buffer.Region,
 	\	'Item': s:Buffer.Item,
 	\	'Change': s:Buffer.Change,
-	\	'Task': s:Schedule.Task,
+	\	'MetaTask': s:Schedule.MetaTask,
 	\	'NeatTask': s:Schedule.NeatTask,
-	\	'EventTask': s:Schedule.EventTask,
-	\	'TimerTask': s:Schedule.TimerTask,
-	\	'RaceTask': s:Schedule.RaceTask,
+	\	'Task': s:Schedule.Task,
 	\	'TaskChain': s:Schedule.TaskChain,
 	\	'shiftenv': function('s:shiftenv'),
 	\	'restoreenv': function('s:restoreenv'),

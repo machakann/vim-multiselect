@@ -1,0 +1,44 @@
+Describe TaskChain
+	Context instance
+		Before
+			let Schedule = multiselect#Schedule#_import()
+			let TaskChain = Schedule.TaskChain
+		End
+
+		It is triggered by any one of given triggers
+			let g:count = 0
+
+			let taskchain = TaskChain('multiselect')
+			call taskchain.hook(['WinEnter'])
+			call taskchain.hook(['WinLeave']).execute('let g:count += 1')
+			call taskchain.hook([100]).execute('let g:count += 1')
+
+			Assert False(exists('#multiselect#WinEnter'))
+			Assert False(exists('#multiselect#WinLeave'))
+			call taskchain.waitfor()
+			Assert True(exists('#multiselect#WinEnter'))
+			Assert False(exists('#multiselect#WinLeave'))
+
+			sleep 110m
+			Assert Equals(g:count, 0)
+
+			doautocmd <nomodeline> multiselect WinEnter
+			Assert Equals(g:count, 0)
+			Assert False(exists('#multiselect#WinEnter'))
+			Assert True(exists('#multiselect#WinLeave'))
+
+			doautocmd <nomodeline> multiselect WinLeave
+			Assert Equals(g:count, 1)
+			Assert False(exists('#multiselect#WinEnter'))
+			Assert False(exists('#multiselect#WinLeave'))
+
+			sleep 110m
+			Assert Equals(g:count, 2)
+
+			unlet! g:count
+			call taskchain.cancel()
+		End
+	End
+End
+
+" vim:set noet ts=4 sw=4 sts=-1:

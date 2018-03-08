@@ -1,5 +1,5 @@
 *multiselect.txt*	A library for multiple selection
-						Last change:03-Feb-2018.
+						Last change:08-Mar-2018.
 
 Author  : machakann <https://github.com/machakann>
 License : MIT license
@@ -409,7 +409,7 @@ List of contents~
   Multiselect.Change()		|multiselect-Multiselect.Change()|
   Multiselect.EventTask()	|multiselect-Multiselect.EventTask()|
   Multiselect.TimerTask()	|multiselect-Multiselect.TimerTask()|
-  Multiselect.RaceTask()	|multiselect-Multiselect.RaceTask()|
+  Multiselect.Task()	|multiselect-Multiselect.Task()|
   Multiselect.TaskChain()	|multiselect-Multiselect.TaskChain()|
 
   - utility functions
@@ -443,19 +443,19 @@ List of contents~
 
   - keymap interfaces
   Multiselector.keymap_check()
-				|multiselect-Multiselector.keymap_check()|
+			     |multiselect-Multiselector.keymap_check()|
   Multiselector.keymap_checkpattern()
 			     |multiselect-Multiselector.keymap_checkpattern()|
   Multiselector.keymap_uncheck()
-				|multiselect-Multiselector.keymap_uncheck()|
+			     |multiselect-Multiselector.keymap_uncheck()|
   Multiselector.keymap_uncheckall()
-			       |multiselect-Multiselector.keymap_uncheckall()|
+			     |multiselect-Multiselector.keymap_uncheckall()|
   Multiselector.keymap_undo()
-				|multiselect-Multiselector.keymap_undo()|
+			     |multiselect-Multiselector.keymap_undo()|
   Multiselector.keymap_multiselect()
-			      |multiselect-Multiselector.keymap_multiselect()|
+			     |multiselect-Multiselector.keymap_multiselect()|
   Multiselector.keymap_broadcast()
-				|multiselect-Multiselector.keymap_broadcast()|
+			     |multiselect-Multiselector.keymap_broadcast()|
 
   - low-level interfaces
   Multiselector.append()	|multiselect-Multiselector.append()|
@@ -520,59 +520,29 @@ List of contents~
   NeatTask.leftcount()		|multiselect-NeatTask.leftcount()|
   NeatTask.hasdone()		|multiselect-NeatTask.hasdone()|
 
-* EventTask class~
-  EventTask			|multiselect-class-EventTask|
-  EventTask.start()		|multiselect-EventTask.start()|
-  EventTask.stop()		|multiselect-EventTask.stop()|
-  EventTask.call()		|multiselect-EventTask.call()|
-  EventTask.execute()		|multiselect-EventTask.execute()|
-  EventTask.append()		|multiselect-EventTask.append()|
-  EventTask.trigger()		|multiselect-EventTask.trigger()|
-  EventTask.clear()		|multiselect-EventTask.clear()|
-  EventTask.isactive()		|multiselect-EventTask.isactive()|
-  EventTask.skip()		|multiselect-EventTask.skip()|
-  EventTask.repeat()		|multiselect-EventTask.repeat()|
-  EventTask.leftcount()		|multiselect-EventTask.leftcount()|
-  EventTask.hasdone()		|multiselect-EventTask.hasdone()|
-
-* TimerTask class~
-  TimerTask			|multiselect-class-TimerTask|
-  TimerTask.start()		|multiselect-TimerTask.start()|
-  TimerTask.stop()		|multiselect-TimerTask.stop()|
-  TimerTask.call()		|multiselect-TimerTask.call()|
-  TimerTask.execute()		|multiselect-TimerTask.execute()|
-  TimerTask.append()		|multiselect-TimerTask.append()|
-  TimerTask.trigger()		|multiselect-TimerTask.trigger()|
-  TimerTask.clear()		|multiselect-TimerTask.clear()|
-  TimerTask.isactive()		|multiselect-TimerTask.isactive()|
-  TimerTask.skip()		|multiselect-TimerTask.skip()|
-  TimerTask.repeat()		|multiselect-TimerTask.repeat()|
-  TimerTask.leftcount()		|multiselect-TimerTask.leftcount()|
-  TimerTask.hasdone()		|multiselect-TimerTask.hasdone()|
-
-* RaceTask class~
-  RaceTask			|multiselect-class-RaceTask|
-  RaceTask.start()		|multiselect-RaceTask.start()|
-  RaceTask.stop()		|multiselect-RaceTask.stop()|
-  RaceTask.call()		|multiselect-RaceTask.call()|
-  RaceTask.execute()		|multiselect-RaceTask.execute()|
-  RaceTask.append()		|multiselect-RaceTask.append()|
-  RaceTask.trigger()		|multiselect-RaceTask.trigger()|
-  RaceTask.clear()		|multiselect-RaceTask.clear()|
-  RaceTask.isactive()		|multiselect-RaceTask.isactive()|
-  RaceTask.skip()		|multiselect-RaceTask.skip()|
-  RaceTask.repeat()		|multiselect-RaceTask.repeat()|
-  RaceTask.leftcount()		|multiselect-RaceTask.leftcount()|
-  RaceTask.hasdone()		|multiselect-RaceTask.hasdone()|
+* Task class~
+  Task				|multiselect-class-Task|
+  Task.waitfor()		|multiselect-Task.waitfor()|
+  Task.cancel()			|multiselect-Task.cancel()|
+  Task.call()			|multiselect-Task.call()|
+  Task.execute()		|multiselect-Task.execute()|
+  Task.append()			|multiselect-Task.append()|
+  Task.trigger()		|multiselect-Task.trigger()|
+  Task.clear()			|multiselect-Task.clear()|
+  Task.isactive()		|multiselect-Task.isactive()|
+  Task.skip()			|multiselect-Task.skip()|
+  Task.repeat()			|multiselect-Task.repeat()|
+  Task.leftcount()		|multiselect-Task.leftcount()|
+  Task.hasdone()		|multiselect-Task.hasdone()|
 
 * TaskChain class~
   TaskChain			|multiselect-class-TaskChain|
   TaskChain.event()		|multiselect-TaskChain.event()|
   TaskChain.timer()		|multiselect-TaskChain.timer()|
-  TaskChain.race()		|multiselect-TaskChain.race()|
+  TaskChain.hook()		|multiselect-TaskChain.hook()|
   TaskChain.trigger()		|multiselect-TaskChain.trigger()|
-  TaskChain.start()		|multiselect-TaskChain.start()|
-  TaskChain.stop()		|multiselect-TaskChain.stop()|
+  TaskChain.waitfor()		|multiselect-TaskChain.waitfor()|
+  TaskChain.cancel()		|multiselect-TaskChain.cancel()|
   TaskChain.repeat()		|multiselect-TaskChain.repeat()|
   TaskChain.leftcount()		|multiselect-TaskChain.leftcount()|
   TaskChain.hasdone()		|multiselect-TaskChain.hasdone()|
@@ -680,7 +650,7 @@ Multiselect.NeatTask()    [function]
 	at onece, and is also a base class of the following classes.
 	|multiselect-class-EventTask|
 	|multiselect-class-TimerTask|
-	|multiselect-class-RaceTask|
+	|multiselect-class-Task|
 
 
 					*multiselect-Multiselect.EventTask()*
@@ -695,11 +665,11 @@ Multiselect.TimerTask()    [function]
 	the execution of processes. See |multiselect-class-TimerTask|.
 
 
-					*multiselect-Multiselect.RaceTask()*
-Multiselect.RaceTask()    [function]
-	This is the constructor of `RaceTask` class. It is employed to
+					*multiselect-Multiselect.Task()*
+Multiselect.Task()    [function]
+	This is the constructor of `Task` class. It is employed to
 	obtain a task executed by multiple triggers.
-	See |multiselect-class-RaceTask|.
+	See |multiselect-class-Task|.
 
 
 					*multiselect-Multiselect.TaskChain()*
@@ -1866,9 +1836,9 @@ them in the order of registration. >
 	call task.trigger()
 <
 
-`NeatTask` can have its life time. |multiselect-NeatTask.repeat()| sets the
-number of executions, and after the number of executions
-|multiselect-NeatTask.trigger()| does nothing. >
+|multiselect-NeatTask.repeat()| sets the number of executions; after the
+number of executions done, |multiselect-NeatTask.trigger()| does nothing.
+The default number of execution is 1. >
 	let neattask = s:Multiselect.NeatTask()
 	call neattask.execute('echo "foo"').repeat(1)
 
@@ -1978,6 +1948,31 @@ NeatTask.skip([{count}])    [method]
 		call neattask.trigger()
 <
 
+					*multiselect-NeatTask.skipif()*
+NeatTask.skipif({Funcref}, {args}[, {dict}])    [method]
+	This method sets a condition to skip an action. If {Funcref} is
+	evaluated with a |List| of {args} as arguments to return |TRUE|, the
+	task will be finished immediately. {dict} is for functions with the
+	"dict" attribute. It will be used to set the local variable "self".
+	|Dictionary-function| This method returns the task object itself. >
+		let neattask = s:Multiselect.NeatTask()
+		call neattask.execute('echo foo').repeat(-1)
+		call neattask.skipif({-> g:skip == 1}, [])
+
+		" echo 'foo'
+		let g:skip = 0
+		call neattask.trigger()
+
+		" does nothing
+		let g:skip = 1
+		call neattask.trigger()
+
+		" echo 'foo'
+		let g:skip = 2
+		call neattask.trigger()
+<
+	A task accepts only one condition to skip.
+
 
 					*multiselect-NeatTask.repeat()*
 NeatTask.repeat([{count}])    [method]
@@ -2010,319 +2005,124 @@ NeatTask.hasdone()    [method]
 	specified by |multiselect-NeatTask.repeat()|, otherwise |FALSE|.
 
 
+					*multiselect-NeatTask.finishif()*
+NeatTask.finishif({Funcref}, {args}[, {dict}])    [method]
+	This method set a condition to finish the task. If {Funcref} is
+	evaluated with a |List| of {args} as arguments to return |TRUE|, the
+	task will be finished immediately. {dict} is for functions with the
+	"dict" attribute. It will be used to set the local variable "self".
+	|Dictionary-function| This method returns the task object itself. >
+		let neattask = s:Multiselect.NeatTask()
+		call neattask.execute('echo foo').repeat(-1)
+		call neattask.finishif({-> g:finish == 1}, [])
+
+		" echo 'foo'
+		let g:finish = 0
+		call neattask.trigger()
+
+		" does nothing
+		let g:finish = 1
+		call neattask.trigger()
+<
+	A task accepts only one condition to finish.
+
+
 
 ------------------------------------------------------------------------------
-EventTask class~
-					*multiselect-class-EventTask*
+Task class~
+					*multiselect-class-Task*
 
-`EventTask` class is used to hook processes for |autocmd-events|. It is a
-subclass of `NeatTask` class and automatically triggered by an autocmd event.
-|multiselect-class-NeatTask|
+`Task` class is a subclass of `NeatTask` class with multiple automatic
+triggers, autocmd events and a delay time.
+See also |multiselect-class-NeatTask|.
 
-`EventTask` class instance has the same methods with that of `NeatTask` class,
-and additionally |multiselect-EventTask.start()| and
-|multiselect-EventTask.stop()|.
+`Task` class instance inherits the methods of `NeatTask` class, and has
+|multiselect-Task.waitfor()| and |multiselect-Task.cancel()| additionally.
 
-|multiselect-EventTask.start()| sets the task to an autocmd event. An
-`EventTask` is repeated forever in default.
+`Task` finishes after an execution in default, this number of execution can be
+changed by |multiselect-Task.repeat()|.
 
-Its life time can be set by |multiselect-EventTask.repeat()|.
 
-If the purpose of the task has achieved, use |multiselect-EventTask.stop()|. >
-	function! s:sayfoo() abort
-		echo 'foo'
-	endfunction
+					*multiselect-Task.waitfor()*
+Task.waitfor({triggers})    [method]
+	This method starts to wait for an auto-trigger in {triggerlist}.
+	{triggerlist} is a list of trigger names. The trigger name should be
+	one of the following types.
 
-	let eventtask = s:Multiselect.EventTask()
-	call eventtask.call(function('s:sayfoo'), [])
-	call eventtask.execute('echo "foo"')
-	call eventtask.start('TextChanged')
-
-	" finish the task
-	call eventtask.stop()
-<
-
-					*multiselect-EventTask.start()*
-EventTask.start({name})    [method]
-	This method sets the task itself to an autocmd event. {name} should be
-	an autocmd event name. An `EventTask` instance can be bound to only an
-	event. If you need multiple triggers, use number of `EventTask`
-	instances or |multiselect-class-RaceTask|.
-
-	If you have achieved the purpose of the task, you can
-	stop the task by calling |multiselect-EventTask.stop()|. >
-		function! s:sayfoo() abort
-		    echo 'foo'
-		endfunction
-
-		" make and set a new task to 'TextChanged' event
-		let task = s:Multiselect.EventTask()
-					\.call(function('s:sayfoo'), [])
-					\.start('TextChanged')
-
-		" finish the task
-		call task.stop()
-<
-	Or use |multiselect-EventTask.repeat()| to finish after a certain
-	number of callings. >
-		" it will be abandoned after three times callings
-		let task = s:Multiselect.EventTask()
-					\.execute('echo "foo"')
-					\.repeat(3)
-					\.start('TextChanged')
+	  * |String|: Regarded as an {event} |autocmd-events|, "*" is applied
+	              for {pat} |autocmd-patterns|
+	  * |List|  : Regarded as an |autocmd-events| and a |autocmd-patterns|
+	              like [{event}, {pat}]
+	  * |Number|: Regarded as a waiting {time} for a timer |timer|
+>
+		let task = s:Multiselect.Task().execute('echo "foo"')
+		call task.waitfor(['TextChanged', ['InsertEnter', '*'], 100])
 <
 	This method returns the task itself.
 
-
-					*multiselect-EventTask.stop()*
-EventTask.stop()    [method]
-	This method stops the execution of the event task.
-
-
-					*multiselect-EventTask.call()*
-EventTask.call({Funcref}, {args}[, {dict}])    [method]
-	See |multiselect-NeatTask.call()|.
-
-
-					*multiselect-EventTask.execute()*
-EventTask.execute({cmd})    [method]
-	See |multiselect-NeatTask.execute()|.
-
-
-					*multiselect-EventTask.append()*
-EventTask.append({task})    [method]
-	See |multiselect-NeatTask.append()|.
-
-
-					*multiselect-EventTask.trigger()*
-EventTask.trigger([{forcibly}])    [method]
-	See |multiselect-NeatTask.trigger()|.
-
-
-					*multiselect-EventTask.clear()*
-EventTask.clear()    [method]
-	See |multiselect-NeatTask.clear()|.
-
-
-					*multiselect-EventTask.clone()*
-EventTask.clone()    [method]
-	See |multiselect-NeatTask.clone()|.
-
-
-					*multiselect-EventTask.isactive()*
-EventTask.isactive()    [method]
-	See |multiselect-NeatTask.isactive()|.
-
-
-					*multiselect-EventTask.skip()*
-EventTask.skip([{count}])    [method]
-	See |multiselect-NeatTask.skip()|.
-
-
-					*multiselect-EventTask.repeat()*
-EventTask.repeat([{count}])    [method]
-	See |multiselect-NeatTask.repeat()|.
-
-
-					*multiselect-EventTask.leftcount()*
-EventTask.leftcount()    [method]
-	See |multiselect-NeatTask.leftcount()|.
-
-
-					*multiselect-EventTask.hasdone()*
-EventTask.hasdone()    [method]
-	See |multiselect-NeatTask.hasdone()|.
-
-
-
-------------------------------------------------------------------------------
-TimerTask class~
-					*multiselect-class-TimerTask*
-
-`TimerTask` is used to delay the execution of tasks. It is a subclass of
-`NeatTask` class and automatically triggered by a delay time.
-See |multiselect-class-NeatTask|.
-
-`TimerTask` class instance has the same methods with that of `NeatTask` class,
-and additionally |multiselect-TimerTask.start()| and
-|multiselect-TimerTask.stop()|.
-
-|multiselect-TimerTask.start()| sets the delay time and start counting down,
-after the delay time the registered tasks are executed. `TimerTask` finishes
-after an action in default, this number of execution can be changed by
-|multiselect-TimerTask.repeat()|. If you want to stop a started `TimerTask`
-before the last execution, you can use |multiselect-TimerTask.stop()|. >
-	function! s:sayfoo() abort
-		echo 'foo'
-	endfunction
-
-	let timertask = s:Multiselect.TimerTask()
-	call timertask.call(function('s:sayfoo'), [])
-	call timertask.execute('echo "foo"')
-	call timertask.start(100)
-<
-
-					*multiselect-TimerTask.start()*
-TimerTask.start({time})    [method]
-	This method sets the delay time and start counting down.
-	This method returns the task itself. >
-		function! s:sayfoo() abort
-			echo 'foo'
-		endfunction
-
-		" make and start a new task executed after 100 millisecond
-		let task  = s:Multiselect.TimerTask()
-					\.call(function('s:sayfoo'), [])
-					\.start(100)
-<
-
-					*multiselect-TimerTask.stop()*
-TimerTask.stop()    [method]
-	This method stops to cancell the delayed task.
-	This method returns the task itself.
-
-
-					*multiselect-TimerTask.call()*
-TimerTask.call({Funcref}, {args}[, {dict}])    [method]
-	See |multiselect-NeatTask.call()|.
-
-
-					*multiselect-TimerTask.execute()*
-TimerTask.execute({cmd})    [method]
-	See |multiselect-NeatTask.execute()|.
-
-
-					*multiselect-TimerTask.append()*
-TimerTask.append({task})    [method]
-	See |multiselect-NeatTask.append()|.
-
-
-					*multiselect-TimerTask.trigger()*
-TimerTask.trigger([{forcibly}])    [method]
-	See |multiselect-NeatTask.trigger()|.
-
-
-					*multiselect-TimerTask.clear()*
-TimerTask.clear()    [method]
-	See |multiselect-NeatTask.clear()|.
-
-
-					*multiselect-TimerTask.clone()*
-TimerTask.clone()    [method]
-	See |multiselect-NeatTask.clone()|.
-
-
-					*multiselect-TimerTask.isactive()*
-TimerTask.isactive()    [method]
-	See |multiselect-NeatTask.isactive()|.
-
-
-					*multiselect-TimerTask.skip()*
-TimerTask.skip([{count}])    [method]
-	See |multiselect-NeatTask.skip()|.
-
-
-					*multiselect-TimerTask.repeat()*
-TimerTask.repeat([{count}])    [method]
-	See |multiselect-NeatTask.repeat()|.
-
-
-					*multiselect-TimerTask.leftcount()*
-TimerTask.leftcount()    [method]
-	See |multiselect-NeatTask.leftcount()|.
-
-
-					*multiselect-TimerTask.hasdone()*
-TimerTask.hasdone()    [method]
-	See |multiselect-NeatTask.hasdone()|.
-
-
-
-------------------------------------------------------------------------------
-RaceTask class~
-					*multiselect-class-RaceTask*
-
-`RaceTask` class is a subclass of `NeatTask` class which can have multiple
-automatic triggers, autocmd events and a delay time.
-See also |multiselect-class-NeatTask|
-	 |multiselect-class-EventTask|
-	 |multiselect-class-TimerTask|.
-
-`RaceTask` class instance has the same methods with that of `NeatTask` class,
-and additionally |multiselect-RaceTask.start()| and
-|multiselect-RaceTask.stop()|.
-
-`RaceTask` will be executed once by either one of registered auto-triggers in
-default. The number of execution can be changed by
-|multiselect-RaceTask.repeat()|.
-
-
-					*multiselect-RaceTask.start()*
-RaceTask.start({triggers})    [method]
-	This method starts to wait for an auto-trigger. {triggers} is a list
-	of trigger names. If one of the item is |String|, it is regarded as an
-	autocmd event. If it is |Number|, it is regarded as an delay time. >
-		let task = s:Multiselect.RaceTask().execute('echo "foo"')
-		call task.start(['TextChanged', 100])
-<
-	This method returns the task itself. However, note that if
-	{triggerlist} does not contain any valid trigger item, this method
-	returns an empty dictionary.
-
-
-					*multiselect-RaceTask.stop()*
-RaceTask.stop()    [method]
+					*multiselect-Task.cancel()*
+Task.cancel()    [method]
 	This method stops to execute the registered tasks.
 
 
-					*multiselect-RaceTask.call()*
-RaceTask.call({Funcref}, {args}[, {dict}])    [method]
+					*multiselect-Task.call()*
+Task.call({Funcref}, {args}[, {dict}])    [method]
 	See |multiselect-NeatTask.call()|.
 
 
-					*multiselect-RaceTask.execute()*
-RaceTask.execute({cmd})    [method]
+					*multiselect-Task.execute()*
+Task.execute({cmd})    [method]
 	See |multiselect-NeatTask.execute()|.
 
 
-					*multiselect-RaceTask.append()*
-RaceTask.append({task})    [method]
+					*multiselect-Task.append()*
+Task.append({task})    [method]
 	See |multiselect-NeatTask.append()|.
 
 
-					*multiselect-RaceTask.trigger()*
-RaceTask.trigger([{forcibly}])    [method]
+					*multiselect-Task.trigger()*
+Task.trigger([{forcibly}])    [method]
 	See |multiselect-NeatTask.trigger()|.
 
 
-					*multiselect-RaceTask.clear()*
-RaceTask.clear()    [method]
+					*multiselect-Task.clear()*
+Task.clear()    [method]
 	See |multiselect-NeatTask.clear()|.
 
 
-					*multiselect-RaceTask.isactive()*
-RaceTask.isactive()    [method]
+					*multiselect-Task.isactive()*
+Task.isactive()    [method]
 	See |multiselect-NeatTask.isactive()|.
 
 
-					*multiselect-RaceTask.skip()*
-RaceTask.skip([{count}])    [method]
+					*multiselect-Task.skip()*
+Task.skip([{count}])    [method]
 	See |multiselect-NeatTask.skip()|.
 
 
-					*multiselect-RaceTask.repeat()*
-RaceTask.repeat([{count}])    [method]
+					*multiselect-Task.skipif()*
+Task.skipif({Funcref}, {args}[, {dict}])    [method]
+	See |multiselect-NeatTask.skipif()|.
+
+
+					*multiselect-Task.repeat()*
+Task.repeat([{count}])    [method]
 	See |multiselect-NeatTask.repeat()|.
 
 
-					*multiselect-RaceTask.leftcount()*
-RaceTask.leftcount()    [method]
+					*multiselect-Task.leftcount()*
+Task.leftcount()    [method]
 	See |multiselect-NeatTask.leftcount()|.
 
 
-					*multiselect-RaceTask.hasdone()*
-RaceTask.hasdone()    [method]
+					*multiselect-Task.hasdone()*
+Task.hasdone()    [method]
 	See |multiselect-NeatTask.hasdone()|.
+
+
+					*multiselect-Task.finishif()*
+Task.finishif({Funcref}, {args}[, {dict}])    [method]
+	See |multiselect-NeatTask.finishif()|.
 
 
 
@@ -2333,81 +2133,47 @@ TaskChain class~
 `TaskChain` class makes a task triggered by a successive sequence of autocmd
 events and timers.
 
-Use |multiselect-TaskChain.event()|, |multiselect-TaskChain.timer()| and
-|multiselect-TaskChain.race()| to make a sequence, and set tasks to the
-return value of these method. These method returns a `NeatTask` instance to
-set tasks for a step of sequence. Its number of execution is set as 1 in
-default but you can change it by |multiselect-NeatTask.repeat()|. >
+Use |multiselect-TaskChain.hook()| to make a sequence, and set tasks to the
+returned `NeatTask` instance. >
 	let taskchain = s:Multiselect.TaskChain()
 	let task1 = taskchain.event('InsertLeave')
 	let task2 = taskchain.event('CursorMoved')
 	call task2.execute('echo "foo"')
-	call taskchain.start()
+	call taskchain.waitfor()
 <
-This example shows a message "foo" after leaving insert mode and then moving
+The above example shows a message "foo" after leaving insert mode and then moving
 cursor. You can write shorter: >
 	let taskchain = s:Multiselect.TaskChain()
 	call taskchain.event('InsertLeave')
 	call taskchain.event('CursorMoved').execute('echo "foo"')
-	call taskchain.start()
+	call taskchain.waitfor()
 <
 
-					*multiselect-TaskChain.event()*
-TaskChain.event({event})    [method]
-	This method registers a task to the autocmd event. {event} should be
-	a name of autocmd event. |autocmd-events| This method returns a
-	`NeatTask` instance bound to the autocmd event. Its number of
-	execution is set as 1 in default >
-		let taskchain = s:Multiselect.TaskChain()
-		let task1 = taskchain.event('InsertEnter')
-		let task2 = taskchain.event('CursorMoved')
-		call task1.execute('echo "InsertEnter"')
-		call task2.execute('echo "CursorMoved"')
-		call taskchain.start()
-<
-	"InsertEnter" will be echoed at the first |InsertEnter| event, then
-	wait for |CursorMovedI| event to echo "CursorMovedI".
-	|multiselect-class-NeatTask|
-	|multiselect-NeatTask.repeat()|
-
-
-					*multiselect-TaskChain.timer()*
-TaskChain.timer({time})    [method]
-	This method registers a timer task. {time} is a delay time duration.
-	This method returns a `NeatTask` instance triggered after {time}
-	millisecond later. Its number of execution is set as 1 in default. >
-		let taskchain = s:Multiselect.TaskChain()
-		let task1 = taskchain.timer(1000)
-		let task2 = taskchain.timer(5000)
-		call task1.execute('echo "1s passed"')
-		call task2.execute('echo "6s passed"')
-		call taskchain.start()
-<
-	You will see the message "1s passed" 1 second later and then "6s
-	passed" will displayed after an additional 5 seconds.
-	|multiselect-class-NeatTask|
-	|multiselect-NeatTask.repeat()|
-
-
-					*multiselect-TaskChain.race()*
-TaskChain.race({triggerlist})    [method]
+					*multiselect-TaskChain.hook()*
+TaskChain.hook({triggerlist})    [method]
 	This method registers a multiple-triggered task. {triggers} is a list
-	of trigger names. If one of the item is |String|, it is regarded as an
-	autocmd event. If it is |Number|, it is regarded as an delay time.
-	This method returns a `NeatTask` instance to be called by either one
-	of those triggers. Its number of execution is set as 1 in default.
-	Note that if {triggerlist} does not contain any valid trigger item,
-	this method returns an empty dictionary. >
+	of trigger names. The trigger name could be one of the following
+	types.
+
+	  * |String|: Regarded as an {event} |autocmd-events|, "*" is applied
+	              for {pat} |autocmd-patterns|
+	  * |List|  : Regarded as an |autocmd-events| and a |autocmd-patterns|
+	              like [{event}, {pat}]
+	  * |Number|: Regarded as a waiting {time} for a timer |timer|
+
+	This method returns a `NeatTask` object to be called by either one of
+	those triggers. >
 		let taskchain = s:Multiselect.TaskChain()
 		let task1 = taskchain.event('CmdwinLeave')
-		let task2 = taskchain.race(['CursorMoved', 1000])
+		let task2 = taskchain.hook(['CursorMoved', 1000])
 		call task2.execute('echo "original buffer"')
-		call taskchain.start()
+		call taskchain.waitfor()
 <
 	After leaving |cmdline-window|, you will see the message "original
 	buffer" if you move cursor or wait for 1 second.
 	|multiselect-class-NeatTask|
 	|multiselect-NeatTask.repeat()|
+	|multiselect-Task.waitfor()|
 
 
 					*multiselect-TaskChain.trigger()*
@@ -2416,15 +2182,16 @@ TaskChain.trigger()    [method]
 	itself.
 
 
-					*multiselect-TaskChain.start()*
-TaskChain.start()    [method]
+					*multiselect-TaskChain.waitfor()*
+TaskChain.waitfor()    [method]
 	This method starts the taskchain, after calling this method it waits
 	for the first trigger to move for the next task.
 
 
-					*multiselect-TaskChain.stop()*
-TaskChain.stop()    [method]
-	This method stops an execution of the taskchain.
+					*multiselect-TaskChain.cancel()*
+TaskChain.cancel()    [method]
+	This method cancels the taskchain.
+	This method returns the taskchain object itself.
 
 
 					*multiselect-TaskChain.repeat()*
@@ -2442,6 +2209,11 @@ TaskChain.leftcount()    [method]
 TaskChain.hasdone()    [method]
 	This method returns |TRUE| if the task has done {count} times
 	specified by |multiselect-TaskChain.repeat()|, otherwise |FALSE|.
+
+
+					*multiselect-TaskChain.finishif()*
+TaskChain.finishif({Funcref}, {args}[, {dict}])    [method]
+	See |multiselect-NeatTask.finishif()|.
 
 
 

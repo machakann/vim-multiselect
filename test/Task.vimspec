@@ -1,65 +1,46 @@
 Describe Task
-	Before
-		let Schedule = multiselect#Schedule#_import()
-		let Task = Schedule.Task
-	End
-
-	Context .call(func, args, ...)
-		It registers a function to be called later
-			let g:count = 0
-			let task = Task()
-			call task.call({n -> execute('let g:count += n')}, [1])
-			Assert Equals(g:count, 0)
-
-			call task.trigger()
-			Assert Equals(g:count, 1)
-
-			call task.call({n -> execute('let g:count += 2*n')}, [1])
-			Assert Equals(g:count, 1)
-
-			call task.trigger()
-			Assert Equals(g:count, 4)
-
-			unlet! g:count
+	Context instance
+		Before
+			let Schedule = multiselect#Schedule#_import()
+			let Task = Schedule.Task
 		End
-	End
 
-	Context .execute(cmd)
-		It registers a command to be executed later
-			let g:count = 0
-			let task = Task()
-			call task.execute('let g:count += 1')
-			Assert Equals(g:count, 0)
+		It is triggered by any one of given triggers
+		let g:count = 0
+		let task = Task()
 
-			call task.trigger()
-			Assert Equals(g:count, 1)
+		call task.execute('let g:count += 1').repeat(3).skip(1)
 
-			call task.execute('let g:count += 2')
-			Assert Equals(g:count, 1)
+		Assert False(exists('#multiselect#WinEnter'))
+		Assert False(exists('#multiselect#WinLeave'))
+		call task.waitfor(['WinEnter', ['WinLeave', '*'], 100])
+		Assert True(exists('#multiselect#WinEnter'))
+		Assert True(exists('#multiselect#WinLeave'))
 
-			call task.trigger()
-			Assert Equals(g:count, 4)
+		" To check if the timer is appropriately abandoned later
+		let id = task._getid()
 
-			unlet! g:count
-		End
-	End
+		doautocmd <nomodeline> multiselect WinEnter
+		Assert Equals(g:count, 0)
 
-	Context .clear()
-		It clears all functions and commands registerd
-			let g:count = 0
-			let task = Task()
-			call task.execute('let g:count += 1')
-			call task.trigger()
-			call task.execute('let g:count += 2')
-			call task.trigger()
-			Assert Equals(g:count, 4)
+		doautocmd <nomodeline> multiselect WinEnter
+		Assert Equals(g:count, 1)
 
-			call task.clear()
-			Assert Equals(g:count, 4)
-			call task.trigger()
-			Assert Equals(g:count, 4)
+		doautocmd <nomodeline> multiselect WinLeave
+		Assert Equals(g:count, 2)
 
-			unlet! g:count
+		sleep 110m
+		Assert Equals(g:count, 3)
+		Assert True(task.hasdone())
+		Assert Empty(timer_info(id))
+
+		doautocmd <nomodeline> multiselect WinEnter
+		Assert Equals(g:count, 3)
+		Assert False(exists('#multiselect#WinEnter'))
+		Assert False(exists('#multiselect#WinLeave'))
+
+		unlet! g:count
+		call task.cancel()
 		End
 	End
 End

@@ -1,0 +1,67 @@
+Describe MetaTask
+	Before
+		let Schedule = multiselect#Schedule#_import()
+		let MetaTask = Schedule.MetaTask
+	End
+
+	Context .call(func, args, ...)
+		It registers a function to be called later
+			let g:count = 0
+			let metatask = MetaTask()
+			call metatask.call({n -> execute('let g:count += n')}, [1])
+			Assert Equals(g:count, 0)
+
+			call metatask.trigger()
+			Assert Equals(g:count, 1)
+
+			call metatask.call({n -> execute('let g:count += 2*n')}, [1])
+			Assert Equals(g:count, 1)
+
+			call metatask.trigger()
+			Assert Equals(g:count, 4)
+
+			unlet! g:count
+		End
+	End
+
+	Context .execute(cmd)
+		It registers a command to be executed later
+			let g:count = 0
+			let metatask = MetaTask()
+			call metatask.execute('let g:count += 1')
+			Assert Equals(g:count, 0)
+
+			call metatask.trigger()
+			Assert Equals(g:count, 1)
+
+			call metatask.execute('let g:count += 2')
+			Assert Equals(g:count, 1)
+
+			call metatask.trigger()
+			Assert Equals(g:count, 4)
+
+			unlet! g:count
+		End
+	End
+
+	Context .clear()
+		It clears all functions and commands registerd
+			let g:count = 0
+			let metatask = MetaTask()
+			call metatask.execute('let g:count += 1')
+			call metatask.trigger()
+			call metatask.execute('let g:count += 2')
+			call metatask.trigger()
+			Assert Equals(g:count, 4)
+
+			call metatask.clear()
+			Assert Equals(g:count, 4)
+			call metatask.trigger()
+			Assert Equals(g:count, 4)
+
+			unlet! g:count
+		End
+	End
+End
+
+" vim:set noet ts=4 sw=4 sts=-1:
