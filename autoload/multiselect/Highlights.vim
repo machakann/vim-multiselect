@@ -26,9 +26,8 @@ augroup END
 
 
 
-" id class{{{
+" id object{{{
 let s:Id = {
-	\	'__CLASS__': 'Id',
 	\	'id': -1,
 	\	'winid': -1,
 	\	}
@@ -42,10 +41,9 @@ endfunction "}}}
 
 
 
-" Highlight class{{{
+" Highlight object{{{
 unlockvar! s:Highlight
 let s:Highlight = {
-	\	'__CLASS__': 'Highlight',
 	\	'group': '',
 	\	'region': {
 	\		'head': deepcopy(s:NULLPOS),

@@ -12,7 +12,7 @@ Describe Region
 		$delete
 	End
 
-	Context class constructor
+	Context constructor
 		It can construct a characterwise-instance
 			let head = [0, 1, 1, 0]
 			let tail = [0, 1, 7, 0]

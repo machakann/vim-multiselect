@@ -1,7 +1,7 @@
 Describe Task
 	Context instance
 		Before
-			let Schedule = multiselect#Schedule#_import()
+			let Schedule = vital#multiselect#new().import('Schedule').augroup('multiselect')
 			let Task = Schedule.Task
 		End
 

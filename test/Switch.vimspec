@@ -1,6 +1,6 @@
 Describe Switch
 	Before
-		let Schedule = multiselect#Schedule#_import()
+		let Schedule = vital#multiselect#new().import('Schedule').augroup('multiselect')
 		let Switch = Schedule.Switch
 	End
 

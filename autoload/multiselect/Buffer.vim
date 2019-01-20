@@ -1,4 +1,3 @@
-let s:ClassSys = multiselect#ClassSys#_import()
 let s:Errors = multiselect#Errors#_import()
 let s:Highlights = multiselect#Highlights#_import()
 let s:TRUE = 1
@@ -6,10 +5,9 @@ let s:FALSE = 0
 let s:MAXCOL = 2147483647
 let s:NULLPOS = [0, 0, 0, 0]
 
-" Region class{{{
+" Region object{{{
 unlockvar! s:Region
 let s:Region = {
-	\	'__CLASS__': 'Region',
 	\	'head': copy(s:NULLPOS),
 	\	'tail': copy(s:NULLPOS),
 	\	'type': 'char',
@@ -293,16 +291,14 @@ lockvar! s:Region
 
 
 
-" Item class (inherits Region class)"{{{
+" Item object (inherits Region object)"{{{
 unlockvar! s:Item
 let s:Item = {
-	\	'__CLASS__': 'Item',
 	\	'id': 0,
 	\	'bufnr': 0,
 	\	'_highlight': {},
 	\	}
 function! s:Item(expr, ...) abort "{{{
-	let sub = deepcopy(s:Item)
 	let args = [a:expr] + a:000
 	try
 		let super = call('s:Region', args)
@@ -310,7 +306,8 @@ function! s:Item(expr, ...) abort "{{{
 		echoerr s:Errors.InvalidArgument('Item', args)
 	endtry
 
-	let item = s:ClassSys.inherit(sub, super)
+	let sub = deepcopy(s:Item)
+	let item = extend(super, sub)
 	let item.id = s:itemid()
 	let item.bufnr = bufnr('%')
 	let item._highlight = s:Highlights.Highlight()
@@ -359,10 +356,9 @@ lockvar! s:Item
 
 
 
-" Change class "{{{
+" Change object "{{{
 unlockva! s:Change
 let s:Change = {
-	\	'__CLASS__': 'Change',
 	\	'_changelist': [],
 	\	}
 function! s:Change() abort "{{{

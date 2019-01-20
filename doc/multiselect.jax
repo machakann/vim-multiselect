@@ -1,5 +1,5 @@
 *multiselect.txt*	複数選択ライブラリ
-						Last change:10-Mar-2018.
+						Last change:12-Jan-2019.
 
 書いた人   : machakann <https://github.com/machakann>
 ライセンス : MIT license
@@ -289,12 +289,12 @@ HOW TO MAKE A PLUGIN			*multiselect-howtomakeaplugin*
 <
 `Multiselect` モジュールはいくつかの関数や定数などを保持していますが、なかでも
 必須のものが `Multiselect.load()` 関数です。
-この関数は `Multiselector` インスタンスを返します。
+この関数は `Multiselector` オブジェクトを返します。
 >
 	" Multiselector instance
 	let s:multiselector = s:Multiselect.load()
 <
-このインスタンスを使って複数選択を扱います。
+このオブジェクトを使って複数選択を扱います。
 
 
 
@@ -309,10 +309,10 @@ HOW TO MAKE A PLUGIN			*multiselect-howtomakeaplugin*
 	  endif
 	endfunction
 <
-それでは一つ一つの要素を処理していきましょう。この要素は `Item` クラス
-|multiselect-class-Item| のインスタンスであり、 複数選択の位置をビジュアル選択
-しなおす `Item.select()` というメソッドを持っています。これを使って対象を順に
-処理していきます。
+それでは一つ一つの要素を処理していきましょう。この要素は `Item` オブジェクト
+|multiselect-object-Item| であり、 複数選択の位置をビジュアル選択しなおす
+`Item.select()` というメソッドを持っています。これを使って対象を順に処理して
+いきます。
 
 実際のバッファの編集を開始しますが、一つコツがあります。それはバッファの末尾か
 ら開始へ向かう順番で要素を編集することです。これは、バッファの先頭付近の要素の
@@ -418,7 +418,7 @@ API					*multiselect-api*
   Multiselect.DEFAULTHIGROUP	|multiselect-Multiselect.DEFAULTHIGROUP|
   Multiselect.load()		|multiselect-Multiselect.load()|
 
-  - class constructors
+  - constructors
   Multiselect.Region()		|multiselect-Multiselect.Region()|
   Multiselect.Item()		|multiselect-Multiselect.Item()|
   Multiselect.Change()		|multiselect-Multiselect.Change()|
@@ -434,8 +434,8 @@ API					*multiselect-api*
   Multiselect.inbetween()	|multiselect-Multiselect.inbetween()|
   Multiselect.isextended()	|multiselect-Multiselect.isextended()|
 
-* Multiselector クラス~
-  Multiselector			|multiselect-class-Multiselector|
+* Multiselector オブジェクト~
+  Multiselector			|multiselect-object-Multiselector|
 
   - メンバ
   Multiselector.name		|multiselect-Multiselector.name|
@@ -484,8 +484,8 @@ API					*multiselect-api*
   - イベントコントロール
   Multiselector.event()		|multiselect-Multiselector.event()|
 
-* Region クラス~
-  Region			|multiselect-class-Region|
+* Region オブジェクト~
+  Region			|multiselect-object-Region|
   Region.head			|multiselect-Region.head|
   Region.tail			|multiselect-Region.tail|
   Region.type			|multiselect-Region.type|
@@ -496,8 +496,8 @@ API					*multiselect-api*
   Region.isinside()		|multiselect-Region.isinside()|
   Region.touches()		|multiselect-Region.touches()|
 
-* Item クラス~
-  Item				|multiselect-class-Item|
+* Item オブジェクト~
+  Item				|multiselect-object-Item|
   Item.id			|multiselect-Item.id|
   Item.bufnr			|multiselect-Item.bufnr|
   Item.head			|multiselect-Item.head|
@@ -513,15 +513,15 @@ API					*multiselect-api*
   Item.quench()			|multiselect-Item.quench()|
   Item.isshownin()		|multiselect-Item.isshownin()|
 
-* Change クラス~
-  Change			|multiselect-class-Change|
+* Change オブジェクト~
+  Change			|multiselect-object-Change|
   Change.beforedelete()		|multiselect-Change.beforedelete()|
   Change.afterinsert()		|multiselect-Change.afterinsert()|
   Change.apply()		|multiselect-Change.apply()|
   Change.mapapply()		|multiselect-Change.mapapply()|
 
-* NeatTask クラス~
-  NeatTask			|multiselect-class-NeatTask|
+* NeatTask オブジェクト~
+  NeatTask			|multiselect-object-NeatTask|
   NeatTask.call()		|multiselect-NeatTask.call()|
   NeatTask.execute()		|multiselect-NeatTask.execute()|
   NeatTask.append()		|multiselect-NeatTask.append()|
@@ -533,8 +533,8 @@ API					*multiselect-api*
   NeatTask.leftcount()		|multiselect-NeatTask.leftcount()|
   NeatTask.hasdone()		|multiselect-NeatTask.hasdone()|
 
-* Task クラス~
-  Task				|multiselect-class-Task|
+* Task オブジェクト~
+  Task				|multiselect-object-Task|
   Task.waitfor()		|multiselect-Task.waitfor()|
   Task.cancel()			|multiselect-Task.cancel()|
   Task.call()			|multiselect-Task.call()|
@@ -548,8 +548,8 @@ API					*multiselect-api*
   Task.leftcount()		|multiselect-Task.leftcount()|
   Task.hasdone()		|multiselect-Task.hasdone()|
 
-* TaskChain クラス~
-  TaskChain			|multiselect-class-TaskChain|
+* TaskChain オブジェクト~
+  TaskChain			|multiselect-object-TaskChain|
   TaskChain.hook()		|multiselect-TaskChain.hook()|
   TaskChain.trigger()		|multiselect-TaskChain.trigger()|
   TaskChain.waitfor()		|multiselect-TaskChain.waitfor()|
@@ -562,7 +562,7 @@ API					*multiselect-api*
 Multiselect モジュール~
 					*multiselect-module-Multiselect*
 
-このモジュールが `Multiselector` インスタンスを返す
+このモジュールが `Multiselector` オブジェクトを返す
 |multiselect-Multiselect.load()| 関数を持っています。
 
 他にもいくつかの便利な機能が集められており、必須ではありませんがプラグインを書
@@ -582,23 +582,24 @@ Multiselect.DEFAULTHIGROUP    [string]
 
 					*multiselect-Multiselect.load()*
 Multiselect.load()    [function]
-	`Multiselector` インスタンスを返します。
-	|multiselect-class-Multiselector| の項も参照してください。 >
+	`Multiselector` オブジェクトを返します。
+	|multiselect-object-Multiselector| の項も参照してください。 >
 		let s:multiselector = s:Multiselect.load()
 <
-	ユーザーはキーマッピングを通してこのインスタンスとやりとりをします。
+	ユーザーはキーマッピングを通してこのオブジェクトとやりとりをします。
 	|multiselect-keymappings|
 
 
-  - クラスコンストラクタ
+  - コンストラクタ
 					*multiselect-Multiselect.Region()*
 Multiselect.Region({head}[, {tail}[, {type}[, {extended}]]])    [function]
 Multiselect.Region({lnum})
 Multiselect.Region({startlnum}, {endlnum})
-	`Region` クラスのコンストラクタです。そのインスタンスはバッファ上の
-	一部分を表します。 |multiselect-class-Region|
+	新しい `Region` オブジェクトを返します。これはバッファ上の一部分を表し
+	ます。 |multiselect-object-Region|
 
-	当クラスは次の `Item` クラスの親クラスです。 |multiselect-class-Item|
+	次の `Item` オブジェクトはこの `Region` の機能を継承します
+	|multiselect-object-Item|
 
 	{head} と {tail} は範囲の先頭と終端の位置です。これは |getpos()| 関数
 	の返り値のように四要素のリストです。
@@ -632,9 +633,9 @@ Multiselect.Region({startlnum}, {endlnum})
 Multiselect.Item({head}[, {tail}[, {type}[, {extended}]]])   [function]
 Multiselect.Item({lnum})
 Multiselect.Item({startlnum}, {endlnum})
-	`Item` クラスのコンストラクタです。 `Region` クラスの子クラスであり、
-	複数選択のひとつを表します。 |multiselect-class-Item|
-	|multiselect-class-Region|
+	新しい `Item` オブジェクトを返します。 `Region` オブジェクトの機能を
+	継承しており、複数選択のひとつを表します。 |multiselect-object-Item|
+	|multiselect-object-Region|
 
 	引数は `Multiselect.Region()` と共通です。
 	|multiselect-Multiselect.Region()| >
@@ -645,29 +646,32 @@ Multiselect.Item({startlnum}, {endlnum})
 
 					*multiselect-Multiselect.Change()*
 Multiselect.Change()    [function]
-	`Change` クラスのコンストラクタです。あるバッファ上の位置の、編集後の
-	位置を追跡するために使われます。 |multiselect-class-Change|
+	新しい `Change` オブジェクトを返します。あるバッファ上の位置の、編集後
+	の位置を追跡するために使われます。 |multiselect-object-Change|
 
 
 					*multiselect-Multiselect.NeatTask()*
 Multiselect.NeatTask()    [function]
-	`NeatTask` クラスのコンストラクタです。 |multiselect-class-NeatTask|
+	新しい `NeatTask` オブジェクトを返します。
+	|multiselect-object-NeatTask|
 
-	このクラスのインスタンスはいくつかの処理を集めておいて、後ほど一度に実
-	行するために使われます。また、当クラスは以下のクラスの親クラスです。
-	|multiselect-class-Task|
+	このオブジェクトはいくつかの処理を集めておいて、後ほど一度に実行するた
+	めに使われます。また、次の `Task` オブジェクトは `NeatTask` の機能を
+	継承します。
+	|multiselect-object-Task|
 
 
 					*multiselect-Multiselect.Task()*
 Multiselect.Task()    [function]
-	`Task` クラスのコンストラクタです。 |multiselect-class-Task|
+	新しい `Task` オブジェクトを返します。 |multiselect-object-Task|
 	自動コマンド |autocommand-events|、および経過時間 |timer| のいずれかに
 	よって実行される処理を予約するために使われます。
 
 
 					*multiselect-Multiselect.TaskChain()*
 Multiselect.TaskChain()    [function]
-	`TaskChain` クラスのコンストラクタです。 |multiselect-class-TaskChain|
+	新しい `TaskChain` オブジェクトを返します。
+	|multiselect-object-TaskChain|
 	自動コマンド、および経過時間によって設定された順序で、数珠繋ぎとなった
 	一連の処理を実行していくために使われます。
 
@@ -842,16 +846,16 @@ Multiselect.isextended()    [function]
 
 
 ------------------------------------------------------------------------------
-Multiselector class~
-					*multiselect-class-Multiselector*
+Multiselector object~
+					*multiselect-object-Multiselector*
 
-`Multiselector` インスタンスは `Multiselect` モジュールの `Multiselect.load()`
+`Multiselector` オブジェクトは `Multiselect` モジュールの `Multiselect.load()`
 関数で得られます。
 
   - メンバ
 					*multiselect-Multiselector.name*
 Multiselector.name    [string]
-	`Multiselector` インスタンスの識別子です。機能に影響は及ぼしません。
+	`Multiselector` オブジェクトの識別子です。機能に影響は及ぼしません。
 
 
 					*multiselect-Multiselector.bufnr*
@@ -867,10 +871,10 @@ Multiselector.higroup    [string]
 
 					*multiselect-Multiselector.itemlist*
 Multiselector.itemlist    [list]
-	現在の複数選択要素を表す `Item` クラスインスタンスのリストです。
+	現在の複数選択要素を表す `Item` オブジェクトのリストです。
 
-	NOTE: このリストは直接変更しないでください。 `Multiselector` クラスの
-	      メソッドを使いましょう。
+	NOTE: このリストは直接変更しないでください。 以下の `Multiselector`
+	      オブジェクトのメソッドを使いましょう。
 
 
   - 主要メソッド
@@ -880,9 +884,9 @@ Multiselector.check({lnum})
 Multiselector.check({startlnum}, {endlnum})
 Multiselector.check({region})
 	指定されたバッファの一範囲を複数選択として `Multiselector.itemlist` に
-	加えます。この新しく生成された `Item` インスタンスが返されます。
+	加えます。この新しく生成された `Item` オブジェクトが返されます。
 	|multiselect-Multiselector.itemlist|
-	|multiselect-class-Item|
+	|multiselect-object-Item|
 
 	引数は `Multiselect.Region()` と共通です。
 	|multiselect-Multiselect.Region()| >
@@ -1013,7 +1017,7 @@ Multiselector.filter({Filterexpr})    [method]
 			\ {_, item -> item.isinside(line5)})
 <
 	|multiselect-Multiselect.Region()|
-	|multiselect-class-Region| |multiselect-class-Item|
+	|multiselect-object-Region| |multiselect-object-Item|
 	|multiselect-Region.isinside()|
 
 	  - Example2: ビジュアル選択の外の複数選択を解除する >
@@ -1025,7 +1029,7 @@ Multiselector.filter({Filterexpr})    [method]
 			\ {_, item -> item.isinside(visual)})
 <
 	|multiselect-Multiselect.Region()|
-	|multiselect-class-Region| |multiselect-class-Item|
+	|multiselect-object-Region| |multiselect-object-Item|
 	|multiselect-Region.isinside()|
 
 
@@ -1176,8 +1180,8 @@ Multiselector.keymap_broadcast({cmd})   [method]
 					*multiselect-Multiselector.append()*
 Multiselector.append({item})    [method]
 	複数選択要素 {item} を `Multiselector.itemlist` の末尾に加えます。
-	{item} は `Item` クラスのインスタンスです。返り値は
-	`Multiselector.itemlist` です。
+	{item} は `Item` オブジェクトです。返り値は `Multiselector.itemlist`
+	です。
 	|multiselect-Multiselector.itemlist|
 >
 		call s:multiselector.uncheckall()
@@ -1383,12 +1387,12 @@ Multiselector.unsafe_append({item})    [method]
   - イベントコントロール
 					*multiselect-Multiselector.event()*
 Multiselector.event({event})    [method]
-	{event} で指定された自動コマンドイベントに紐づけられた `Task` クラス
-	インスタンスを返します。これは `Multiselector` インスタンス自身の制御
-	のために使われます。 |multiselect-class-Task|
+	{event} で指定された自動コマンドイベントに紐づけられた `Task` オブジェ
+	クトを返します。これは `Multiselector` オブジェクト自身の制御のために
+	使われます。 |multiselect-object-Task|
 
-	`Multiselector` インスタンスの制御のために次の自動コマンドイベントに対
-	して `Task` インスタンスを準備します。
+	`Multiselector` オブジェクトの制御のために次の自動コマンドイベントに対
+	して `Task` オブジェクトを準備します。
 	 |BufLeave|, |TabLeave|, |CmdwinEnter|, |CmdwinLeave|, |TextChanged|,
 	|InsertEnter|, |WinNew|
 
@@ -1415,15 +1419,15 @@ Multiselector.event({event})    [method]
 
 
 ------------------------------------------------------------------------------
-Region クラス~
-					*multiselect-class-Region*
+Region オブジェクト~
+					*multiselect-object-Region*
 
-`Region` クラスのコンストラクタは `Multiselect` モジュールにあります。
+`Region` オブジェクトは `Multiselect.Region()` によって得られます。
 |multiselect-Multiselect.Region()|
 
 					*multiselect-Region.head*
 Region.head    [list]
-	そのインスタンスの表す範囲の先頭位置です。 |setpos()| 関数の引数として
+	そのオブジェクトの表す範囲の先頭位置です。 |setpos()| 関数の引数として
 	有効な形式です。 >
 		let head = [0, 1, 1, 0]
 		let tail = [0, 1, 3, 0]
@@ -1435,7 +1439,7 @@ Region.head    [list]
 
 					*multiselect-Region.tail*
 Region.tail    [list]
-	そのインスタンスの表す範囲の末尾位置です。 |setpos()| 関数の引数として
+	そのオブジェクトの表す範囲の末尾位置です。 |setpos()| 関数の引数として
 	有効な形式です。 >
 		let head = [0, 1, 1, 0]
 		let tail = [0, 1, 3, 0]
@@ -1447,21 +1451,21 @@ Region.tail    [list]
 
 					*multiselect-Region.type*
 Region.type    [string]
-	そのインスタンスの表す範囲の種類を表す文字列です。 "char", "line",
+	そのオブジェクトの表す範囲の種類を表す文字列です。 "char", "line",
 	"block" のどれかで、それぞれ |characterwise-visual|,
 	|linewise-visual|, |blockwise-visual| に相当します。
 
 
 					*multiselect-Region.extended*
 Region.extended    [boolean]
-	このプロパティはそのインスタンスが矩形範囲を表すときにのみ意味を持ちま
+	このプロパティはそのオブジェクトが矩形範囲を表すときにのみ意味を持ちま
 	す。この値が真 |TRUE| なら、各行の末尾位置は行末へ拡張されます。これは
 	|v_$| が使われた場合に相当します。
 
 
 					*multiselect-Region.select()*
 Region.select()    [method]
-	そのインスタンスの表す範囲をビジュアル選択します。
+	そのオブジェクトの表す範囲をビジュアル選択します。
 	  - Example: 範囲を削除 >
 		let head = [0, 1, 1, 0]
 		let tail = [0, 1, 3, 0]
@@ -1482,7 +1486,7 @@ Region.select()    [method]
 
 					*multiselect-Region.yank()*
 Region.yank()    [method]
-	そのインスタンスの表す範囲をヤンク |yank| し、その文字列を返します。 >
+	そのオブジェクトの表す範囲をヤンク |yank| し、その文字列を返します。 >
 		call setline(1, 'foo bar baz')
 		let head = [0, 1, 5, 0]
 		let tail = [0, 1, 7, 0]
@@ -1496,7 +1500,7 @@ Region.includes({head}[, {tail}[, {type}[, {extended}]]])    [method]
 Region.includes({lnum})
 Region.includes({startlnum}, {endlnum})
 Region.includes({region})
-	そのインスタンスが指定された範囲を内包していれば真 |TRUE| が、そうでな
+	そのオブジェクトが指定された範囲を内包していれば真 |TRUE| が、そうでな
 	ければ偽 |FALSE| が返ります。
 
 	引数は `Multiselect.Region()` と共通です。
@@ -1532,7 +1536,7 @@ Region.isinside({head}[, {tail}[, {type}[, {extended}]]])    [method]
 Region.isinside({lnum})
 Region.isinside({startlnum}, {endlnum})
 Region.isinside({region})
-	そのインスタンスが指定された範囲に内包されていれば真 |TRUE| が、そうで
+	そのオブジェクトが指定された範囲に内包されていれば真 |TRUE| が、そうで
 	なければ偽 |FALSE| が返ります。
 
 	引数は `Multiselect.Region()` と共通です。
@@ -1568,7 +1572,7 @@ Region.touches({head}[, {tail}[, {type}[, {extended}]]])    [method]
 Region.touches({lnum})
 Region.touches({startlnum}, {endlnum})
 Region.touches({region})
-	そのインスタンスが指定された範囲に触れていれば真 |TRUE| が、そうでなけ
+	そのオブジェクトが指定された範囲に触れていれば真 |TRUE| が、そうでなけ
 	れば偽 |FALSE| が返ります。
 
 	引数は `Multiselect.Region()` と共通です。
@@ -1619,23 +1623,23 @@ Region.touches({region})
 
 
 ------------------------------------------------------------------------------
-Item クラス~
-					*multiselect-class-Item*
+Item オブジェクト~
+					*multiselect-object-Item*
 
-`Item` クラスのコンストラクタは `Multiselect` モジュールにあります。
+`Item` オブジェクトは `Multiselect.Item()` によって得られます。
 |multiselect-Multiselect.Item()|
 
-`Item` クラスは `Region` クラスの子クラスであり、そのすべてのプロパティを継承
-しています。
+`Item` オブジェクトは `Region` オブジェクトのすべてのプロパティを継承していま
+す。
 
 					*multiselect-Item.id*
 Item.id    [number]
-	各インスタンスに特有の数字です。
+	各オブジェクトに特有の数字です。
 
 
 					*multiselect-Item.bufnr*
 Item.bufnr    [number]
-	そのインスタンスの所属するバッファ番号です。
+	そのオブジェクトの所属するバッファ番号です。
 
 
 					*multiselect-Item.head*
@@ -1696,7 +1700,7 @@ Item.quench()    [method]
 
 					*multiselect-Item.isshownin()*
 Item.isshownin([{winid}])    [method]
-	ウィンドウid {winid} によって指定されるウィンドウにそのインスタンスの
+	ウィンドウid {winid} によって指定されるウィンドウにそのオブジェクトの
 	ハイライトが存在すれば真 |TRUE| が、そうでなければ偽 |FALSE| が返りま
 	す。 {winid} は |win_getid()| 関数によって取得できます。 {winid} が省
 	略された場合はカレントウィンドウの情報が返ります。
@@ -1704,12 +1708,12 @@ Item.isshownin([{winid}])    [method]
 
 
 ------------------------------------------------------------------------------
-Change クラス~
-					*multiselect-class-Change*
+Change オブジェクト~
+					*multiselect-object-Change*
 
-`Change` クラスはバッファを編集した場合の、バッファ上のある位置の移動を追跡す
-るために使われます。これは必須ではありませんが、プラグインを作る際に便利かもし
-れません。
+`Change` オブジェクトはバッファを編集した場合の、バッファ上のある位置の移動を
+追跡するために使われます。これは必須ではありませんが、プラグインを作る際に便利
+かもしれません。
 
 
 					*multiselect-Change.beforedelete()*
@@ -1721,7 +1725,7 @@ Change.beforedelete({region})
 	うとしている範囲を与えてください。これは |inclusive| な削除範囲とみな
 	されます、すなわち {tail} は削除の対象に含まれます。
 
-	このメソッドはインスタンス自身を返します。
+	このメソッドはオブジェクト自身を返します。
 
 
 					*multiselect-Change.afterinsert()*
@@ -1733,7 +1737,7 @@ Change.afterinsert({region})
 	文字列の範囲を指定してください。{tail} は挿入文字列の終端 (= 続く文字
 	列の開始位置) です。
 
-	このメソッドはインスタンス自身を返します。
+	このメソッドはオブジェクト自身を返します。
 
 
 					*multiselect-Change.apply()*
@@ -1749,12 +1753,12 @@ Change.apply({region})
 
 					*multiselect-Change.mapapply()*
 Change.mapapply({itemlist})    [method]
-	このメソッドは次の操作と同じ結果を得ます。 >
+	このメソッドは次の操作と同じ結果を返します。 >
 		call map({itemlist}, 'change.apply(v:val)')
 <
 	ただし、 {itemlist} の要素数が多いときより効率的に結果を得られます。
-	{itemlist} の要素は位置を表すリストか、 `Region` クラスのインスタンス
-	でなければいけません。
+	{itemlist} の要素は位置を表すリストか、 `Region` オブジェクトでなけれ
+	ばいけません。
 
 
   - 使用方法
@@ -1793,11 +1797,11 @@ Change.mapapply({itemlist})    [method]
 
 
 ------------------------------------------------------------------------------
-NeatTask クラス~
-					*multiselect-class-NeatTask*
+NeatTask オブジェクト~
+					*multiselect-object-NeatTask*
 
-`NeatTask` クラスはいくつかの処理をまとめておいて、後ほど一度に実行するために
-使われます。処理は |multiselect-NeatTask.call()|,
+`NeatTask` オブジェクトはいくつかの処理をまとめておいて、後ほど一度に実行する
+ために使われます。処理は |multiselect-NeatTask.call()|,
 |multiselect-NeatTask.execute()|, |multiselect-NeatTask.append()| を使って登録
 できます。 >
 	function! s:sayfoo() abort
@@ -1844,7 +1848,7 @@ NeatTask.call({Funcref}, {args}[, {dict}])    [method]
 	リスト |List| {args} の要素を引数として関数参照 {Funcref} の指す関数を
 	呼ぶタスクを登録します。 {dict} は "dict" 属性つきの関数用で、これがロ
 	ーカル変数 "self" に代入されます。 |Dictionary-function|
-	このメソッドはインスタンス自身を返します。
+	このメソッドはオブジェクト自身を返します。
 >
 		function! s:sayfoo() abort
 		    echo 'foo'
@@ -1861,7 +1865,7 @@ NeatTask.call({Funcref}, {args}[, {dict}])    [method]
 					*multiselect-NeatTask.execute()*
 NeatTask.execute({cmd})    [method]
 	Ex コマンド {cmd} を実行するタスクを登録します。
-	このメソッドはインスタンス自身を返します。 >
+	このメソッドはオブジェクト自身を返します。 >
 		" 新しいタスクの生成
 		let neattask = s:Multiselect.NeatTask().execute('echo "foo"')
 
@@ -1871,9 +1875,9 @@ NeatTask.execute({cmd})    [method]
 
 					*multiselect-NeatTask.append()*
 NeatTask.append({task})    [method]
-	他のタスクインスタンス {task} を実行するタスクを登録します。 {task} は
-	`NeatTask` クラスかその子クラスのインスタンスでなければいけません。
-	このメソッドはインスタンス自身を返します。 >
+	他のタスクオブジェクト {task} を即時実行するタスクを登録します。
+	{task} は `NeatTask` オブジェクトか `Task` オブジェクトでなければいけ
+	ません。このメソッドはオブジェクト自身を返します。 >
 		" 新しいタスクの生成
 		let task = s:Multiselect.NeatTask().execute('echo "foo"')
 		let neattask = s:Multiselect.NeatTask().append(task)
@@ -1885,7 +1889,7 @@ NeatTask.append({task})    [method]
 					*multiselect-NeatTask.trigger()*
 NeatTask.trigger([{forcibly}])    [method]
 	登録されたタスクを実行します。
-	このメソッドはインスタンス自身を返します。
+	このメソッドはオブジェクト自身を返します。
 
 	{forcibly} があたえられ、それが真 |TRUE| なら、設定された実行回数を超
 	えていても処理を実行します。
@@ -1895,12 +1899,12 @@ NeatTask.trigger([{forcibly}])    [method]
 					*multiselect-NeatTask.clear()*
 NeatTask.clear()    [method]
 	登録されたタスクをすべて除去します。
-	このメソッドはインスタンス自身を返します。
+	このメソッドはオブジェクト自身を返します。
 
 
 					*multiselect-NeatTask.clone()*
 NeatTask.clone()    [method]
-	自身のクローンを生成します。クローンは別のインスタンスですが同じ登録タ
+	自身のクローンを生成します。クローンは別のオブジェクトですが同じ登録タ
 	スクを持っています。
 
 
@@ -1915,7 +1919,7 @@ NeatTask.skip([{count}])    [method]
 	次の {count} 回、 |multiselect-NeatTask.trigger()| が呼ばれても処理が
 	実行されなくなります。 {count} が省略されれば 1 回スキップします。
 	{count} が 0 なら再び実行されるようになります。
-	このメソッドはインスタンス自身を返します。 >
+	このメソッドはオブジェクト自身を返します。 >
 		let neattask = s:Multiselect.NeatTask()
 		call neattask.execute('echo "foo"').skip(1)
 
@@ -1970,7 +1974,7 @@ NeatTask.repeat([{count}])    [method]
 		call neattask.trigger()
 		call neattask.trigger() " 何も起こらない
 <
-	このメソッドはインスタンス自身を返します。
+	このメソッドはオブジェクト自身を返します。
 
 
 					*multiselect-NeatTask.leftcount()*
@@ -2009,14 +2013,16 @@ NeatTask.finishif({Funcref}, {args}[, {dict}])    [method]
 
 
 ------------------------------------------------------------------------------
-Task クラス~
-					*multiselect-class-Task*
+Task オブジェクト~
+					*multiselect-object-Task*
 
-`Task` は自動コマンドイベントや、タイマーなど複数のトリガーをもつタスクで
-す。 `Task` クラスは `NeatTask` の子クラスです。
-|multiselect-class-NeatTask|
+`Task` は自動コマンドイベントや、タイマーなど複数のトリガーによって遅延実行さ
+れるタスクです。
 
-`Task` クラスは `NeatTask` クラスのメソッドに加え、
+`Task` オブジェクトは `NeatTask` のプロパティを継承しています。
+|multiselect-object-NeatTask|
+
+`Task` オブジェクトは `NeatTask` オブジェクトのメソッドに加え、
 |multiselect-Task.waitfor()|, |multiselect-Task.cancel()| メソッドを持ちます。
 
 `Task` は設定されたトリガーのうちどれかが発火した時に処理を実行します。
@@ -2026,7 +2032,7 @@ Task クラス~
 
 					*multiselect-Task.waitfor()*
 Task.waitfor({triggers})    [method]
-	インスタンスにトリガーを設定し、どれかが発火するのを待ちます。
+	オブジェクトにトリガーを設定し、どれかが発火するのを待ちます。
 	{triggerlist} はトリガー名のリスト |List| で、以下のいずれかに当てはま
 	っていなければいけません。
 
@@ -2043,13 +2049,13 @@ Task.waitfor({triggers})    [method]
 		let task = s:Multiselect.Task().execute('echo "foo"')
 		call task.waitfor(['TextChanged', 100])
 <
-	このメソッドはインスタンス自身を返しますが、 {triggerlist} が有効な
+	このメソッドはオブジェクト自身を返しますが、 {triggerlist} が有効な
 	要素を含まない場合、空の辞書 |Dictionary| を返します。
 
 
 					*multiselect-Task.cancel()*
 Task.cancel()    [method]
-	タスクを停止します。このメソッドはインスタンス自身を返します。
+	タスクを停止します。このメソッドはオブジェクト自身を返します。
 
 
 					*multiselect-Task.call()*
@@ -2114,14 +2120,14 @@ Task.finishif({Funcref}, {args}[, {dict}])    [method]
 
 
 ------------------------------------------------------------------------------
-TaskChain クラス~
-					*multiselect-class-TaskChain*
+TaskChain オブジェクト~
+					*multiselect-object-TaskChain*
 
-`TaskChain` クラスは自動コマンドやタイマーによって順番に実行される数珠つなぎの
-処理を作るために使われます。
+`TaskChain` オブジェクトは自動コマンドやタイマーによって順番に実行される数珠つ
+なぎの処理を作るために使われます。
 
 |multiselect-TaskChain.hook()| メソッドによってトリガーの流れをつくります。
-それぞれのメソッドは紐づけられた `NeatTask` インスタンスを返すので、このインス
+それぞれのメソッドは紐づけられた `NeatTask` オブジェクトを返すので、このインス
 タンスに処理を登録すれば、順番に実行されます。紐づけられたタスクが終了し次第、
 次のトリガーを待つ状態に移行します。 >
 	let taskchain = s:Multiselect.TaskChain()
@@ -2154,7 +2160,7 @@ TaskChain.hook({triggerlist})    [method]
 	  * 整数 |Number|:
 	      タイマーの待機時間 {time} と解釈されます。 |timer|
 
-	このメソッドは `NeatTask` インスタンスを返します。この `NeatTask` イン
+	このメソッドは `NeatTask` オブジェクトを返します。この `NeatTask` イン
 	スタンスに処理を設定することでいずれかのトリガー発火時に処理を実行でき
 	ます。
 >
@@ -2167,14 +2173,14 @@ TaskChain.hook({triggerlist})    [method]
 	コマンドラインウィンドウ |cmdline-window| を抜けた後、カーソルを動かす
 	か、一秒経過するかすると "original buffer" というメッセージが表示され
 	ます。
-	|multiselect-class-NeatTask|
+	|multiselect-object-NeatTask|
 	|multiselect-NeatTask.repeat()|
 
 
 					*multiselect-TaskChain.trigger()*
 TaskChain.trigger()    [method]
 	現在トリガーを待っている処理を発火し、次のトリガーを待ちます。
-	このメソッドはインスタンス自身を返します。
+	このメソッドはオブジェクト自身を返します。
 
 
 					*multiselect-TaskChain.waitfor()*

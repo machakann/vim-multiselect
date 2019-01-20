@@ -1,5 +1,5 @@
 *multiselect.txt*	A library for multiple selection
-						Last change:10-Mar-2018.
+						Last change:12-Jan-2019.
 
 Author  : machakann <https://github.com/machakann>
 License : MIT license
@@ -228,8 +228,8 @@ MultiselectItem				*hl-MultiselectItem*
 AUTOCMD EVENTS				*multiselect-events*
 
 MultiselectEnter			*MultiselectEnter*
-	This autocmd event is triggered once when the `Multiselector` instance
-	is born.
+	This autocmd event is triggered once when the `Multiselector` object
+	is made.
 
 
 MultiselectCheckPost			*MultiselectCheckPost*
@@ -270,19 +270,19 @@ new plugin, it would be better to think the use of |autoload| scripts.
 
 Step 1~
 The first thing to do is to load the `Multiselect` module and to obtain an
-`Multiselector` instance.
+`Multiselector` object.
 >
 	" Multiselect module
 	let s:Multiselect = multiselect#import()
 <
 This module contains some functions, constructors and constants, but in many
 cases what you need would be only the `Multiselect.load()` function. This
-function returns the `Multiselector` instance.
+function returns the `Multiselector` object.
 >
-	" Multiselector instance
+	" Multiselector object
 	let s:multiselector = s:Multiselect.load()
 <
-Use this instance to get information and to control the multiple selections.
+Use this object to get information and to control the multiple selections.
 
 
 
@@ -403,7 +403,7 @@ List of contents~
   Multiselect.DEFAULTHIGROUP	|multiselect-Multiselect.DEFAULTHIGROUP|
   Multiselect.load()		|multiselect-Multiselect.load()|
 
-  - class constructors
+  - constructors
   Multiselect.Region()		|multiselect-Multiselect.Region()|
   Multiselect.Item()		|multiselect-Multiselect.Item()|
   Multiselect.Change()		|multiselect-Multiselect.Change()|
@@ -421,8 +421,8 @@ List of contents~
   Multiselect.inbetween()	|multiselect-Multiselect.inbetween()|
   Multiselect.isextended()	|multiselect-Multiselect.isextended()|
 
-* Multiselector class~
-  Multiselector			|multiselect-class-Multiselector|
+* Multiselector object~
+  Multiselector			|multiselect-object-Multiselector|
 
   - members
   Multiselector.name		|multiselect-Multiselector.name|
@@ -471,8 +471,8 @@ List of contents~
   - event controls
   Multiselector.event()		|multiselect-Multiselector.event()|
 
-* Region class~
-  Region			|multiselect-class-Region|
+* Region object~
+  Region			|multiselect-object-Region|
   Region.head			|multiselect-Region.head|
   Region.tail			|multiselect-Region.tail|
   Region.type			|multiselect-Region.type|
@@ -483,8 +483,8 @@ List of contents~
   Region.isinside()		|multiselect-Region.isinside()|
   Region.touches()		|multiselect-Region.touches()|
 
-* Item class~
-  Item				|multiselect-class-Item|
+* Item object~
+  Item				|multiselect-object-Item|
   Item.id			|multiselect-Item.id|
   Item.bufnr			|multiselect-Item.bufnr|
   Item.head			|multiselect-Item.head|
@@ -500,15 +500,15 @@ List of contents~
   Item.quench()			|multiselect-Item.quench()|
   Item.isshownin()		|multiselect-Item.isshownin()|
 
-* Change class~
-  Change			|multiselect-class-Change|
+* Change object~
+  Change			|multiselect-object-Change|
   Change.beforedelete()		|multiselect-Change.beforedelete()|
   Change.afterinsert()		|multiselect-Change.afterinsert()|
   Change.apply()		|multiselect-Change.apply()|
   Change.mapapply()		|multiselect-Change.mapapply()|
 
-* NeatTask class~
-  NeatTask			|multiselect-class-NeatTask|
+* NeatTask object~
+  NeatTask			|multiselect-object-NeatTask|
   NeatTask.call()		|multiselect-NeatTask.call()|
   NeatTask.execute()		|multiselect-NeatTask.execute()|
   NeatTask.append()		|multiselect-NeatTask.append()|
@@ -520,8 +520,8 @@ List of contents~
   NeatTask.leftcount()		|multiselect-NeatTask.leftcount()|
   NeatTask.hasdone()		|multiselect-NeatTask.hasdone()|
 
-* Task class~
-  Task				|multiselect-class-Task|
+* Task object~
+  Task				|multiselect-object-Task|
   Task.waitfor()		|multiselect-Task.waitfor()|
   Task.cancel()			|multiselect-Task.cancel()|
   Task.call()			|multiselect-Task.call()|
@@ -535,8 +535,8 @@ List of contents~
   Task.leftcount()		|multiselect-Task.leftcount()|
   Task.hasdone()		|multiselect-Task.hasdone()|
 
-* TaskChain class~
-  TaskChain			|multiselect-class-TaskChain|
+* TaskChain object~
+  TaskChain			|multiselect-object-TaskChain|
   TaskChain.event()		|multiselect-TaskChain.event()|
   TaskChain.timer()		|multiselect-TaskChain.timer()|
   TaskChain.hook()		|multiselect-TaskChain.hook()|
@@ -551,11 +551,11 @@ List of contents~
 Multiselect module~
 					*multiselect-module-Multiselect*
 
-This module holds a function to get the "global" multiselector instance,
+This module holds a function to get the "global" multiselector object,
 |multiselect-Multiselect.load()|.
 
-Additionally, class constructors and utility functions are included. These
-might be unnecessary but might be helpful to develop a plugin.
+Additionally, constructors and utility functions are included. These might be
+unnecessary but might be helpful to develop a plugin.
 
 
 
@@ -572,22 +572,22 @@ Multiselect.DEFAULTHIGROUP    [string]
 
 					*multiselect-Multiselect.load()*
 Multiselect.load()    [function]
-	This function returns the `Multiselector` instance.
-	See |multiselect-class-Multiselector|. >
+	This function returns the `Multiselector` object.
+	See |multiselect-object-Multiselector|. >
 		let s:multiselector = s:Multiselect.load()
 <
-	Users can communicate with the instance with the provided keymappings
-	|multiselect-keymappings|.
+	Users can communicate with this object through the provided
+	keymappings |multiselect-keymappings|.
 
 
-  - class constructors
+  - constructors
 					*multiselect-Multiselect.Region()*
 Multiselect.Region({head}[, {tail}[, {type}[, {extended}]]])    [function]
 Multiselect.Region({lnum})
 Multiselect.Region({startlnum}, {endlnum})
 Multiselect.Region({region})
-	This is the constructor of `Region` class, it is a class to represent
-	a region of a buffer. See |multiselect-class-Region|.
+	This function returns a new `Region` object, it represents a region of
+	a buffer. See |multiselect-object-Region|.
 
 	{head} and {tail} are the edge positions of the region. These
 	positions are a list like a return value of |getpos()|.
@@ -606,18 +606,18 @@ Multiselect.Region({region})
 		let tail = [0, 3, 1, 0]
 		let region = s:Multiselect.Region(head, tail, 'block', 1)
 <
-	With only {head}, it returns an character-wise `Region` instance of a
+	With only {head}, it returns an character-wise `Region` object of a
 	character, its head and tail is same.
 
-	With only {lnum}, it returns an line-wise `Region` instance
-	representing the line {lnum}.
+	With only {lnum}, it returns an line-wise `Region` object representing
+	the line {lnum}.
 
 	With {startlnum} and {endlnum}, it returns an line-wise `Region`
-	instance representing the range from {startlnum} to {endlnum}.
+	object representing the range from {startlnum} to {endlnum}.
 
-	With {region}, {region} is an instance of `Region` class or its
-	subclasses, it returns an `Region` instance points the same region
-	with {region}. The returned value is not same instance with {region},
+	With {region}, it returns an `Region` object points the same region
+	with the given {region} which should be a `Region` object or `Item`
+	object. The returned value is not same instance with the {region},
 	that is, `{region} isnot# Multiselect.Region({retion})` is true.
 
 
@@ -625,9 +625,9 @@ Multiselect.Region({region})
 Multiselect.Item({head}[, {tail}[, {type}[, {extended}]]])   [function]
 Multiselect.Item({lnum})
 Multiselect.Item({startlnum}, {endlnum})
-	This is the constructor of `Item` class, it is a subclass of `Region`
-	class used for handling a selection region on a buffer.
-	See |multiselect-class-Item|.
+	This function returns a new `Item` object, it inherits all properties
+	of `Region` object and represents a selection on a buffer.
+	See |multiselect-object-Item|.
 
 	The arguments are common with `Multiselect.Region()`.  >
 		let head = [0, 1, 1, 0]
@@ -637,46 +637,32 @@ Multiselect.Item({startlnum}, {endlnum})
 
 					*multiselect-Multiselect.Change()*
 Multiselect.Change()    [function]
-	This is the constructor of `Change` class. It is employed to track a
-	position after some edits. See |multiselect-class-Change|.
+	This function returns a new `Change` object. It is employed to trace a
+	position in some edits. See |multiselect-object-Change|.
 
 
 					*multiselect-Multiselect.NeatTask()*
 Multiselect.NeatTask()    [function]
-	This is the constructor of `NeatTask` class.
-	See |multiselect-class-NeatTask|.
+	This function returns a new `NeatTask` object.
+	See |multiselect-object-NeatTask|.
 	
-	This class is used to assemble several processes and trigger them all
-	at onece, and is also a base class of the following classes.
-	|multiselect-class-EventTask|
-	|multiselect-class-TimerTask|
-	|multiselect-class-Task|
-
-
-					*multiselect-Multiselect.EventTask()*
-Multiselect.EventTask()    [function]
-	This is the constructor of `EventTask` class. It is employed to hook
-	processes for |autocmd-events|. See |multiselect-class-EventTask|.
-
-
-					*multiselect-Multiselect.TimerTask()*
-Multiselect.TimerTask()    [function]
-	This is the constructor of `TimerTask` class. It is employed to delay
-	the execution of processes. See |multiselect-class-TimerTask|.
+	This object is used to assemble several processes and trigger them all
+	at onece, and is also a base object of the following objects.
+	|multiselect-object-Task|
 
 
 					*multiselect-Multiselect.Task()*
 Multiselect.Task()    [function]
-	This is the constructor of `Task` class. It is employed to
+	This function returns a new `Task` object. It is employed to
 	obtain a task executed by multiple triggers.
-	See |multiselect-class-Task|.
+	See |multiselect-object-Task|.
 
 
 					*multiselect-Multiselect.TaskChain()*
 Multiselect.TaskChain()    [function]
-	This is the constructor of `TaskChain` class. It makes a successive
+	This function returns a new `TaskChain` object. It makes a successive
 	sequence of autocmd events and timers.
-	See |multiselect-class-TaskChain|.
+	See |multiselect-object-TaskChain|.
 
 
   - utility functions
@@ -842,16 +828,16 @@ Multiselect.isextended()    [function]
 
 
 ------------------------------------------------------------------------------
-Multiselector class~
-					*multiselect-class-Multiselector*
+Multiselector object~
+					*multiselect-object-Multiselector*
 
-A developer can access to the multiselector instance by `Multiselect.load()`
+A developer can access to the multiselector object by `Multiselect.load()`
 function. |multiselect-Multiselect.load()|
 
   - members
 					*multiselect-Multiselector.name*
 Multiselector.name    [string]
-	The identifier of the `Multiselector` instance. It does not affect any
+	The identifier of the `Multiselector` object. It does not affect any
 	functionality.
 
 
@@ -867,8 +853,8 @@ Multiselector.higroup    [string]
 
 					*multiselect-Multiselector.itemlist*
 Multiselector.itemlist    [list]
-	The list of the current multiple selection items. The items are the
-	instances of `Item` class.
+	The list of the current multiple selection items. The item is an
+	`Item` object.
 	NOTE: Do not change this list directly, use the below methods instead.
 
 
@@ -878,10 +864,10 @@ Multiselector.check({head}[, {tail}[, {type}[, {extended}]]])    [method]
 Multiselector.check({lnum})
 Multiselector.check({startlnum}, {endlnum})
 Multiselector.check({region})
-	This method produces an `Item` instance and add it into
+	This method produces an `Item` object and add it into
 	`Multiselector.itemlist`. This method returns the added item.
 	|multiselect-Multiselector.itemlist|
-	|multiselect-class-Item|
+	|multiselect-object-Item|
 
 	The arguments are common with `Multiselect.Region()`.
 	|multiselect-Multiselect.Region()| >
@@ -1015,7 +1001,7 @@ Multiselector.filter({Filterexpr})    [method]
 			\ {_, item -> item.isinside(line5)})
 <
 	|multiselect-Multiselect.Region()|
-	|multiselect-class-Region| |multiselect-class-Item|
+	|multiselect-object-Region| |multiselect-object-Item|
 	|multiselect-Region.isinside()|
 
 	  - Example2: filter items outside the visual selection >
@@ -1027,14 +1013,14 @@ Multiselector.filter({Filterexpr})    [method]
 			\ {_, item -> item.isinside(visual)})
 <
 	|multiselect-Multiselect.Region()|
-	|multiselect-class-Region| |multiselect-class-Item|
+	|multiselect-object-Region| |multiselect-object-Item|
 	|multiselect-Region.isinside()|
 
 
 					*multiselect-Multiselector.sort()*
 Multiselector.sort({itemlist})    [function]
 	This method sorts the items in {itemlist}. An item in {itemlist}
-	should be an instance of `Item` class. An item closer to the beginning
+	should be an `Item` object. An item closer to the beginning
 	of a buffer comes to the earlier order in the {itemlist}; however if
 	blockwise items and characterwise items are in a same line, these
 	items are sorted by screen columns. The items at left-side comes
@@ -1192,8 +1178,7 @@ Multiselector.keymap_broadcast({cmd})   [method]
 					*multiselect-Multiselector.append()*
 Multiselector.append({item})    [method]
 	This method append items in {item} into `Multiselector.itemlist`.
-	The {item} should be an instance of `Item` class or a list of the
-	instances.
+	The {item} should be an `Item` object or a list of the objects.
 	The items are appended at the end of `Multiselector.itemlist`.
 	This method returns `Multiselector.itemlist`.
 	|multiselect-Multiselector.itemlist|
@@ -1304,7 +1289,7 @@ Multiselector.itemnum([{Filterexpr}])    [method]
 	evaluates {Filterexpr} for each items and count the number of items
 	which {Filterexpr} returns |TRUE|. The {Filterexpr} is evaluated with
 	two arguments, index of the item and the item itself. The item is an
-	instance of `Item` class. >
+	`Item` object. >
 		" count the number of items in line 1
 		call s:multiselector.itemnum({i, item -> item.head[1] == 1})
 <
@@ -1402,13 +1387,13 @@ Multiselector.unsafe_append({item})    [method]
   - event controls
 					*multiselect-Multiselector.event()*
 Multiselector.event({event})    [method]
-	This method returns an `EventTask` class instance specified by {event}
-	for the control of the `Multiselector` instance itself.
-	See |multiselect-class-EventTask|.
+	This method returns an `EventTask` object associated with an
+	autocmd-event {event} to control the `Multiselector` object itself.
+	See |multiselect-object-EventTask|.
 
-	This plugin prepares `EventTask` class instances for |BufLeave|,
-	|TabLeave|, |CmdwinEnter|, |CmdwinLeave|, |TextChanged|,
-	|InsertEnter| and |WinNew|.
+	This plugin prepares `EventTask` objects for |BufLeave|, |TabLeave|,
+	|CmdwinEnter|, |CmdwinLeave|, |TextChanged|, |InsertEnter| and
+	|WinNew|.
 
 	An initialization process is executed in |BufLeave|; all the items are
 	unchecked and clear |multiselect-Multiselector.bufnr|.
@@ -1417,7 +1402,7 @@ Multiselector.event({event})    [method]
 	unchecked and clear |multiselect-Multiselector.bufnr|.
 
 	A pending process is executed in |CmdwinEnter|; some information of
-	`Multiselector` instance is saved and switched to the one for the
+	`Multiselector` object is saved and switched to the one for the
 	|command-line-window| temporary.
 
 	An initialization process and a resume process are executed in
@@ -1436,10 +1421,10 @@ Multiselector.event({event})    [method]
 
 
 ------------------------------------------------------------------------------
-Region class~
-					*multiselect-class-Region*
+Region object~
+					*multiselect-object-Region*
 
-The constructor of `Region` class is available with `Multiselect` module.
+A `Region` object is supplied by `Multiselect.Region()` function.
 |multiselect-Multiselect.Region()|
 
 					*multiselect-Region.head*
@@ -1517,7 +1502,7 @@ Region.includes({head}[, {tail}[, {type}[, {extended}]]])    [method]
 Region.includes({lnum})
 Region.includes({startlnum}, {endlnum})
 Region.includes({region})
-	This method returns |TRUE| if the `Region` instance includes an
+	This method returns |TRUE| if the `Region` object includes the
 	assigned region, otherwise |FALSE|.
 
 	The arguments are common with `Multiselect.Region()`.
@@ -1553,7 +1538,7 @@ Region.isinside({head}[, {tail}[, {type}[, {extended}]]])    [method]
 Region.isinside({lnum})
 Region.isinside({startlnum}, {endlnum})
 Region.isinside({region})
-	This method returns |TRUE| if the `Region` instance is inside an
+	This method returns |TRUE| if the `Region` object is inside the
 	assigned region, otherwise |FALSE|.
 
 	The arguments are common with `Multiselect.Region()`.
@@ -1589,7 +1574,7 @@ Region.touches({head}[, {tail}[, {type}[, {extended}]]])    [method]
 Region.touches({lnum})
 Region.touches({startlnum}, {endlnum})
 Region.touches({region})
-	This method returns |TRUE| if the `Region` instance is touching an
+	This method returns |TRUE| if the `Region` object is touching the
 	assigned region, otherwise |FALSE|.
 
 	The arguments are common with `Multiselect.Region()`.
@@ -1640,14 +1625,13 @@ Region.touches({region})
 
 
 ------------------------------------------------------------------------------
-Item class~
-					*multiselect-class-Item*
+Item object~
+					*multiselect-object-Item*
 
-The constructor of `Item` class is available with `Multiselect` module.
+An `Item` object is supplied by `Multiselect.Item()` function.
 |multiselect-Multiselect.Item()|
 
-`Item` class is a subclass of `Region` class, thus `Item` class inherites all
-the properties of `Region` class.
+`Item` object inherites all the properties of `Region` object.
 
 					*multiselect-Item.id*
 Item.id    [number]
@@ -1724,14 +1708,14 @@ Item.isshownin([{winid}])    [method]
 
 
 ------------------------------------------------------------------------------
-Change class~
-					*multiselect-class-Change*
+Change object~
+					*multiselect-object-Change*
 
-This is an utility class to track a position after deletions and additions of
+This is an utility object to trace a position after deletions and additions of
 texts into the current buffer. It might be useful when a plugin developer
 makes a new plugin to do well with |multiselect.vim|
 
-Note that the `Change` class instance cannot track the change by 'autoindent'
+Note that the `Change` object cannot trace the change by 'autoindent'
 option and its relatives ('smartindent', 'cindent', 'indentexpr') perfectly.
 
 					*multiselect-Change.beforedelete()*
@@ -1744,7 +1728,7 @@ Change.beforedelete({region})
 	|inclusive| delete action. Thus the last character pointed by {tail}
 	is included.
 
-	This method returns the `Change` instance itself.
+	This method returns the `Change` object itself.
 
 
 					*multiselect-Change.afterinsert()*
@@ -1756,14 +1740,14 @@ Change.afterinsert({region})
 	buffer to record the region. The {tail} should point the ending edge
 	of the insertion.
 
-	This method returns the `Change` instance itself.
+	This method returns the `Change` object itself.
 
 
 					*multiselect-Change.apply()*
 Change.apply({pos})    [method]
 Change.apply({region})
 	This method calculates the position after a series of editings.
-	This method updates the position (or a `Region` instance) in-place and
+	This method updates the position (or a `Region` object) in-place and
 	returns it.
 
 	NOTE: Change.apply() may not be effective with a lot of items.
@@ -1777,7 +1761,7 @@ Change.mapapply({itemlist})    [method]
 		call map({itemlist}, 'change.apply(v:val)')
 <
 	but faster if the number of items in {itemlist} is larger. {itemlist}
-	should be a list of positions or `Region` class instances.
+	should be a list of positions or `Region` object.
 
 
   - Usage
@@ -1816,11 +1800,11 @@ last edit. >
 
 
 ------------------------------------------------------------------------------
-NeatTask class~
-					*multiselect-class-NeatTask*
+NeatTask object~
+					*multiselect-object-NeatTask*
 
-`NeatTask` class is used to assemble several processes and trigger them all at
-once. The processes are registered via |multiselect-NeatTask.call()|,
+`NeatTask` object is used to assemble several processes and trigger them all
+at once. The processes are registered via |multiselect-NeatTask.call()|,
 |multiselect-NeatTask.execute()| and |multiselect-NeatTask.append()|. >
 	function! s:sayfoo() abort
 		echo 'foo'
@@ -1894,8 +1878,8 @@ NeatTask.execute({cmd})    [method]
 					*multiselect-NeatTask.append()*
 NeatTask.append({task})    [method]
 	This method registers a task to trigger other tasks. {task} should be
-	an instance of `NeatTask` class or its subclasses. This method returns
-	the task itself. >
+	an `NeatTask` object or a `Task` object. This method returns the task
+	itself. >
 		" make new tasks
 		let task = s:Multiselect.NeatTask().execute('echo "foo"')
 		let neattask = s:Multiselect.NeatTask().append(task)
@@ -1907,7 +1891,7 @@ NeatTask.append({task})    [method]
 					*multiselect-NeatTask.trigger()*
 NeatTask.trigger([{forcibly}])    [method]
 	This method executes all the registered tasks.
-	This method returns the `NeatTask` instance itself.
+	This method returns the `NeatTask` object itself.
 
 	If {forcibly} is given and it is |TRUE|, this method triggers the
 	registered task even if the task has already done.
@@ -1917,12 +1901,12 @@ NeatTask.trigger([{forcibly}])    [method]
 					*multiselect-NeatTask.clear()*
 NeatTask.clear()    [method]
 	This method clears all registered tasks. This method returns the
-	`NeatTask` instance itself.
+	`NeatTask` object itself.
 
 
 					*multiselect-NeatTask.clone()*
 NeatTask.clone()    [method]
-	This method returns another `NeatTask` instance which have the same
+	This method returns another `NeatTask` object which have the same
 	task with itself.
 
 
@@ -1977,7 +1961,7 @@ NeatTask.skipif({Funcref}, {args}[, {dict}])    [method]
 					*multiselect-NeatTask.repeat()*
 NeatTask.repeat([{count}])    [method]
 	This method sets the number of execution. If {count} is negative, the
-	`NeatTask` will be persistent. An `NeatTask` instance is produced as
+	`NeatTask` will be persistent. An `NeatTask` object is produced as
 	it is 1 in default. If {count} is omitted, it will reset the number
 	of execution to the one last set. >
 		" 'foo' will be displayed three times
@@ -2029,14 +2013,13 @@ NeatTask.finishif({Funcref}, {args}[, {dict}])    [method]
 
 
 ------------------------------------------------------------------------------
-Task class~
-					*multiselect-class-Task*
+Task object~
+					*multiselect-object-Task*
 
-`Task` class is a subclass of `NeatTask` class with multiple automatic
-triggers, autocmd events and a delay time.
-See also |multiselect-class-NeatTask|.
+`Task` object is similar to `NeatTask` object but is triggered by autocmd
+events or a delay time automatically. See also |multiselect-object-NeatTask|.
 
-`Task` class instance inherits the methods of `NeatTask` class, and has
+`Task` object inherits all the properties of `NeatTask` object, and has
 |multiselect-Task.waitfor()| and |multiselect-Task.cancel()| additionally.
 
 `Task` finishes after an execution in default, this number of execution can be
@@ -2127,14 +2110,14 @@ Task.finishif({Funcref}, {args}[, {dict}])    [method]
 
 
 ------------------------------------------------------------------------------
-TaskChain class~
-					*multiselect-class-TaskChain*
+TaskChain object~
+					*multiselect-object-TaskChain*
 
-`TaskChain` class makes a task triggered by a successive sequence of autocmd
+`TaskChain` object makes a task triggered by a successive sequence of autocmd
 events and timers.
 
 Use |multiselect-TaskChain.hook()| to make a sequence, and set tasks to the
-returned `NeatTask` instance. >
+returned `NeatTask` object. >
 	let taskchain = s:Multiselect.TaskChain()
 	let task1 = taskchain.event('InsertLeave')
 	let task2 = taskchain.event('CursorMoved')
@@ -2171,7 +2154,7 @@ TaskChain.hook({triggerlist})    [method]
 <
 	After leaving |cmdline-window|, you will see the message "original
 	buffer" if you move cursor or wait for 1 second.
-	|multiselect-class-NeatTask|
+	|multiselect-object-NeatTask|
 	|multiselect-NeatTask.repeat()|
 	|multiselect-Task.waitfor()|
 

@@ -1,7 +1,7 @@
 Describe TaskChain
 	Context instance
 		Before
-			let Schedule = multiselect#Schedule#_import()
+			let Schedule = vital#multiselect#new().import('Schedule').augroup('multiselect')
 			let TaskChain = Schedule.TaskChain
 		End
 

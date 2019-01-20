@@ -2,15 +2,14 @@
 let s:Errors = multiselect#Errors#_import()
 let s:Buffer = multiselect#Buffer#_import()
 let s:Highlights = multiselect#Highlights#_import()
-let s:Schedule = multiselect#Schedule#_import().augroup('multiselect')
+let s:Schedule = vital#multiselect#new().import('Schedule').augroup('multiselect')
 let s:TRUE = 1
 let s:FALSE = 0
 let s:NULLPOS = [0, 0, 0, 0]
 
-" Multiselector class "{{{
+" Multiselector object "{{{
 unlockvar! s:Multiselector
 let s:Multiselector = {
-	\	'__CLASS__': 'Multiselector',
 	\	'name': '',
 	\	'bufnr': -1,
 	\	'itemlist': [],
